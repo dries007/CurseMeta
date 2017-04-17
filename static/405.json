@@ -1,0 +1,5 @@
+{
+  "error": true,
+  "code": 405,
+  "message": "Method not allowed"
+}
