@@ -63,16 +63,16 @@ def run(input_folder, output_folder):
                     del data['Modules']
                     with y_out.open('w') as f:
                         json.dump(data, f)
-                elif y.name == 'description.txt':
-                    y_out = y_out.with_suffix('.html')
+                elif y.name == 'description.html':
                     y_out.write_bytes(y.read_bytes())
                     sub_content['description'] = y_out.name
-                elif y.suffix == '.txt':
-                    y_out = y_out.with_suffix('.html')
+                elif y.suffix == '.html':
                     y_out.write_bytes(y.read_bytes())
+                else:
+                    print('Skipping unknown file', x.relative_to(input_folder))
 
             sub_content['ids'] = sorted(sub_content['ids'])
-            Path(x_out, "index.json").write_text(json.dumps(sub_content))
+            Path(x_out, 'index.json').write_text(json.dumps(sub_content))
         else:
             with x.open() as f:
                 data = json.load(f)
@@ -80,7 +80,7 @@ def run(input_folder, output_folder):
                 del files['Modules']
             with Path(output_folder, x.relative_to(input_folder)).open('w') as f:
                 json.dump(data, f)
-    Path(output_folder, "index.json").write_text(json.dumps({
+    Path(output_folder, 'index.json').write_text(json.dumps({
         'timestamp': calendar.timegm(time.gmtime()),
         'ids': sorted(root_content)
     }))
