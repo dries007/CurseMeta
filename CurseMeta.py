@@ -82,6 +82,7 @@ def run(input_folder, output_folder):
                 json.dump(data, f)
     Path(output_folder, 'index.json').write_text(json.dumps({
         'timestamp': calendar.timegm(time.gmtime()),
+        'date_time': time.strftime(time.gmtime()),
         'ids': sorted(root_content)
     }))
 
