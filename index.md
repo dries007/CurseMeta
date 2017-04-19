@@ -3,32 +3,19 @@ title: Curse Meta
 ---
 # Curse Meta
 
-**Not production ready.**
-
 All generated with publicly available data from Minecraft's CurseFoge.
 
-This is meant to be updated hourly, since that's the rate at which CurseForge updates.
+The JSON data is updated twice a day, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
 
-## Features
+**Developers who want to use this?** [More info here.](devinfo.html)
 
-- JSON based index: [`index.json`](index.json)
-- Every `/projectID.json` JSON file has the CurseForge project metadata.
-- Every `/projectID/` folder has:
-  - A JSON based index: `/projectid/index.json`
-  - The CurseForge project description: `/projectid/description.html`
-  - A list of all CurseForge file metadata: `/projectid/files.json`
-  - Two files per `fileID`:
-    - The changelog: `/projectid/fileID.changelog.html`
-    - The CurseForge file metadata: `/projectid/fileID.changelog.html`
+Obligatory Legalese:
 
-## Example
 
-- [`/projectID.json`](/226294.json)
-- [`/projectID/`](/226294/)
-  - [`/projectID/files.json`](/226294/files.json)
-  - [`/projectID/description.html`](/226294/description.html)
-  - [`/projectID/fileid.json`](/226294/2222653.json)
-  - [`/projectID/fileid.changelog.html`](/226294/2222653.changelog.html)
+```
+This website is hosted in Europe. EU law applies here.
+Unless required by applicable law or agreed to in writing, the information provided on this subdomain is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+```
 
 **PS:** If you are going to be browsing this site in a browser, install a [JSON Viewer](https://chrome.google.com/webstore/detail/json-viewer/gbmdgpbipfallnflgajpaliibnhdgobh)!
 
