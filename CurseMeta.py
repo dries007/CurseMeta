@@ -31,17 +31,6 @@ import time
 from collections import defaultdict
 
 
-FILE_FILTER_LIST = (
-    'Modules', 'CommentCount', 'DownloadCount', 'GamePopularityRank', 'InstallCount', 'Likes', 'PopularityScore',
-    'PrimaryCategoryAvatarUrl', 'PrimaryCategoryName', 'Rating')
-
-
-def filter_file(file):
-    for x in FILE_FILTER_LIST:
-        if x in file:
-            del x
-
-
 def run(input_folder, output_folder):
     if not input_folder.is_dir():
         raise IOError("Input not a folder.")
@@ -66,20 +55,11 @@ def run(input_folder, output_folder):
                 # y is files.json, array of file objects
                 if y.name == 'files.json':
                     x_content['files'] = y.name
-                    with y.open() as f:
-                        data = json.load(f)
-                    for file in data:
-                        filter_file(file)
-                    with y_out.open('w') as f:
-                        json.dump(data, f)
+                    y_out.write_bytes(y.read_bytes())
                 # y is file object
                 elif y.suffix == '.json':
                     x_content['ids'].append(int(y.stem))
-                    with y.open() as f:
-                        data = json.load(f)
-                    filter_file(data)
-                    with y_out.open('w') as f:
-                        json.dump(data, f)
+                    y_out.write_bytes(y.read_bytes())
                 # y is description.html
                 elif y.name == 'description.html':
                     y_out.write_bytes(y.read_bytes())
@@ -95,12 +75,8 @@ def run(input_folder, output_folder):
             Path(x_out, 'index.json').write_text(json.dumps(x_content))
         else:
             # x is file, aka a project json
-            with x.open() as f:
-                data = json.load(f)
-            for file in data['LatestFiles']:
-                filter_file(file)
-            with Path(output_folder, x.relative_to(input_folder)).open('w') as f:
-                json.dump(data, f)
+            x_out = Path(output_folder, x.relative_to(input_folder))
+            x_out.write_bytes(x.read_bytes())
     # @formatter:off
     Path(output_folder, 'index.json').write_text(json.dumps(
         {
