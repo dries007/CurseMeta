@@ -3,8 +3,10 @@
 # It is just in the repo for completeness, this file is not actually run.
 date
 cd
-git -C alpacka-meta-files pull
-git -C curseMeta pull
+git -C alpacka-meta-files fetch --all
+git -C alpacka-meta-files reset --hard origin/master
+git -C curseMeta fetch --all
+git -C curseMeta reset --hard origin/master
 mkdir tmp_out
 python3 curseMeta/CurseMeta.py -i alpacka-meta-files/addon/ -o tmp_out
 cp curseMeta/static/* tmp_out
