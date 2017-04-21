@@ -31,6 +31,17 @@ import time
 from collections import defaultdict
 
 
+FILE_FILTER_LIST = (
+    'Modules', 'CommentCount', 'DownloadCount', 'GamePopularityRank', 'InstallCount', 'Likes', 'PopularityScore',
+    'PrimaryCategoryAvatarUrl', 'PrimaryCategoryName', 'Rating')
+
+
+def filter_file(file):
+    for x in FILE_FILTER_LIST:
+        if x in file:
+            del x
+
+
 def run(input_folder, output_folder):
     if not input_folder.is_dir():
         raise IOError("Input not a folder.")
@@ -40,51 +51,65 @@ def run(input_folder, output_folder):
         raise IOError("Input not a folder.")
     root_content = set()
     for x in input_folder.iterdir():
+        # skip .git(ignore) and other hidden files/folders
+        if x.name[0] == '.':
+            continue
         root_content.add(int(x.stem))
         if x.is_dir():
-            sub_content = defaultdict(list)
+            # x is project dir
+            x_content = defaultdict(list)
             x_out = Path(output_folder, x.name)
             if not x_out.exists():
                 x_out.mkdir()
             for y in x.iterdir():
                 y_out = Path(x_out, y.name)
+                # y is files.json, array of file objects
                 if y.name == 'files.json':
-                    sub_content['files'] = y.name
+                    x_content['files'] = y.name
                     with y.open() as f:
                         data = json.load(f)
-                    for files in data:
-                        del files['Modules']
+                    for file in data:
+                        filter_file(file)
                     with y_out.open('w') as f:
                         json.dump(data, f)
+                # y is file object
                 elif y.suffix == '.json':
-                    sub_content['ids'].append(int(y.stem))
+                    x_content['ids'].append(int(y.stem))
                     with y.open() as f:
                         data = json.load(f)
-                    del data['Modules']
+                    filter_file(data)
                     with y_out.open('w') as f:
                         json.dump(data, f)
+                # y is description.html
                 elif y.name == 'description.html':
                     y_out.write_bytes(y.read_bytes())
-                    sub_content['description'] = y_out.name
+                    x_content['description'] = y_out.name
+                # y is changelog html
                 elif y.suffix == '.html':
                     y_out.write_bytes(y.read_bytes())
+                # y is unknown, skipped.
                 else:
                     print('Skipping unknown file', x.relative_to(input_folder))
 
-            sub_content['ids'] = sorted(sub_content['ids'])
-            Path(x_out, 'index.json').write_text(json.dumps(sub_content))
+            x_content['ids'] = sorted(x_content['ids'])
+            Path(x_out, 'index.json').write_text(json.dumps(x_content))
         else:
+            # x is file, aka a project json
             with x.open() as f:
                 data = json.load(f)
-            for files in data['LatestFiles']:
-                del files['Modules']
+            for file in data['LatestFiles']:
+                filter_file(file)
             with Path(output_folder, x.relative_to(input_folder)).open('w') as f:
                 json.dump(data, f)
-    Path(output_folder, 'index.json').write_text(json.dumps({
-        'timestamp': calendar.timegm(time.gmtime()),
-        'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
-        'ids': sorted(root_content)
-    }))
+    # @formatter:off
+    Path(output_folder, 'index.json').write_text(json.dumps(
+        {
+            'timestamp': calendar.timegm(time.gmtime()),
+            'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
+            'ids': sorted(root_content)
+        }))
+    # @formatter:on
+    print("Did %d projects in total." % len(root_content))
 
 
 def main(argv):
