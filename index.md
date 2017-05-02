@@ -1,23 +1,26 @@
 ---
-title: Curse Meta
+title: CurseMeta - Home
 ---
 # Curse Meta
 
+This website offers easy access to Minecraft's CurseForge's metadata about mods and modpacks.
+
+The primary purpose is to allow third party modpack downloaders or launchers such as [MultiMC](multimc.org) or [CurseModpackDownloader](https://github.com/DoubleDoorDevelopment/CurseModpackDownloader) access to simple and easy access.
+
 All generated with publicly available data from Minecraft's CurseFoge.
 
-The JSON data is updated twice a day, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
+The JSON data is updated periodically, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
 
-**Developers who want to use this?** [More info here.](devinfo.html)
+**How to use this website?** [More info here.](devinfo.html)
 
-Obligatory Legalese:
+## Obligatory Legalese
 
-
-```
+<pre>
 This website is hosted in Europe. EU law applies here.
 Unless required by applicable law or agreed to in writing, the information provided on this subdomain is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-```
+</pre>
 
-**PS:** If you are going to be browsing this site in a browser, install a [JSON Viewer](https://chrome.google.com/webstore/detail/json-viewer/gbmdgpbipfallnflgajpaliibnhdgobh)!
+## Credits
 
 _Maintained by [Dries007](https://dries007.net). Source code on [Github](https://github.com/dries007/curseMeta)._
 

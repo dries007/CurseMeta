@@ -23,69 +23,92 @@ import calendar
 import sys
 import getopt
 import json
+import time
 
 from pathlib import Path
 
-import time
 
-from collections import defaultdict
+def parse_top_level_files(file):
+    ids = set()
+
+    with open(file) as f:
+        data = json.load(f)["Data"]
+
+    for project in data:
+        ids.add(project["Id"])
+
+    return ids
+
+
+def parse_addon_folder(addon_folder, output_folder, **kwargs):
+    for i, project in enumerate(addon_folder.iterdir()):
+        project_in = Path(addon_folder, project.name)
+        project_files = Path(project_in, 'files')
+        project_out = Path(output_folder, project.name)
+        project_id = int(project.name)
+
+        project_out.mkdir(parents=True, exist_ok=True)
+        types = []
+        for name, ids in kwargs.items():
+            if project_id in ids:
+                types.append(name)
+        project_type = ','.join(types) if len(types) != 0 else "UNKNOWN"
+
+        print("Parsing project nr", i, "id:", project_id, "type:", project_type)
+
+        # make out/<projectid>.json
+        with open(Path(project_in, 'index.json')) as f:
+            data = json.load(f)
+        with open(Path(output_folder, project.name).with_suffix('.json'), 'w') as f:
+            json.dump(data, f)
+
+        ids = set()
+        # make out/<projectid>/files.json
+        with open(Path(project_files, 'index.json')) as f:
+            data = json.load(f)
+        for file in data:
+            ids.add(file['Id'])
+        with open(Path(project_out, 'files.json'), 'w') as f:
+            json.dump(data, f)
+
+        # make out/<projectid>/index.json
+        with open(Path(project_out, 'index.json'), 'w') as f:
+            json.dump({'type': project_type, 'ids': sorted(ids)}, f)
+
+        # make out/<projectid>/<fileid>.json
+        for j, file in enumerate(project_files.iterdir()):
+            if file.name == "index.json":
+                continue
+            with open(file) as f:
+                data = json.load(f)
+            with open(Path(project_out, file.name), 'w') as f:
+                json.dump(data, f)
 
 
 def run(input_folder, output_folder):
     if not input_folder.is_dir():
         raise IOError("Input not a folder.")
-    if not output_folder.exists():
-        output_folder.mkdir()
+    output_folder.mkdir(parents=True, exist_ok=True)
     if not output_folder.is_dir():
         raise IOError("Input not a folder.")
-    root_content = set()
-    for x in input_folder.iterdir():
-        # skip .git(ignore) and other hidden files/folders
-        if x.name[0] == '.':
-            continue
-        root_content.add(int(x.stem))
-        if x.is_dir():
-            # x is project dir
-            x_content = defaultdict(list)
-            x_out = Path(output_folder, x.name)
-            if not x_out.exists():
-                x_out.mkdir()
-            for y in x.iterdir():
-                y_out = Path(x_out, y.name)
-                # y is files.json, array of file objects
-                if y.name == 'files.json':
-                    x_content['files'] = y.name
-                    y_out.write_bytes(y.read_bytes())
-                # y is file object
-                elif y.suffix == '.json':
-                    x_content['ids'].append(int(y.stem))
-                    y_out.write_bytes(y.read_bytes())
-                # y is description.html
-                elif y.name == 'description.html':
-                    y_out.write_bytes(y.read_bytes())
-                    x_content['description'] = y_out.name
-                # y is changelog html
-                elif y.suffix == '.html':
-                    y_out.write_bytes(y.read_bytes())
-                # y is unknown, skipped.
-                else:
-                    print('Skipping unknown file', x.relative_to(input_folder))
 
-            x_content['ids'] = sorted(x_content['ids'])
-            Path(x_out, 'index.json').write_text(json.dumps(x_content))
-        else:
-            # x is file, aka a project json
-            x_out = Path(output_folder, x.relative_to(input_folder))
-            x_out.write_bytes(x.read_bytes())
-    # @formatter:off
-    Path(output_folder, 'index.json').write_text(json.dumps(
-        {
+    print("Parsing mods.json ...")
+    mods = parse_top_level_files(Path(input_folder, "mods.json"))
+    print("Parsing modpacks.json ...")
+    modpacks = parse_top_level_files(Path(input_folder, "modpacks.json"))
+    print("Parsing complete.json ...")
+    complete = parse_top_level_files(Path(input_folder, "complete.json"))
+    print("Parsing addons ...")
+    parse_addon_folder(Path(input_folder, "addon"), output_folder, mod=mods, modpack=modpacks)
+
+    with open(Path(output_folder, 'index.json'), 'w') as f:
+        json.dump({
             'timestamp': calendar.timegm(time.gmtime()),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
-            'ids': sorted(root_content)
-        }))
-    # @formatter:on
-    print("Did %d projects in total." % len(root_content))
+            'mods': sorted(mods),
+            'modpacks': sorted(modpacks),
+            'ids': sorted(complete),
+        }, f)
 
 
 def main(argv):
