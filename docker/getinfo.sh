@@ -4,7 +4,7 @@ IDS=(${QUERY_STRING//-/ })
 PROJECT_ID="${IDS[0]}"
 FILE_ID="${IDS[1]}"
 
-FILE_PATH="/alpacka.meta/output/addon/${PROJECT_ID}/${FILE_ID}.json"
+FILE_PATH="/out/addon/${PROJECT_ID}/${FILE_ID}.json"
 
 if [[ -f $FILE_PATH ]]; then
     echo "Content-type: text/json"
@@ -15,7 +15,7 @@ if [[ -f $FILE_PATH ]]; then
 fi
 
 cd /alpacka-meta
-dotnet run get -o /alpacka.meta/ --file ${PROJECT_ID}:${FILE_ID} 2>&1 >/dev/null
+dotnet run get -o /out/ --file ${PROJECT_ID}:${FILE_ID} 2>&1 >/dev/null
 
 if [[ -f $FILE_PATH ]]; then
     echo "Content-type: text/json"
