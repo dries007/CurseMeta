@@ -64,7 +64,7 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
 
         ids = set()
         # make out/<projectid>/files.json
-        with Path(project_files, 'index.json') as f:
+        with Path(project_files, 'index.json').open() as f:
             data = json.load(f)
         for file in data:
             ids.add(file['Id'])
