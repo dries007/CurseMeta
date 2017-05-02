@@ -15,7 +15,7 @@ if [[ -f $FILE_PATH ]]; then
 fi
 
 cd /alpacka-meta
-dotnet run grab ${PROJECT_ID} ${FILE_ID} >/dev/null 2>&1
+dotnet run get -o /alpacka.meta/ --file ${PROJECT_ID}:${FILE_ID} 2>&1 >/dev/null
 
 if [[ -f $FILE_PATH ]]; then
     echo "Content-type: text/json"
