@@ -60,16 +60,16 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         with Path(project_in, 'index.json').open() as f:
             data = json.load(f)
         with Path(output_folder, project.name).with_suffix('.json').open('w') as f:
-            json.dump(data, f)
+            json.dump(data, f, sort_keys=True)
 
         ids = set()
         # make out/<projectid>/files.json
         with Path(project_files, 'index.json').open() as f:
-            data = json.load(f)
+            data = json.load(f, sort_keys=True)
         for file in data:
             ids.add(file['Id'])
         with Path(project_out, 'files.json').open('w') as f:
-            json.dump(data, f)
+            json.dump(data, f, sort_keys=True)
 
         # make out/<projectid>/index.json
         with Path(project_out, 'index.json').open('w') as f:
@@ -82,7 +82,7 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
             with file.open() as f:
                 data = json.load(f)
             with Path(project_out, file.name).open('w') as f:
-                json.dump(data, f)
+                json.dump(data, f, sort_keys=True)
 
 
 def run(input_folder, output_folder):
