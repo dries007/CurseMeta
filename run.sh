@@ -8,6 +8,6 @@ git -C curseMeta reset --hard origin/master
 mkdir tmp_out
 python3 curseMeta/CurseMeta.py -i alpacka-meta-files -o tmp_out
 cp -r curseMeta/static/* tmp_out
-rsync -r tmp_out/ www/
+rsync -r --delete tmp_out/ www/
 rm -r tmp_out
 date
