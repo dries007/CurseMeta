@@ -132,6 +132,8 @@ def main(argv):
 
     run(Path(input_folder).resolve(), Path(output_folder).resolve())
 
+    print("CurseMeta script done")
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])

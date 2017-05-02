@@ -12,6 +12,8 @@ To save bandwidth all JSON data is minified, and not all metadata is retained.
 
 If you are going to be browsing this site in a browser, install a [JSON Viewer](https://chrome.google.com/webstore/detail/json-viewer/gbmdgpbipfallnflgajpaliibnhdgobh)!
 
+The JSON data is updated periodically, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
+
 ## Features
 
 - JSON based file index: [`index.json`](index.json)

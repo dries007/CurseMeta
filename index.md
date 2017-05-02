@@ -5,9 +5,9 @@ title: CurseMeta - Home
 
 This website offers easy access to Minecraft's CurseForge's metadata about mods and modpacks.
 
-The primary purpose is to allow third party modpack downloaders or launchers such as [MultiMC](multimc.org) or [CurseModpackDownloader](https://github.com/DoubleDoorDevelopment/CurseModpackDownloader) access to simple and easy access.
+The primary purpose is to allow third party modpack downloaders or launchers such as [MultiMC](multimc.org) or [CurseModpackDownloader](https://github.com/DoubleDoorDevelopment/CurseModpackDownloader) simple and easy access to said metadata.
 
-All generated with publicly available data from Minecraft's CurseFoge.
+All generated with publicly available data from Minecraft's CurseFoge. No mods are being hosted.
 
 The JSON data is updated periodically, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
 
