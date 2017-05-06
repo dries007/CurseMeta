@@ -109,10 +109,10 @@ def run(input_folder, output_folder):
     parse_addon_folder(Path(input_folder, "addon"), output_folder, mod=mod_ids, modpack=modpack_ids)
 
     with Path(output_folder, 'mods.json').open('w') as f:
-        json.dump(mods, f)
+        json.dump(mods, f, sort_keys=True)
 
     with Path(output_folder, 'modpacks.json').open('w') as f:
-        json.dump(modpacks, f)
+        json.dump(modpacks, f, sort_keys=True)
 
     with Path(output_folder, 'index.json').open('w') as f:
         json.dump({
