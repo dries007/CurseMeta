@@ -29,15 +29,22 @@ from pathlib import Path
 
 
 def parse_top_level_files(file):
-    ids = set()
+    ids = []
+    summery = {}
 
     with file.open() as f:
         data = json.load(f)["Data"]
 
     for project in data:
-        ids.add(project["Id"])
+        ids.append(project["Id"])
+        summery[project["Id"]] = {
+            "Name": project["Name"],
+            "PrimaryAuthorName": project["PrimaryAuthorName"],
+            "Summary": project["Summary"],
+            "WebSiteURL": project["WebSiteURL"],
+        }
 
-    return ids
+    return ids, summery
 
 
 def parse_addon_folder(addon_folder, output_folder, **kwargs):
@@ -54,7 +61,7 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
                 types.append(name)
         project_type = ','.join(types) if len(types) != 0 else "UNKNOWN"
 
-        print("Parsing project nr", i, "id:", project_id, "type:", project_type)
+        # print("Parsing project nr", i, "id:", project_id, "type:", project_type)
 
         # make out/<projectid>.json
         with Path(project_in, 'index.json').open() as f:
@@ -93,21 +100,27 @@ def run(input_folder, output_folder):
         raise IOError("Input not a folder.")
 
     print("Parsing mods.json ...")
-    mods = parse_top_level_files(Path(input_folder, "mods.json"))
+    mod_ids, mods = parse_top_level_files(Path(input_folder, "mods.json"))
     print("Parsing modpacks.json ...")
-    modpacks = parse_top_level_files(Path(input_folder, "modpacks.json"))
+    modpack_ids, modpacks = parse_top_level_files(Path(input_folder, "modpacks.json"))
     print("Parsing complete.json ...")
-    complete = parse_top_level_files(Path(input_folder, "complete.json"))
+    all_ids, _ = parse_top_level_files(Path(input_folder, "complete.json"))
     print("Parsing addons ...")
-    parse_addon_folder(Path(input_folder, "addon"), output_folder, mod=mods, modpack=modpacks)
+    parse_addon_folder(Path(input_folder, "addon"), output_folder, mod=mod_ids, modpack=modpack_ids)
+
+    with Path(output_folder, 'mods.json').open('w') as f:
+        json.dump(mods, f)
+
+    with Path(output_folder, 'modpacks.json').open('w') as f:
+        json.dump(modpacks, f)
 
     with Path(output_folder, 'index.json').open('w') as f:
         json.dump({
             'timestamp': calendar.timegm(time.gmtime()),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
-            'mods': sorted(mods),
-            'modpacks': sorted(modpacks),
-            'ids': sorted(complete),
+            'mods': sorted(mod_ids),
+            'modpacks': sorted(modpack_ids),
+            'ids': sorted(all_ids),
         }, f)
 
 

@@ -20,6 +20,10 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
   - A `timestamp` of last update
   - Lists of all `mods`, `modpacks` project ids
   - A list of all project `ids`.
+- A list of all [`mods.json`](mods.json) and [`modpacks.json`](modpacks.json), for easy searchability.
+  - These files are an `Id` to `Name`, `PrimaryAuthorName`, `Summary`, and `WebSiteURL` map.
+  - They are meant for search services, to avoid having to download unnecessary data.
+  - If you'd like to see a key added, open an issue with a strong use-case please.
 - A `/projectID.json` JSON file for every project.
   - Has the (stripped) CurseForge project metadata.
 - A `/projectID/` folder with:
@@ -41,7 +45,9 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
 
-### May 1st, 2017
+### May 6th, 2017
+- Added mods.json and modpacks.json
 
+### May 1st, 2017
 - Removed .html files
 - Added modpacks & mods id lists in `/index.json`
