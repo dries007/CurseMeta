@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CurseMeta - Search</title>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/scroller/1.4.2/css/scroller.dataTables.min.css">
+
+    <style>
+        #credits {
+            float: right;
+            text-align: right;
+            color: gray;
+        }
+        a {
+            color: inherit;
+        }
+
+        @font-face { font-family: Merriweather; font-style: normal; font-weight: 300; src: local("Merriweather Light"), local("Merriweather-Light"), url("./pixyll/Merriweather-Light.ttf"); }
+        @font-face { font-family: Merriweather; font-style: normal; font-weight: 900; src: local("Merriweather Heavy"), local("Merriweather-Heavy"), url("./pixyll/Merriweather-Bold.ttf"); }
+        @font-face { font-family: Merriweather; font-style: italic; font-weight: 300; src: local("Merriweather Light Italic"), local("Merriweather-LightItalic"), url("./pixyll/Merriweather-LightItalic.ttf"); }
+        @font-face { font-family: Merriweather; font-style: italic; font-weight: 900; src: local("Merriweather Heavy Italic"), local("Merriweather-HeavyItalic"), url("./pixyll/Merriweather-HeavyItalic.ttf"); }
+        @font-face { font-family: Lato; font-style: normal; font-weight: 300; src: local("Lato Light"), local("Lato-Light"), url("./pixyll/Lato-Light.ttf"); }
+        @font-face { font-family: Lato; font-style: normal; font-weight: 900; src: local("Lato Black"), local("Lato-Blcak"), url("./pixyll/Lato-Black.ttf"); }
+        @font-face { font-family: Lato; font-style: normal; font-weight: bold; src: local("Lato Black"), local("Lato-Blcak"), url("./pixyll/Lato-Black.ttf"); }
+        @font-face { font-family: Lato; font-style: italic; font-weight: 900; src: local("Lato BlackItalic"), local("Lato-BlackItalic"), url("./pixyll/Lato-BlackItalic.ttf"); }
+        @font-face { font-family: Lato; font-style: italic; font-weight: bold; src: local("Lato BlackItalic"), local("Lato-BlackItalic"), url("./pixyll/Lato-BlackItalic.ttf"); }
+
+        h1 {
+            font-family: Lato, "Helvetica Neue", Helvetica, sans-serif;
+            font-weight: 900;
+            line-height: 1.2;
+        }
+
+        body {
+            font-family: Merriweather, "PT Serif", Georgia, "Times New Roman", STSong, serif;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+<h1>CurseMeta - Search</h1>
+<button id="mods">Mods</button>
+<button id="modpacks">Modpacks</button>
+<span id="credits">See <a href="https://cursemeta.dries007.net">cursemeta.dries007.net</a> for more info.</span>
+<table id="table" class="display compact">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Links</th>
+        <th>Name</th>
+        <th>Primary Author</th>
+        <th>Summary</th>
+    </tr>
+    </thead>
+</table>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/scroller/1.4.2/js/dataTables.scroller.min.js"></script>
+<script>
+
+    var urls = {
+        mods: "https://cursemeta.dries007.net/mods.json",
+        modpacks: "https://cursemeta.dries007.net/modpacks.json"
+    };
+
+    $(document).ready(function () {
+
+        var url = urls["mods"];
+
+        if (window.location.hash) {
+            var target = window.location.hash.substr(1);
+            if (urls.hasOwnProperty(target)) {
+                url = urls[target];
+            }
+        }
+
+        var table = $('#table').DataTable({
+            ajax: {
+                url: url,
+                dataSrc: function (json) {
+                    var out = [];
+                    $.each(json, function (k, v) {
+                        var row = $.extend({"Id": k}, v);
+                        row["WebSiteURL"] = '<a href="'+ row["WebSiteURL"] + '" target="_blank">Curse</a> <a href="https://cursemeta.dries007.net/' + k + '.json"" target="_blank">CurseMeta</a>';
+                        out.push(row);
+                    });
+                    return out;
+                }
+            },
+            columns: [
+                { "data": "Id" },
+                { "data": "WebSiteURL" },
+                { "data": "Name" },
+                { "data": "PrimaryAuthorName" },
+                { "data": "Summary" },
+            ],
+            scrollY:        "calc(100vh - 250px)",
+            deferRender:    true,
+            scroller:       true
+        });
+
+        $('#mods').click(function () {
+            window.location.hash = "#mods";
+            table.ajax.url(urls['mods']).load();
+        });
+
+        $('#modpacks').click(function () {
+            window.location.hash = "#modpacks";
+            table.ajax.url(urls['modpacks']).load();
+        });
+    })
+</script>
+</body>
+</html>

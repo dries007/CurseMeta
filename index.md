@@ -13,6 +13,8 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 
 **How to use this website?** [More info here.](devinfo.html)
 
+**Just wanna search Mods and Modpacks?** [Go here.](search.html)
+
 ## Obligatory Legalese
 
 <pre>
