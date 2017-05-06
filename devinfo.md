@@ -46,7 +46,8 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
 
 ### May 6th, 2017
-- Added mods.json and modpacks.json
+- Added `mods.json` and `modpacks.json`
+- Added [search](/search) page.
 
 ### May 1st, 2017
 - Removed .html files

@@ -11,9 +11,9 @@ All generated with publicly available data from Minecraft's CurseFoge. No mods a
 
 The JSON data is updated periodically, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
 
-**How to use this website?** [More info here.](devinfo.html)
+**How to use this website?** [More info here.](devinfo)
 
-**Just wanna search Mods and Modpacks?** [Go here.](search.html)
+**Just wanna search Mods and Modpacks?** [Go here.](search)
 
 ## Obligatory Legalese
 
