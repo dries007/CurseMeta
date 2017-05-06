@@ -41,8 +41,8 @@
 </head>
 <body>
 <h1>CurseMeta - Search</h1>
-<button id="mods">Mods</button>
-<button id="modpacks">Modpacks</button>
+<input id="mods" type="radio" name="list" checked/><label for="mods">Mods</label>
+<input id="modpacks" type="radio" name="list"/><label for="modpacks">Modpacks</label>
 <span id="credits">See <a href="https://cursemeta.dries007.net">cursemeta.dries007.net</a> for more info.</span>
 <table id="table" class="display compact">
     <thead>
@@ -74,6 +74,7 @@
             var target = window.location.hash.substr(1);
             if (urls.hasOwnProperty(target)) {
                 url = urls[target];
+                $('#' + target).prop("checked", true)
             }
         }
 
