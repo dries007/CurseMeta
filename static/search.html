@@ -113,6 +113,10 @@
             min-width: 150px;
         }
 
+        .info > div > p {
+            text-align: center;
+        }
+
         .info > div:first-child {
             width: 200px;
             min-width: 200px;
@@ -323,11 +327,11 @@
             return '<li>' + obj["Name"] + '</li>';
         }) + '</ul>';
 
+        // Link to Curse Project page
+        var curseLink = '<p><a href="' + data["WebSiteURL"] + '" target="_blank">Curse Project Page</a></p>';
+
         // Links to Curse and {project.json, project/index.json, project/files.json} from CurseMeta
-        var links = '' +
-            '<p><a href="' + data["WebSiteURL"] + '" target="_blank">Curse.com</a></p>' +
-            '<h3>CurseMeta links</h3>' +
-            '<ul><li>' + [
+        var links = '<ul><li>' + [
                 '<a href="' + URL_BASE + data["Id"] + '.json" target="_blank">Project JSON</a>',
                 '<a href="' + URL_BASE + data["Id"] + '/" target="_blank">Files ID list</a>',
                 '<a href="' + URL_BASE + data["Id"] + '/files.json" target="_blank">Files JSON</a>'
@@ -341,7 +345,7 @@
 
         // HTML
         return '<div class="info">' +
-            '<div><h2>Info</h2><h3>Image</h3>'+ image+ '<h3>Authors</h3>' + authors + '<h3>Links</h3>' + links + '</div>' +
+            '<div><h2>Info</h2>' + image + curseLink + '<h3>Authors</h3>' + authors + '<h3>CurseMeta Links</h3>' + links + '</div>' +
             '<div><h2>Latest Files per MC Version</h2>' + version_files + '</div>' +
             '<div><h2>Latest Files</h2>' + latest_files + '</div>' +
             '</div>'
