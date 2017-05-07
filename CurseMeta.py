@@ -103,8 +103,9 @@ def run(input_folder, output_folder):
     mod_ids, mods = parse_top_level_files(Path(input_folder, "mods.json"))
     print("Parsing modpacks.json ...")
     modpack_ids, modpacks = parse_top_level_files(Path(input_folder, "modpacks.json"))
-    print("Parsing complete.json ...")
-    all_ids, _ = parse_top_level_files(Path(input_folder, "complete.json"))
+    all_ids = mod_ids + modpack_ids
+    # print("Parsing complete.json ...")
+    # all_ids, _ = parse_top_level_files(Path(input_folder, "complete.json"))
     print("Parsing addons ...")
     parse_addon_folder(Path(input_folder, "addon"), output_folder, mod=mod_ids, modpack=modpack_ids)
 
