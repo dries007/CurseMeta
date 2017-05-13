@@ -66,7 +66,7 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
 
-## May 13th, 2017
+### May 13th, 2017
 - Added Markdown script (and css) for easier changed to the info pages.
 
 ### May 6th, 2017
