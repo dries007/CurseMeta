@@ -2,173 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="description" content="CurseForge metadata for third party integrations">
+    <meta name="keywords" content="Curse,CurseForge,Minecraft,Dries007,MinecraftForge,Forge,Mods,Modpacks">
+    <meta name="author" content="Dries007">
+    <meta name="robots" content="index, nofollow" />
+    <meta name="revisit-after" content="14 days" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>CurseMeta - Search</title>
 
+    <link rel="stylesheet" href="normalize.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/scroller/1.4.2/css/scroller.dataTables.min.css">
-
-    <style>
-        #credits {
-            float: right;
-            text-align: right;
-            color: gray;
-        }
-
-        a {
-            color: inherit;
-        }
-
-        @font-face {
-            font-family: Merriweather;
-            font-style: normal;
-            font-weight: 300;
-            src: local("Merriweather Light"), local("Merriweather-Light"), url("./pixyll/Merriweather-Light.ttf");
-        }
-
-        @font-face {
-            font-family: Merriweather;
-            font-style: normal;
-            font-weight: 900;
-            src: local("Merriweather Heavy"), local("Merriweather-Heavy"), url("./pixyll/Merriweather-Bold.ttf");
-        }
-
-        @font-face {
-            font-family: Merriweather;
-            font-style: italic;
-            font-weight: 300;
-            src: local("Merriweather Light Italic"), local("Merriweather-LightItalic"), url("./pixyll/Merriweather-LightItalic.ttf");
-        }
-
-        @font-face {
-            font-family: Merriweather;
-            font-style: italic;
-            font-weight: 900;
-            src: local("Merriweather Heavy Italic"), local("Merriweather-HeavyItalic"), url("./pixyll/Merriweather-HeavyItalic.ttf");
-        }
-
-        @font-face {
-            font-family: Lato;
-            font-style: normal;
-            font-weight: 300;
-            src: local("Lato Light"), local("Lato-Light"), url("./pixyll/Lato-Light.ttf");
-        }
-
-        @font-face {
-            font-family: Lato;
-            font-style: normal;
-            font-weight: 900;
-            src: local("Lato Black"), local("Lato-Blcak"), url("./pixyll/Lato-Black.ttf");
-        }
-
-        @font-face {
-            font-family: Lato;
-            font-style: normal;
-            font-weight: bold;
-            src: local("Lato Black"), local("Lato-Blcak"), url("./pixyll/Lato-Black.ttf");
-        }
-
-        @font-face {
-            font-family: Lato;
-            font-style: italic;
-            font-weight: 900;
-            src: local("Lato BlackItalic"), local("Lato-BlackItalic"), url("./pixyll/Lato-BlackItalic.ttf");
-        }
-
-        @font-face {
-            font-family: Lato;
-            font-style: italic;
-            font-weight: bold;
-            src: local("Lato BlackItalic"), local("Lato-BlackItalic"), url("./pixyll/Lato-BlackItalic.ttf");
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: Lato, "Helvetica Neue", Helvetica, sans-serif;
-            font-weight: 900;
-            line-height: 1.2;
-        }
-
-        body {
-            font-family: Merriweather, "PT Serif", Georgia, "Times New Roman", STSong, serif;
-            font-weight: 400;
-        }
-
-        td.details-control {
-            cursor: pointer;
-            background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACjElEQVR4Aa2V30uTURjHnVBUgglCaXVTJJVLMdhQm7+1JEvJiKAggmgSQiKJl0V0E13UVf0HQZmBLcvlpqa55tqV0YoMzIhY6js0yDH11X17vuO8Sq5Zgl/48DznPD/G63nOMSmBkoUNwhYhTUgn9NUeY8z5p0wqOVXYKRwQLMJhhYV7Kpaqck2rNdskbBPMdrv9osfjcQaDwW/RaHSR0OceY8xhrqox/a3ZZmGHkO9wOB7ouj6PBGKMOcxlzcqmdDYKGZmZmSWjo6PvIYosRuDWXGj50IwTb4+hxleN5sAVvJh4jvBCGBRzWSO121UPk3EAaUKuz+d7ycTp+Wnc/nwL1d4qHBVidmjZv/npBkJzGiiv19vFWmGrcVDsvKupqeky/056VMf1j9dQOViBKo9Aa/ixdbnYcrQGWsBc1jQ2NtrZQ/VKShHM8kvdEPVN9qJsoBRl/aUoHyiJ+UpcCxJTtmfCDYoHJT2yYyOlPtcaCoUmGGwdbkVRbxGK+2y0gg2GisUvNmJCy/BVUJqm/eBIxXqpgbUtiBise12HQlc+ClwFSKRCiZH6wXpQs7OzETWn6XENa/trYemywuK0IpGsTotgRU3fcVBzouWG6pOnpqY0BhuGGpDXeUjIW7JKcfuX3tjjP9k4FBkZN4PtY+042JGzzNMcGDJ35C7tmcU++tJmjE63OpSUuLEJ62GcfXUO+59kr8rJnlOY0WfAGtYaY/PHYPv9fhdEY7++4nz/BWS17UPWY0Es2avWp3vOYOTnCCheBtaqHskJr95kZBL3AvdR2XkEex5mYbdQ+qwCd97dRTAcXHn1Moyrt16PA2tN//V8jY+Pf4cS/VWerzU9sDay1gd2Xf4F/AZqlpeB9836LwAAAABJRU5ErkJggg==) no-repeat center center;
-        }
-
-        tr.shown td.details-control {
-            background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAACdUlEQVR4Aa2V30tTYRjHVSgsoQKhXPUPlKZMlImiIIg/pggiiDeCBAdqyC4Kf9zVhVdeelX33QnCbtYvxZsxxkoqKxiz1SzdFudMb5xO5/bt+fa+sPCw3IVf+PA+532e5ytn53lfK0qoSrggXBauCbUKxtxjjjVnq1IXXxFuCXeEFqGdMOYec6zRtZX/M6sWrgv1hmHcDwQCLxOJxM9CoZAnjLnHHGt0bbXdVG1cEm4KLp/P9yKXyx2jhJhjDWvZc9qUwUWhzuFwdMVisc8QFQ4PcbCygvT0NJLDw0gNDSH96DEyfj8KmQwo1rJHem8oD2VapX/sxlAo9Aqi/N4e9hYWsDMwgARxD2DH7ZZYren5eZxYFqhgMOhnr3BVeSnn216v98Hf3yqXg/X0CX719YFs9/WquJfPGtkzZ2fBWvZ4PB6DHtqrokaol7/0GqLM2hq2enpsxMmpvf3VVVD8UOJxV42Uet1Wy7J+M5mam8P37u6ySM7MgDJNM8mRUl5qYDtOREz+GB3FZlcXNjs7UUrMk/jYGKhsNnuo57TWZhgTw0hHO0EpRdpV/tvICKgjUdFQv/Lu7q7JZHxqCl9dLqGtSJtL4VJ80Wvc8xD2V9YfRUbmLZPp5WVstLTYaSWt+lmt1tISKH5Q/VFqbGOTl6GNTk7iQ3Oz4FSrU8UfuTqdBJHxceQz+2APe/8Zm+Jgh8PhNxBlt7YQNQysNzVivbEJ7wXGiiZEJiZwEI2C4mFgr/aoKnn0jk0TiWfPsTE4iHcN9xBuaMCn/n5sLy7iKJk8ffTqikfvfC4H9laWdX2lUqltaDEu9/o664LtIOVfsOf4L+APb5yaiwyN8+8AAAAASUVORK5CYII=) no-repeat center center;
-        }
-
-        .info {
-             display: flex;
-        }
-
-        .info > div {
-            padding: 5px;
-            border: 1px solid black;
-            border-radius: 5px;
-            margin: 5px;
-            min-width: 150px;
-        }
-
-        .info > div > p {
-            text-align: center;
-        }
-
-        .info > div:first-child {
-            width: 200px;
-            min-width: 200px;
-        }
-
-        .info > div > h2 {
-            text-align: center;
-            margin-top: 0.1em;
-        }
-
-        .info > div > h3 {
-            text-align: center;
-        }
-
-        .logo {
-            max-height: 175px;
-            max-width: 175px;
-            display:block;
-            margin:auto;
-        }
-
-        .default-file {
-            font-weight: bold;
-        }
-
-        ul {
-            padding-left: 1.2em;
-        }
-    </style>
+    <link rel="stylesheet" href="pixyll/fonts.css">
+    <link rel="stylesheet" href="search.css">
 </head>
 <body>
-<!--
-    Copyright 2017 Dries007
-
-    Licensed under the EUPL, Version 1.1 only (the "Licence");
-    You may not use this work except in compliance with the Licence.
-    You may obtain a copy of the Licence at:
-
-    https://joinup.ec.europa.eu/software/page/eupl5
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the Licence is distributed on an "AS IS" basis,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the Licence for the specific language governing
-    permissions and limitations under the Licence.
--->
+<div>
 <h1>CurseMeta - Search</h1>
-<noscript><h1>You need JavaScript for this page.</h1></noscript>
+
+<noscript><h1><b>You need JavaScript for this page.</b></h1></noscript>
+
 <input id="list-mods" type="radio" name="list" checked/><label for="list-mods">Mods</label>
 <input id="list-modpacks" type="radio" name="list"/><label for="list-modpacks">Modpacks</label>
 &nbsp;&nbsp;&nbsp;&nbsp;<small>Last update of data: <span id="timestamp">Loading...</span></small>
-<span id="credits">See <a href="https://cursemeta.dries007.net">cursemeta.dries007.net</a> for more info.</span>
+
+<span id="credits"><small>See <a href="https://cursemeta.dries007.net">cursemeta.dries007.net</a> for more info and terms and conditions.</small></span>
+
 <table id="table" class="display compact">
     <thead>
     <tr>
@@ -181,290 +41,15 @@
     </thead>
 </table>
 
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
-<!--<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>-->
-<!--<script src="https://cdn.datatables.net/scroller/1.4.2/js/dataTables.scroller.min.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/scroller/1.4.2/js/dataTables.scroller.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
-<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
-<script src="https://cdn.datatables.net/scroller/1.4.2/js/dataTables.scroller.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>-->
+<!--<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>-->
+<!--<script src="https://cdn.datatables.net/scroller/1.4.2/js/dataTables.scroller.js"></script>-->
 
-<script>
-    "use strict";
-
-    console.info("Copyright 2017 Dries007 - Licensed under the EUPL v1.1 - https://github.com/dries007/curseMeta");
-
-    var URL_BASE = "https://cursemeta.dries007.net/";
-
-    var currentList = 'mods';
-    var list_urls = {
-        mods: URL_BASE + "mods.json",
-        modpacks: URL_BASE + "modpacks.json"
-    };
-    var index = {};
-
-    var _getData_cache = {};
-    /**
-     * Get data, cached or ajax
-     * @param url Last part of URL, without extension json.
-     * @param callback Callback
-     */
-    function getData(url, callback) {
-        if (_getData_cache.hasOwnProperty(url)) {
-            callback(_getData_cache[url]);
-        } else {
-            $.getJSON(URL_BASE + url + ".json", function (data) {
-                _getData_cache[url] = data;
-                callback(data);
-            });
-        }
-    }
-
-    // For ability to cross-list depend jump, we need all ids mapped to what list they are from
-    getData("index", function (data) {
-        $('#timestamp').text(data["timestamp_human"]);
-        index = data;
-    });
-
-    /**
-     * Formatting loop
-     * @param data Data object
-     * @param name Key that is an array in data
-     * @param f Callback
-     * @returns {string} Accumulative returns of callback
-     */
-    function loop(data, name, f) {
-        if (!data.hasOwnProperty(name)) return '';
-        var out = '';
-        $.each(data[name], function (i) {
-            var r = f(data[name][i]);
-            if ((typeof r) !== 'undefined') out += r;
-        });
-        return out;
-    }
-
-    /**
-     * Called after row is added to DOM, so the jQ selectors work (also, it's async)
-     * @param row
-     */
-    function fixDownloadLinks(row) {
-        var row_data = row.data();
-        var child_node = row.child();
-        child_node.find(".file").each(function(i, e) {
-            var jQe = $(e);
-            var download = jQe.find(".download");
-            var dependencies = jQe.find(".dependencies");
-            console.log(download);
-            console.log(dependencies);
-            getData(row_data["Id"] + '/' + jQe.data('fileid'), function (data) {
-                download.replaceWith('<a href="' + data["DownloadURL"] + '" target="_blank">Download</a>');
-                dependencies.replaceWith(makedeps(data));
-            })
-        });
-    }
-
-    /**
-     * Truncate (and wrap in span with title)
-     * @param str
-     * @param len
-     * @returns {*}
-     */
-    function truncate(str, len) {
-        if (str.length < len) return str;
-        return '<span title="' + str + '">' + str.substr(0, len) + '&hellip;</span>';
-    }
-
-    function makedeps(obj) {
-        return loop(obj, "Dependencies", function (dep) {
-            var target = '#';
-            var pid = parseInt(dep["AddOnId"]);
-            $.each(list_urls, function (key) {
-               if (index.hasOwnProperty(key) && index[key].indexOf(pid) !== -1) {
-                   target = '#' + key + '-' + pid;
-               }
-            });
-            return '<a href="' + target + '" title="' + dep["Type"] + '">' + dep["AddOnId"] + '</a>&nbsp;'
-        });
-    }
-
-    /**
-     * Format files table
-     * @returns {string} HTML
-     */
-    function formatFileTable(data, rootId, idId, fileTypeId, nameId, urlID, gameVersionId) {
-        return '<table>' +
-            '<tr><th>MC</th><th>Id</th><th>Type</th><th>Filename</th><th>Download</th><th>Dependencies</th><th>JSON</th></tr>' +
-            loop(data, rootId, function (obj) {
-                var def = data["DefaultFileId"] === obj[idId];
-                return '<tr '+ (def ? 'class="file default-file" title="Default file"' : 'class="file"' ) + ' data-fileid="' + obj[idId] + '"><td>' + [
-                        obj[gameVersionId],
-                        obj[idId],
-                        obj[fileTypeId],
-                        truncate(obj[nameId], 25),
-                        urlID === null ? '<span class="download">Getting URL...</span>' : '<a href="' + obj[urlID] + '" target="_blank">Download</a>',
-                        urlID === null ? '<span class="dependencies">Loading...</span>' : makedeps(obj),
-                        '<a href="' + URL_BASE + data["Id"] + '/' + obj[idId] + '.json" target="_blank">JSON</a>'
-                    ].join('</td><td>') + '</td></tr>';
-                }) +
-            '</table>';
-    }
-
-    /**
-     * Make child HTML
-     * @param data Project Data object
-     * @returns {string}
-     */
-    function makeChildHTML(data) {
-        // Only default image, skip the rest
-        var image = loop(data, "Attachments", function (obj) {
-            if (obj['IsDefault']) {
-                return '<a href="' + obj['Url'] + '" target="_blank"><img class="logo" src="' + obj['ThumbnailUrl'] + '" title="' + $(obj['Description']).text() + '"></a>'
-            }
-        });
-
-        // All authors
-        var authors = '<ul>' + loop(data, "Authors", function (obj) {
-            return '<li>' + obj["Name"] + '</li>';
-        }) + '</ul>';
-
-        // Link to Curse Project page
-        var curseLink = '<p><a href="' + data["WebSiteURL"] + '" target="_blank">Curse Project Page</a></p>';
-
-        // Links to Curse and {project.json, project/index.json, project/files.json} from CurseMeta
-        var links = '<ul><li>' + [
-                '<a href="' + URL_BASE + data["Id"] + '.json" target="_blank">Project JSON</a>',
-                '<a href="' + URL_BASE + data["Id"] + '/" target="_blank">Files ID list</a>',
-                '<a href="' + URL_BASE + data["Id"] + '/files.json" target="_blank">Files JSON</a>'
-            ].join('</li><li>') +
-            '</li></ul>';
-
-        // no code duplication yey
-        // Also, yes "GameVesion" is misspelled. That's Curse's fault.
-        var version_files = formatFileTable(data, "GameVersionLatestFiles", "ProjectFileID", "FileType", "ProjectFileName", null, "GameVesion");
-        var latest_files = formatFileTable(data, "LatestFiles", "Id", "ReleaseType", "FileName", "DownloadURL", "GameVersion");
-
-        // HTML
-        return '<div class="info">' +
-            '<div><h2>Info</h2>' + image + curseLink + '<h3>Authors</h3>' + authors + '<h3>CurseMeta Links</h3>' + links + '</div>' +
-            '<div><h2>Latest Files per MC Version</h2>' + version_files + '</div>' +
-            '<div><h2>Latest Files</h2>' + latest_files + '</div>' +
-            '</div>'
-    }
-
-    /**
-     * ON READY
-     */
-    $(function () {
-        // radio buttons
-        $.each(list_urls, function (key, val) {
-            $('#list-' + key).click(function () {
-                //todo: something with state & history
-                window.location.hash = '#' + key;
-                table.ajax.url(val).load();
-            })
-        });
-
-        var _prev_child = null;
-        /**
-         * Toggle child of row & scroll to it.
-         * @param row Datatables row obj
-         * @param forceShow {boolean} if true, ignore status and always show & scroll
-         */
-        function toggleChild(row, forceShow) {
-            if (row.child.isShown() && !forceShow) {
-                _prev_child = null;
-                row.child.hide();
-                $(row.node()).removeClass('shown');
-            }
-            else {
-                if (_prev_child !== null) {
-                    _prev_child.child.hide();
-                    $(_prev_child.node()).removeClass('shown');
-                }
-                getData(row.data()['Id'], function (data) {
-                    row.child(makeChildHTML(data)).show();
-                    row.scrollTo(true);
-                    _prev_child = row;
-                    fixDownloadLinks(row);
-                });
-                $(row.node()).addClass('shown');
-            }
-        }
-
-        // table is used in navigate, which is used before the var is made, and we'd like it to be null instead of undefined.
-        var table = null;
-
-        /**
-         * Used to select the right list (and entry if required)
-         * @param target
-         */
-        function navigate(target) {
-            //todo: something with state & history
-            // split = list-projectid
-            target = target.split('-');
-            if (!list_urls.hasOwnProperty(target[0])) {
-                return navigate(currentList);
-            }
-            currentList = target[0];
-            $('#list-' + target[0]).prop("checked", true);
-            if (target.length > 1 && table !== null) {
-                var row = table.row("#pid" + target[1]);
-                toggleChild(row, true);
-            }
-            return list_urls[target[0]];
-        }
-
-        window.onpopstate = function(event) {
-            navigate(window.location.hash ? window.location.hash.substr(1) : currentList);
-        };
-
-        // do the magic
-        table = $('#table').DataTable({
-            ajax: {
-                // get proper URL, so we don't have to load this twice at the start
-                url: navigate(window.location.hash ? window.location.hash.substr(1) : currentList),
-                // insert ID and HTMLid into the data objects
-                dataSrc: function (json) {
-                    var out = [];
-                    $.each(json, function (k, v) {
-                        var row = $.extend({"Id": k, "HTMLid": "pid" + k}, v);
-                        out.push(row);
-                    });
-                    return out;
-                }
-            },
-            // select HTMLid as row id, cause it gets prepended with pid (projectId)
-            rowId: 'HTMLid',
-            columns: [
-                { // icons set via CSS, no data
-                    "className": 'details-control',
-                    "orderable": false,
-                    "data": null,
-                    "defaultContent": ''
-                },
-                {"data": "Id"},
-                {"data": "Name"},
-                {"data": "PrimaryAuthorName"},
-                {"data": "Summary"}
-            ],
-            scrollY: "calc(100vh - 200px)", // magic numbers!
-            deferRender: true, // keep elements off screen out of mem if possible
-            scroller: true, // no pages for me sir
-            stateSave: true, // save state to HTML session stuff. We use hash/history, but this also preserves search
-            initComplete: function () { // re-navigate, so we scroll and unfold child
-                navigate(window.location.hash ? window.location.hash.substr(1) : currentList);
-            }
-        });
-
-        // (un)fold children on click
-        $('#table tbody').on('click', 'td.details-control', function () {
-            var tr = $(this).closest('tr');
-            var row = table.row(tr);
-            //todo: something with state & history
-            window.location.hash = '#' + currentList + '-' + row.data()["Id"];
-            toggleChild(row);
-        });
-    })
-</script>
+<script src="search.js"></script>
+</div>
 </body>
 </html>

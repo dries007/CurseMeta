@@ -1,6 +1,27 @@
 ---
 title: CurseMeta - Usage Info
+description: CurseForge metadata for third party integrations
+keywords: Curse,CurseForge,Minecraft,MinecraftForge,Forge,Mods,Modpacks
+author: Dries007
+robots: index, nofollow
+revisit-after: 14 days
+viewport: width=device-width, initial-scale=1.0
 ---
+<!--
+    Copyright 2017 Dries007
+
+    Licensed under the EUPL, Version 1.1 only (the "Licence");
+    You may not use this work except in compliance with the Licence.
+    You may obtain a copy of the Licence at:
+
+    https://joinup.ec.europa.eu/software/page/eupl5
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the Licence is distributed on an "AS IS" basis,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the Licence for the specific language governing
+    permissions and limitations under the Licence.
+-->
 
 # Usage info
 
@@ -31,7 +52,7 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
     - The project `type` (comma separated list of `mod`, `modpack`, and or `UNKNOWN`)
   - A metadata file per `fileID`:  `/projectid/fileID.json`
   - A list of all CurseForge's files metadata: `/projectid/files.json`
-    + _Please don't use this file if you only need one file's metadata._
+    - _Please don't use this file if you only need one file's metadata._
 
 ## Example
 
@@ -44,6 +65,9 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 ## Changes
 
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
+
+## May 13th, 2017
+- Added Markdown script (and css) for easier changed to the info pages.
 
 ### May 6th, 2017
 - Added `mods.json` and `modpacks.json`
