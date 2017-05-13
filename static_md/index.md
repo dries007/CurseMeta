@@ -45,10 +45,10 @@ _Thanks to [NikkyAI's alpacka-meta](https://github.com/NikkyAI/alpacka-meta) for
 
 ## Obligatory Legalese
 **Terms of Service**
-<pre>
+```
 This website is made as a good-faith effort to allow interoperability between (Minecraft's) CurseForge and third party systems.
 Although this is no guaranty, downloads made via URLs provided by this site should count towards downloads counts in CurseForge.
 
 This website is hosted in Europe. EU law applies here.
 Unless required by applicable law or agreed to in writing, the information provided on this subdomain is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-</pre>
+```
