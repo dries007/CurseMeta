@@ -1,5 +1,5 @@
 #!/bin/env python3
-"""
+'''
 CurseMeta
 
 Use output of https://github.com/NikkyAI/alpacka-meta to make static metadata 
@@ -7,18 +7,18 @@ used by CurseModpackDownloader v1.x to get all modfiles.
 
 Copyright 2017 Dries007
 
-Licensed under the EUPL, Version 1.1 only (the "Licence");
+Licensed under the EUPL, Version 1.1 only (the 'Licence');
 You may not use this work except in compliance with the Licence.
 You may obtain a copy of the Licence at:
 
 https://joinup.ec.europa.eu/software/page/eupl5
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
+distributed under the Licence is distributed on an 'AS IS' basis,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the Licence for the specific language governing
 permissions and limitations under the Licence.
-"""
+'''
 import calendar
 import sys
 import getopt
@@ -33,15 +33,15 @@ def parse_top_level_files(file):
     summery = {}
 
     with file.open() as f:
-        data = json.load(f)["Data"]
+        data = json.load(f)['Data']
 
     for project in data:
-        ids.append(project["Id"])
-        summery[project["Id"]] = {
-            "Name": project["Name"],
-            "PrimaryAuthorName": project["PrimaryAuthorName"],
-            "Summary": project["Summary"],
-            "WebSiteURL": project["WebSiteURL"],
+        ids.append(project['Id'])
+        summery[project['Id']] = {
+            'Name': project['Name'],
+            'PrimaryAuthorName': project['PrimaryAuthorName'],
+            'Summary': project['Summary'],
+            'WebSiteURL': project['WebSiteURL'],
         }
 
     return ids, summery
@@ -59,15 +59,15 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         for name, ids in kwargs.items():
             if project_id in ids:
                 types.append(name)
-        project_type = ','.join(types) if len(types) != 0 else "UNKNOWN"
+        project_type = ','.join(types) if len(types) != 0 else 'UNKNOWN'
 
-        # print("Parsing project nr", i, "id:", project_id, "type:", project_type)
+        # print('Parsing project nr', i, 'id:', project_id, 'type:', project_type)
 
         # make out/<projectid>.json
         with Path(project_in, 'index.json').open() as f:
-            data = json.load(f)
+            project_data = json.load(f)
         with Path(output_folder, project.name).with_suffix('.json').open('w') as f:
-            json.dump(data, f, sort_keys=True)
+            json.dump(project_data, f, sort_keys=True)
 
         ids = set()
         # make out/<projectid>/files.json
@@ -80,34 +80,45 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
 
         # make out/<projectid>/index.json
         with Path(project_out, 'index.json').open('w') as f:
-            json.dump({'type': project_type, 'ids': sorted(ids)}, f)
+            json.dump({
+                'type': project_type, 
+                'ids': sorted(ids),
+                'Name': project_data['Name'],
+                'PrimaryAuthorName': project_data['PrimaryAuthorName'],
+                'Summary': project_data['Summary'],
+            }, f)
 
         # make out/<projectid>/<fileid>.json
         for j, file in enumerate(project_files.iterdir()):
-            if file.name == "index.json":
+            if file.name == 'index.json':
                 continue
             with file.open() as f:
                 data = json.load(f)
+            data['_Project'] = {
+                'Name': project_data['Name'],
+                'PrimaryAuthorName': project_data['PrimaryAuthorName'],
+                'Summary': project_data['Summary'],
+            }
             with Path(project_out, file.name).open('w') as f:
                 json.dump(data, f, sort_keys=True)
 
 
 def run(input_folder, output_folder):
     if not input_folder.is_dir():
-        raise IOError("Input not a folder.")
+        raise IOError('Input not a folder.')
     output_folder.mkdir(parents=True, exist_ok=True)
     if not output_folder.is_dir():
-        raise IOError("Input not a folder.")
+        raise IOError('Input not a folder.')
 
-    print("Parsing mods.json ...")
-    mod_ids, mods = parse_top_level_files(Path(input_folder, "mods.json"))
-    print("Parsing modpacks.json ...")
-    modpack_ids, modpacks = parse_top_level_files(Path(input_folder, "modpacks.json"))
+    print('Parsing mods.json ...')
+    mod_ids, mods = parse_top_level_files(Path(input_folder, 'mods.json'))
+    print('Parsing modpacks.json ...')
+    modpack_ids, modpacks = parse_top_level_files(Path(input_folder, 'modpacks.json'))
     all_ids = mod_ids + modpack_ids
-    # print("Parsing complete.json ...")
-    # all_ids, _ = parse_top_level_files(Path(input_folder, "complete.json"))
-    print("Parsing addons ...")
-    parse_addon_folder(Path(input_folder, "addon"), output_folder, mod=mod_ids, modpack=modpack_ids)
+    # print('Parsing complete.json ...')
+    # all_ids, _ = parse_top_level_files(Path(input_folder, 'complete.json'))
+    print('Parsing addons ...')
+    parse_addon_folder(Path(input_folder, 'addon'), output_folder, mod=mod_ids, modpack=modpack_ids)
 
     with Path(output_folder, 'mods.json').open('w') as f:
         json.dump(mods, f, sort_keys=True)
@@ -153,7 +164,7 @@ def main(argv):
 
     run(Path(input_folder).resolve(), Path(output_folder).resolve())
 
-    print("CurseMeta script done")
+    print('CurseMeta script done')
 
 
 if __name__ == '__main__':

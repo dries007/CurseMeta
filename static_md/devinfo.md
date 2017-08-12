@@ -37,9 +37,11 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 
 ## Features
 
+**Any key in any JSON file starting with an underscore is to be treated as optional. It may or may not be present.!**
+
 - JSON based file index: [`index.json`](index.json)
-  - A `timestamp` of last update
-  - Lists of all `mods`, `modpacks` project ids
+  - A `timestamp` (and `timestamp_human`) of last update.
+  - Lists of all `mods`, `modpacks` project ids.
   - A list of all project `ids`.
 - A list of all [`mods.json`](mods.json) and [`modpacks.json`](modpacks.json), for easy searchability.
   - These files are an `Id` to `Name`, `PrimaryAuthorName`, `Summary`, and `WebSiteURL` map.
@@ -50,7 +52,10 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 - A `/projectID/` folder with:
   - A JSON based index: `/projectid/index.json`
     - The project `type` (comma separated list of `mod`, `modpack`, and or `UNKNOWN`)
-  - A metadata file per `fileID`:  `/projectid/fileID.json`
+    - A list of ids of all known files of this project.
+    - The `Name`, `PrimaryAuthorName` and `Summary` items. 
+  - A metadata file per `fileID`: `/projectid/fileID.json`
+    - The `_Project` key contains metadata about the project this file belongs to, to avoid having to make multiple requests. **It is optional.** 
   - A list of all CurseForge's files metadata: `/projectid/files.json`
     - _Please don't use this file if you only need one file's metadata._
 
@@ -65,6 +70,12 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 ## Changes
 
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
+
+## August 13, 2017
+
+- Added the optional `_Project` key to the `fileid.json` files.
+  Requested by reddit user joonatoona to eliminate extra HTTP requests.
+- `Name`, `PrimaryAuthorName` and `Summary` added to `/projectid/index.json` and to `_Project` in `fileid.json`.
 
 ## August 12, 2017
 
