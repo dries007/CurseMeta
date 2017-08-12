@@ -27,7 +27,7 @@ viewport: width=device-width, initial-scale=1.0
 
 When using this website in your own projects, acknowledgement would be appreciated!
 
-Also, please set your `User Agent` to something unique to your project, so I can identify it in logs.
+**Please set your `User Agent` to something unique to your project, so I can identify it in logs.**
 
 To save bandwidth all JSON data is minified, and not all metadata is retained.
 
