@@ -115,10 +115,17 @@ def run(input_folder, output_folder):
     with Path(output_folder, 'modpacks.json').open('w') as f:
         json.dump(modpacks, f, sort_keys=True)
 
+    if os.path.is_file('git_timestamp'):
+        with Path('git_timestamp').open('r') as f:
+            timestamp = int(f.read())
+        print('Git timestamp: ', time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)))
+    else:
+        timestamp = int(time.time())
+
     with Path(output_folder, 'index.json').open('w') as f:
         json.dump({
-            'timestamp': calendar.timegm(time.gmtime()),
-            'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
+            'timestamp': calendar.timegm(time.gmtime(timestamp)),
+            'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
             'mods': sorted(mod_ids),
             'modpacks': sorted(modpack_ids),
             'ids': sorted(all_ids),

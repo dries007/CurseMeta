@@ -7,6 +7,7 @@ git -C curseMeta reset --hard origin/master
 echo "Updating alpacka-meta-files..."
 git -C alpacka-meta-files fetch --all
 git -C alpacka-meta-files reset --hard origin/master
+git -C alpacka-meta-files/ log -1 --format=%ct > git_timestamp
 mkdir tmp_out
 python3 curseMeta/CurseMeta.py -i alpacka-meta-files -o tmp_out
 python3 curseMeta/Markdown.py -i curseMeta/static_md -o tmp_out

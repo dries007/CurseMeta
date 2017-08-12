@@ -13,9 +13,9 @@ viewport: width=device-width, initial-scale=1.0
     Licensed under the EUPL, Version 1.1 only (the "Licence");
     You may not use this work except in compliance with the Licence.
     You may obtain a copy of the Licence at:
-
+    
     https://joinup.ec.europa.eu/software/page/eupl5
-
+    
     Unless required by applicable law or agreed to in writing, software
     distributed under the Licence is distributed on an "AS IS" basis,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,13 +66,19 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
 
-### May 13th, 2017
+## August 12, 2017
+
+- Changed timestamp in `/index.json` to reflect actual last update, if possible.
+  Uses last git commit timestamp.
+
+### May 13, 2017
+
 - Added Markdown script (and css) for easier changed to the info pages.
 
-### May 6th, 2017
+### May 6, 2017
 - Added `mods.json` and `modpacks.json`
 - Added [search](/search) page.
 
-### May 1st, 2017
+### May 1, 2017
 - Removed .html files
 - Added modpacks & mods id lists in `/index.json`
