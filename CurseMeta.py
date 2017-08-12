@@ -115,7 +115,7 @@ def run(input_folder, output_folder):
     with Path(output_folder, 'modpacks.json').open('w') as f:
         json.dump(modpacks, f, sort_keys=True)
 
-    if os.path.is_file('git_timestamp'):
+    if Path('git_timestamp').exists():
         with Path('git_timestamp').open('r') as f:
             timestamp = int(f.read())
         print('Git timestamp: ', time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)))
