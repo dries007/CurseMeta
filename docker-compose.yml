@@ -5,3 +5,4 @@ services:
     restart: always
     volumes:
       - "./data:/data"
+    network_mode: "host"
