@@ -1,6 +1,6 @@
 version: '3'
 services:
-  docker:
+  app:
     build: ./docker
     restart: always
     volumes:
