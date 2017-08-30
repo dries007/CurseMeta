@@ -30,7 +30,7 @@ def parse_top_level_files(file):
     ids = []
     summery = {}
 
-    with file.open() as f:
+    with file.open(encoding='utf-8') as f:
         data = json.load(f)['Data']
 
     for project in data:
@@ -62,22 +62,22 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         # print('Parsing project nr', i, 'id:', project_id, 'type:', project_type)
 
         # make out/<projectid>.json
-        with Path(project_in, 'index.json').open() as f:
+        with Path(project_in, 'index.json').open(encoding='utf-8') as f:
             project_data = json.load(f)
-        with Path(output_folder, project.name).with_suffix('.json').open('w') as f:
+        with Path(output_folder, project.name).with_suffix('.json').open('w', encoding='utf-8') as f:
             json.dump(project_data, f, sort_keys=True)
 
         ids = set()
         # make out/<projectid>/files.json
-        with Path(project_files, 'index.json').open() as f:
+        with Path(project_files, 'index.json').open(encoding='utf-8') as f:
             data = json.load(f)
         for file in data:
             ids.add(file['Id'])
-        with Path(project_out, 'files.json').open('w') as f:
+        with Path(project_out, 'files.json').open('w', encoding='utf-8') as f:
             json.dump(data, f, sort_keys=True)
 
         # make out/<projectid>/index.json
-        with Path(project_out, 'index.json').open('w') as f:
+        with Path(project_out, 'index.json').open('w', encoding='utf-8') as f:
             json.dump({
                 'type': project_type,
                 'ids': sorted(ids),
@@ -90,14 +90,14 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         for j, file in enumerate(project_files.iterdir()):
             if file.name == 'index.json':
                 continue
-            with file.open() as f:
+            with file.open(encoding='utf-8') as f:
                 data = json.load(f)
             data['_Project'] = {
                 'Name': project_data['Name'],
                 'PrimaryAuthorName': project_data['PrimaryAuthorName'],
                 'Summary': project_data['Summary'],
             }
-            with Path(project_out, file.name).open('w') as f:
+            with Path(project_out, file.name).open('w', encoding='utf-8') as f:
                 json.dump(data, f, sort_keys=True)
 
 
@@ -117,15 +117,15 @@ def run(input_folder, output_folder):
     print('Parsing addons ...')
     parse_addon_folder(Path(input_folder, 'addon'), output_folder, mod=mod_ids, modpack=modpack_ids)
 
-    with Path(output_folder, 'mods.json').open('w') as f:
+    with Path(output_folder, 'mods.json').open('w', encoding='utf-8') as f:
         json.dump(mods, f, sort_keys=True)
 
-    with Path(output_folder, 'modpacks.json').open('w') as f:
+    with Path(output_folder, 'modpacks.json').open('w', encoding='utf-8') as f:
         json.dump(modpacks, f, sort_keys=True)
 
     timestamp = int(time.time())
 
-    with Path(output_folder, 'index.json').open('w') as f:
+    with Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
         json.dump({
             'timestamp': calendar.timegm(time.gmtime(timestamp)),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
@@ -136,7 +136,7 @@ def run(input_folder, output_folder):
 
 
 def parse_single_file(i, o):
-    with i.open() as f:
+    with i.open(encoding='utf-8') as f:
         file_data = json.load(f)
-    with o.open('w') as f:
+    with o.open('w', encoding='utf-8') as f:
         json.dump(file_data, f, sort_keys=True)
