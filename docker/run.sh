@@ -4,19 +4,16 @@ RUN=$1
 
 cd
 
-if [ "$RUN" == "Complete" ]; then
-    echo Skipping complete
-    exit
-fi
-
 if [ -f .working_lock ]; then
     echo Was working already: `date`
     exit
 fi
 touch .working_lock
 
+echo Downloading...
 dotnet /alpacka-meta/out/alpacka-meta.dll download -o /data --filter None ${RUN}
 
+echo Python magic...
 python3 -m CurseMeta /data
 
 rm .working_lock

@@ -20,13 +20,16 @@ RUN dotnet publish -c Release -o out
 WORKDIR /root/.config/alpacka.meta
 COPY curse.yaml ./
 
-WORKDIR /root
-COPY CurseMeta CurseMeta
-COPY getinfo.sh getinfo.sh
-
 COPY crontab /etc/cron.d/hello-cron
 RUN chmod 0644 /etc/cron.d/hello-cron
 RUN touch /var/log/cron.log
+
+WORKDIR /root
+COPY CurseMeta CurseMeta
+COPY getinfo.sh getinfo.sh
+COPY run.sh run.sh
+RUN chmod +x *.sh
+
 CMD spawn-fcgi -s /data/fcgiwrap.socket /usr/sbin/fcgiwrap && chmod +rw /data/fcgiwrap.socket \
-    && run.sh Complete \
+    && ~/run.sh Complete \
     && cron && tail -f /var/log/cron.log

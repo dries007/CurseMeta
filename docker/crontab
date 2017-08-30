@@ -1,2 +1,2 @@
-7,37 * * * * root run.sh Hourly >> /var/log/cron.log 2>&1
+7,37 * * * * root ~/run.sh Hourly >> /var/log/cron.log 2>&1
 # empty line required
