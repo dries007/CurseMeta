@@ -4,9 +4,8 @@ IDS=(${QUERY_STRING//-/ })
 PROJECT_ID="${IDS[0]}"
 FILE_ID="${IDS[1]}"
 
-BASE_PATH="/data"
-FILE_PATH_1="$BASE_PATH/addon/${PROJECT_ID}/files/${FILE_ID}.json"
-FILE_PATH_2="$BASE_PATH/www/${PROJECT_ID}/${FILE_ID}.json"
+FILE_PATH_1="/data/addon/${PROJECT_ID}/files/${FILE_ID}.json"
+FILE_PATH_2="/www/${PROJECT_ID}/${FILE_ID}.json"
 
 echo "Content-type: text/json"
 echo ""

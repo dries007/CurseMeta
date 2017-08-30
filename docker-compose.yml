@@ -5,6 +5,7 @@ services:
     restart: always
     volumes:
       - "./data:/data"
+      - "./www:/www"
     dns:
       - 8.8.8.8
       - 8.8.4.4
