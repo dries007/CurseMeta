@@ -52,7 +52,8 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         project_out = Path(output_folder, project.name)
         project_id = int(project.name)
 
-        project_out.mkdir(parents=True, exist_ok=True)
+        if not project_out.is_dir():
+            project_out.mkdir(parents=True)
         types = []
         for name, ids in kwargs.items():
             if project_id in ids:
