@@ -5,6 +5,6 @@ cd alpacka-meta
 dotnet restore
 
 spawn-fcgi -s /var/run/export/fcgiwrap.socket /usr/sbin/fcgiwrap
-chmod +rw /var/run/export/fcgiwrap.socket
+chmod og+rw /var/run/export/fcgiwrap.socket
 
 sleep infinity

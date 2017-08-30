@@ -14,6 +14,6 @@ echo Downloading...
 dotnet /alpacka-meta/out/alpacka-meta.dll download -o /data --filter None ${RUN}
 
 echo Python magic...
-python3 -m CurseMeta /data
+python3 -m CurseMeta /data /data/www
 
 rm .working_lock
