@@ -28,7 +28,7 @@ RUN touch /var/log/cron.log
 
 WORKDIR /root
 # Python module
-COPY CurseMeta ./
+COPY CurseMeta CurseMeta
 # Run & CGI scripts
 COPY *.sh ./
 RUN chmod +x *.sh
