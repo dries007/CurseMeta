@@ -31,7 +31,7 @@ The primary purpose is to allow third party modpack downloaders or launchers suc
 
 All generated with publicly available data from Minecraft's CurseFoge. No mods are being hosted.
 
-The JSON data is updated periodically, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
+The JSON data is updated periodically, ideally hourly. (Just as fast as the Twitch launcher.)  
 
 **How to use this website?** [More info here.](devinfo)
 

@@ -33,7 +33,7 @@ To save bandwidth all JSON data is minified, and not all metadata is retained.
 
 If you are going to be browsing this site in a browser, install a [JSON Viewer](https://chrome.google.com/webstore/detail/json-viewer/gbmdgpbipfallnflgajpaliibnhdgobh)!
 
-The JSON data is updated periodically, based on [this](https://github.com/NikkyAI/alpacka-meta-files) data.
+The JSON data is updated periodically, ideally hourly. (Just as fast as the Twitch launcher.)
 
 ## Features
 
@@ -70,6 +70,11 @@ The JSON data is updated periodically, based on [this](https://github.com/NikkyA
 ## Changes
 
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
+
+## August 30, 2017
+
+- Massive re-write, now everything is handled on our side, no more relying on git synced data.
+  This means much quicker update times and hopefully no more extended periods of out-of-date data.
 
 ## August 13, 2017
 
