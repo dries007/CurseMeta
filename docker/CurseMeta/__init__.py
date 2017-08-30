@@ -104,7 +104,8 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
 def run(input_folder, output_folder):
     if not input_folder.is_dir():
         raise IOError('Input not a folder.')
-    output_folder.mkdir(parents=True, exist_ok=True)
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True)
     if not output_folder.is_dir():
         raise IOError('Output not a folder.')
 
