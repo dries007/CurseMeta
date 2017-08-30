@@ -26,6 +26,11 @@ import time
 from pathlib import Path
 
 
+def _filter_latest(x):
+    del x['ProjectFileName']
+    return x
+
+
 def parse_top_level_files(file):
     ids = []
     summery = {}
@@ -40,9 +45,15 @@ def parse_top_level_files(file):
             'PrimaryAuthorName': project['PrimaryAuthorName'],
             'Summary': project['Summary'],
             'WebSiteURL': project['WebSiteURL'],
+            'GameVersionLatestFiles': [_filter_latest(x) for x in project['GameVersionLatestFiles']]
         }
 
     return ids, summery
+
+
+def _filter_file(file):
+    del file['Modules']
+    return file
 
 
 def parse_addon_folder(addon_folder, output_folder, **kwargs):
@@ -65,6 +76,8 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         # make out/<projectid>.json
         with Path(project_in, 'index.json').open(encoding='utf-8') as f:
             project_data = json.load(f)
+        for file in project_data['LatestFiles']:
+            _filter_file(file)
         with Path(output_folder, project.name).with_suffix('.json').open('w', encoding='utf-8') as f:
             json.dump(project_data, f, sort_keys=True)
 
@@ -73,6 +86,7 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         with Path(project_files, 'index.json').open(encoding='utf-8') as f:
             data = json.load(f)
         for file in data:
+            _filter_file(file)
             ids.add(file['Id'])
         with Path(project_out, 'files.json').open('w', encoding='utf-8') as f:
             json.dump(data, f, sort_keys=True)
@@ -93,6 +107,7 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
                 continue
             with file.open(encoding='utf-8') as f:
                 data = json.load(f)
+            _filter_file(data)
             data['_Project'] = {
                 'Name': project_data['Name'],
                 'PrimaryAuthorName': project_data['PrimaryAuthorName'],
@@ -139,5 +154,6 @@ def run(input_folder, output_folder):
 def parse_single_file(i, o):
     with i.open(encoding='utf-8') as f:
         file_data = json.load(f)
+    _filter_file(file_data)
     with o.open('w', encoding='utf-8') as f:
         json.dump(file_data, f, sort_keys=True)
