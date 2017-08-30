@@ -5,6 +5,8 @@ RUN apt-get update \
         cron \
         fcgiwrap \
         python3 \
+        xz-utils \
+        bzip2 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /alpacka-meta

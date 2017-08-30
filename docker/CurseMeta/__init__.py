@@ -139,7 +139,8 @@ def run(input_folder, output_folder):
     with Path(output_folder, 'modpacks.json').open('w', encoding='utf-8') as f:
         json.dump(modpacks, f, sort_keys=True)
 
-    timestamp = int(time.time())
+    with Path(input_folder, 'complete.json').open(encoding='utf-8') as f:
+        timestamp = int(json.load(f)['Timestamp'])
 
     with Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
         json.dump({

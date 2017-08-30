@@ -44,7 +44,7 @@ The JSON data is updated periodically, ideally hourly. (Just as fast as the Twit
   - Lists of all `mods`, `modpacks` project ids.
   - A list of all project `ids`.
 - A list of all [`mods.json`](mods.json) and [`modpacks.json`](modpacks.json), for easy searchability.
-  - These files are an `Id` to `Name`, `PrimaryAuthorName`, `Summary`, and `WebSiteURL` map.
+  - These files are an `Id` to `Name`, `PrimaryAuthorName`, `Summary`, `WebSiteURL`, `GameVersionLatestFiles` map. ( `ProjectFileName` is removed from the `GameVersionLatestFiles` objects.)
   - They are meant for search services, to avoid having to download unnecessary data.
   - If you'd like to see a key added, open an issue with a strong use-case please.
 - A `/projectID.json` JSON file for every project.
@@ -58,9 +58,15 @@ The JSON data is updated periodically, ideally hourly. (Just as fast as the Twit
     - The `_Project` key contains metadata about the project this file belongs to, to avoid having to make multiple requests. **It is optional.** 
   - A list of all CurseForge's files metadata: `/projectid/files.json`
     - _Please don't use this file if you only need one file's metadata._
+- The 'raw' data from CurseForge:
+  - `raw_complete.json`, `raw_mods.json` and `raw_modpacks.json`.
+    _Only available as compressed files, in gzip (`.gz`), bzip2 (`.bz2`) and xz (`.xz`)._ 
 
-## Example
+## Example Links
 
+- [`/index.json`](index.json)
+- [`/mods.json`](mods.json)
+- [`/modpacks.json`](modpacks.json)
 - [`/projectID.json`](/226294.json)
 - [`/projectID/`](/226294/)
   - [`/projectID/index.json`](/226294/index.json) (same as the directory URL)
@@ -75,6 +81,9 @@ _This is only a partial change log. Changes before May 1st, 2017 are not logged.
 
 - Massive re-write, now everything is handled on our side, no more relying on git synced data.
   This means much quicker update times and hopefully no more extended periods of out-of-date data.
+- Added `GameVersionLatestFiles` to mods/modspacks JSON files, `ProjectFileName` is removed.
+- Several fields are no longer filtered out, like `PopularityScore` and `DownloadCount`.
+- Added `raw_complete.json`, `raw_mods.json` and `raw_modpacks.json` (only compressed). 
 
 ## August 13, 2017
 
