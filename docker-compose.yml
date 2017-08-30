@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 services:
   app:
     build: ./docker
@@ -8,3 +8,4 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
+    network_mode: "host"

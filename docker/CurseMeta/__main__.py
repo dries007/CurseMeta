@@ -26,8 +26,8 @@ from . import *
 def main(argv):
     if len(argv) != 2:
         raise Exception("You need 2 args: in and out.")
-    i = Path(argv[0]).resolve()
-    o = Path(argv[1]).resolve()
+    i = Path(argv[0])
+    o = Path(argv[1])
 
     print(i, o)
 
