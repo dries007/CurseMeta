@@ -22,9 +22,11 @@ COPY curse.yaml ./
 
 WORKDIR /root
 COPY CurseMeta CurseMeta
+COPY getinfo.sh getinfo.sh
 
 COPY crontab /etc/cron.d/hello-cron
 RUN chmod 0644 /etc/cron.d/hello-cron
 RUN touch /var/log/cron.log
-CMD run.sh Complete \
+CMD spawn-fcgi -s /data/fcgiwrap.socket /usr/sbin/fcgiwrap && chmod +rw /data/fcgiwrap.socket \
+    && run.sh Complete \
     && cron && tail -f /var/log/cron.log
