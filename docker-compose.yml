@@ -1,0 +1,12 @@
+version: '3'
+services:
+  hourly:
+    build: ./hourly
+    restart: always
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+
+volumes:
+  data_volume:

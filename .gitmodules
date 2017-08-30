@@ -1,0 +1,3 @@
+[submodule "hourly/alpacka-meta-fork"]
+	path = hourly/alpacka-meta-fork
+	url = https://github.com/dries007/alpacka-meta

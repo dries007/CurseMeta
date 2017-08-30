@@ -1,0 +1,2 @@
+* * * * * root echo "Hello world `date`" >> /var/log/cron.log 2>&1
+# empty line required

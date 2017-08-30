@@ -1,9 +1,11 @@
 # CurseMeta
 
-CurseMeta is a Python based post processor for the output of [alpacka-meta](https://github.com/NikkyAI/alpacka-meta) files to suite my needs.
+CurseMeta a CurseForge integration platform powered by [alpacka-meta](https://github.com/NikkyAI/alpacka-meta).
+
+The output is post processed by the [CurseMeta](./CurseMeta) python package.
 
 This repository will also server for any issues with the web service associated with this project.
 
-A hosted version at [https://cursemeta.dries007.net/](https://cursemeta.dries007.net/).
+A hosted version is available at [cursemeta.dries007.net](https://cursemeta.dries007.net/).
 
-The HTML for index & devinfo is generated with the [Markdown.py](Markdown.py) script.
+The static HTML is generated with the [Markdown.py](Markdown.py) script.
