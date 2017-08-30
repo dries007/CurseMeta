@@ -1,15 +1,30 @@
-FROM microsoft/dotnet
+FROM microsoft/dotnet:1.1.2-sdk
 
-RUN apt-get update && apt-get upgrade \
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        cron \
         fcgiwrap \
+        python3 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /cgi && chmod 777 /cgi
-COPY getinfo.sh /cgi/getinfo.sh
-COPY run.sh /run.sh
-RUN mkdir -p /root/.config/alpacka.meta
-COPY curse.yaml /root/.config/alpacka.meta/curse.yaml
-RUN chmod +x /run.sh && chmod 777 /cgi/getinfo.sh
+WORKDIR /alpacka-meta
 
-CMD /run.sh
+# Restore seperate, as per example: https://github.com/dotnet/dotnet-docker-samples/blob/master/dotnetapp-dev/Dockerfile
+COPY alpacka-meta-fork/alpacka.meta.csproj ./
+RUN dotnet restore
+
+COPY alpacka-meta-fork/. ./
+RUN dotnet publish -c Release -o out
+# dll is now in /alpacka-meta/out/alpaca-meta.dll
+
+WORKDIR /root/.config/alpacka.meta
+COPY curse.yaml ./
+
+WORKDIR /root
+COPY CurseMeta CurseMeta
+
+COPY crontab /etc/cron.d/hello-cron
+RUN chmod 0644 /etc/cron.d/hello-cron
+RUN touch /var/log/cron.log
+CMD run.sh Complete \
+    && cron && tail -f /var/log/cron.log

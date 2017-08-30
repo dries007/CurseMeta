@@ -4,9 +4,7 @@ services:
     build: ./hourly
     restart: always
     volumes:
-      - type: bind
-        source: ./data
-        target: /data
+      - "./data:/data"
 
 volumes:
   data_volume:
