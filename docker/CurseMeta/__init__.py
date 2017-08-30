@@ -140,7 +140,7 @@ def run(input_folder, output_folder):
         json.dump(modpacks, f, sort_keys=True)
 
     with Path(input_folder, 'complete.json').open(encoding='utf-8') as f:
-        timestamp = int(json.load(f)['Timestamp'])
+        timestamp = int(json.load(f)['Timestamp']/1000)
 
     with Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
         json.dump({
