@@ -3,6 +3,7 @@
 RUN=$1
 
 cd
+pwd
 
 if [ -f .working_lock ]; then
     echo Was working already: `date`
