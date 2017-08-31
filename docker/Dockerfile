@@ -38,4 +38,4 @@ RUN chmod +x *.sh
 # Start on-demand fetch, run 1 complete, start cron
 CMD spawn-fcgi -s /data/fcgiwrap.socket /usr/sbin/fcgiwrap && chmod og+rw /data/fcgiwrap.socket \
     && ~/run.sh Complete \
-    && cron -p -s && tail -f /var/log/cron.log
+    && cron && tail -f /var/log/cron.log
