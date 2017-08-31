@@ -26,7 +26,6 @@ COPY curse.yaml ./
 # prep cron
 COPY crontab /etc/cron.d/hello-cron
 RUN chmod 0644 /etc/cron.d/hello-cron
-RUN touch /var/log/cron.log
 
 WORKDIR /root
 # Python module
@@ -38,4 +37,4 @@ RUN chmod +x *.sh
 # Start on-demand fetch, run 1 complete, start cron
 CMD spawn-fcgi -s /data/fcgiwrap.socket /usr/sbin/fcgiwrap && chmod og+rw /data/fcgiwrap.socket \
     && ~/run.sh Complete \
-    && cron && tail -f /var/log/cron.log
+    && touch /var/log/cron.log && cron && tail -f /var/log/cron.log
