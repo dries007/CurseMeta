@@ -4,8 +4,6 @@ cd
 
 RUN=$1
 
-sleep 10
-
 echo "Running a $1 from `pwd`"
 
 if [ -f .working_lock ]; then
