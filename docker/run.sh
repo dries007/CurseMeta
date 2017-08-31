@@ -30,3 +30,5 @@ for f in /data/*.json; do
 done
 
 rm .working_lock
+
+exit 0
