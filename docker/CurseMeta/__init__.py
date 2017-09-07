@@ -56,64 +56,62 @@ def _filter_file(file):
     return file
 
 
-def parse_addon_folder(addon_folder, output_folder):
-    for i, project in enumerate(addon_folder.iterdir()):
-        project_in = Path(addon_folder, project.name)
-        project_files = Path(project_in, 'files')
-        project_out = Path(output_folder, project.name)
+def parse_addon_folder(project_in, output_folder):
+    project_files = Path(project_in, 'files')
+    project_out = Path(output_folder, project_in.name)
 
-        if not Path(project_in, 'index.json').exists():
+    if not Path(project_in, 'index.json').exists():
+        return
+
+    if not project_out.is_dir():
+        project_out.mkdir(parents=True)
+
+    # print('Parsing project nr', i, 'id:', project_id, 'type:', project_type)
+
+    # make out/<projectid>.json
+    with Path(project_in, 'index.json').open(encoding='utf-8') as f:
+        project_data = json.load(f)
+    for file in project_data['LatestFiles']:
+        _filter_file(file)
+    with Path(output_folder, project_in.name).with_suffix('.json').open('w', encoding='utf-8') as f:
+        json.dump(project_data, f, sort_keys=True)
+
+    ids = set()
+    # make out/<projectid>/files.json
+    with Path(project_files, 'index.json').open(encoding='utf-8') as f:
+        data = json.load(f)
+    for file in data:
+        _filter_file(file)
+        ids.add(file['Id'])
+    with Path(project_out, 'files.json').open('w', encoding='utf-8') as f:
+        json.dump(data, f, sort_keys=True)
+
+    # make out/<projectid>/index.json
+    with Path(project_out, 'index.json').open('w', encoding='utf-8') as f:
+        json.dump({
+            'type': project_data['CategorySection']['Name'],
+            'ids': sorted(ids),
+            'Name': project_data['Name'],
+            'PrimaryAuthorName': project_data['PrimaryAuthorName'],
+            'Summary': project_data['Summary'],
+        }, f)
+
+    # make out/<projectid>/<fileid>.json
+    for j, file in enumerate(project_files.iterdir()):
+        if file.name == 'index.json':
             continue
-
-        if not project_out.is_dir():
-            project_out.mkdir(parents=True)
-
-        # print('Parsing project nr', i, 'id:', project_id, 'type:', project_type)
-
-        # make out/<projectid>.json
-        with Path(project_in, 'index.json').open(encoding='utf-8') as f:
-            project_data = json.load(f)
-        for file in project_data['LatestFiles']:
-            _filter_file(file)
-        with Path(output_folder, project.name).with_suffix('.json').open('w', encoding='utf-8') as f:
-            json.dump(project_data, f, sort_keys=True)
-
-        ids = set()
-        # make out/<projectid>/files.json
-        with Path(project_files, 'index.json').open(encoding='utf-8') as f:
+        with file.open(encoding='utf-8') as f:
             data = json.load(f)
-        for file in data:
-            _filter_file(file)
-            ids.add(file['Id'])
-        with Path(project_out, 'files.json').open('w', encoding='utf-8') as f:
+        _filter_file(data)
+        data['_Project'] = {
+            'Name': project_data['Name'],
+            'PrimaryAuthorName': project_data['PrimaryAuthorName'],
+            'Summary': project_data['Summary'],
+            'PackageType': project_data['CategorySection']['PackageType'],
+            'Path': project_data['CategorySection']['Path'],
+        }
+        with Path(project_out, file.name).open('w', encoding='utf-8') as f:
             json.dump(data, f, sort_keys=True)
-
-        # make out/<projectid>/index.json
-        with Path(project_out, 'index.json').open('w', encoding='utf-8') as f:
-            json.dump({
-                'type': project_data['CategorySection']['Name'],
-                'ids': sorted(ids),
-                'Name': project_data['Name'],
-                'PrimaryAuthorName': project_data['PrimaryAuthorName'],
-                'Summary': project_data['Summary'],
-            }, f)
-
-        # make out/<projectid>/<fileid>.json
-        for j, file in enumerate(project_files.iterdir()):
-            if file.name == 'index.json':
-                continue
-            with file.open(encoding='utf-8') as f:
-                data = json.load(f)
-            _filter_file(data)
-            data['_Project'] = {
-                'Name': project_data['Name'],
-                'PrimaryAuthorName': project_data['PrimaryAuthorName'],
-                'Summary': project_data['Summary'],
-                'PackageType': project_data['CategorySection']['PackageType'],
-                'Path': project_data['CategorySection']['Path'],
-            }
-            with Path(project_out, file.name).open('w', encoding='utf-8') as f:
-                json.dump(data, f, sort_keys=True)
 
 
 def run(input_folder, output_folder):
@@ -130,7 +128,9 @@ def run(input_folder, output_folder):
     # print('Parsing complete.json ...')
     # all_ids, _ = parse_top_level_files(Path(input_folder, 'complete.json'))
     print('Parsing addons ...')
-    parse_addon_folder(Path(input_folder, 'addon'), output_folder)
+    for project in Path(input_folder, 'addon').iterdir():
+        if project.is_dir():
+            parse_addon_folder(project, output_folder)
 
     with Path(output_folder, 'mods.json').open('w', encoding='utf-8') as f:
         json.dump(mods, f, sort_keys=True)
