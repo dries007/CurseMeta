@@ -37,6 +37,8 @@ The JSON data is updated periodically, ideally hourly. (Just as fast as the Twit
 
 **Just wanna search Mods and Modpacks?** [Go here.](search)
 
+Contact me: [Discord (also good for updates)](https://discord.gg/zCQaCAA) or [Twitter](https://twitter.com/driesk007). 
+
 ## Credits
 
 _Maintained by [Dries007](https://dries007.net). Source code / issue tracker on [Github](https://github.com/dries007/curseMeta)._
