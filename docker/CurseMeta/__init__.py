@@ -71,7 +71,7 @@ def parse_addon_folder(project_in, project_out):
         project_data = json.load(f)
     for file in project_data['LatestFiles']:
         _filter_file(file)
-    with Path(output_folder, project_in.name).with_suffix('.json').open('w', encoding='utf-8') as f:
+    with Path(project_out.parent, project_in.name).with_suffix('.json').open('w', encoding='utf-8') as f:
         json.dump(project_data, f, sort_keys=True)
 
     ids = set()
