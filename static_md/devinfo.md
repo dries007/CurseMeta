@@ -77,7 +77,13 @@ The JSON data is updated periodically, ideally hourly. (Just as fast as the Twit
 
 _This is only a partial change log. Changes before May 1st, 2017 are not logged._
 
-## August 30, 2017
+## 7 September 2017
+
+- Round of fixes of on demand file fetching
+    - Including fixed texture packs causing havoc.
+- Added `PackageType` and `Path` to `_Project`, so you can detect texture packs and put them in the right place. 
+
+## 30 August 2017
 
 - Massive re-write, now everything is handled on our side, no more relying on git synced data.
   This means much quicker update times and hopefully no more extended periods of out-of-date data.
@@ -85,25 +91,25 @@ _This is only a partial change log. Changes before May 1st, 2017 are not logged.
 - Several fields are no longer filtered out, like `PopularityScore` and `DownloadCount`.
 - Added `raw_complete.json`, `raw_mods.json` and `raw_modpacks.json` (only compressed). 
 
-## August 13, 2017
+## 13 August 2017
 
 - Added the optional `_Project` key to the `fileid.json` files.
   Requested by reddit user joonatoona to eliminate extra HTTP requests.
 - `Name`, `PrimaryAuthorName` and `Summary` added to `/projectid/index.json` and to `_Project` in `fileid.json`.
 
-## August 12, 2017
+## 12 August 2017
 
 - Changed timestamp in `/index.json` to reflect actual last update, if possible.
   Uses last git commit timestamp.
 
-### May 13, 2017
+### 13 May 2017
 
 - Added Markdown script (and css) for easier changed to the info pages.
 
-### May 6, 2017
+### 6 May 2017
 - Added `mods.json` and `modpacks.json`
 - Added [search](/search) page.
 
-### May 1, 2017
+### 1 May 2017
 - Removed .html files
 - Added modpacks & mods id lists in `/index.json`

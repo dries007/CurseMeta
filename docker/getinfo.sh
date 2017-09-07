@@ -23,7 +23,9 @@ dotnet /alpacka-meta/out/alpacka-meta.dll get -o /data --filter None --file ${PR
 
 if [[ -f $FILE_PATH_INDEX ]]; then
     python3 -m CurseMeta project $PROJECT_PATH_1 $PROJECT_PATH_2 2>&1 >> /var/log/cron.log
-else
+fi
+
+if [[ ! -f $FILE_PATH_2 ]]; then
     python3 -m CurseMeta file $FILE_PATH_1 $FILE_PATH_2 2>&1 >> /var/log/cron.log
 fi
 

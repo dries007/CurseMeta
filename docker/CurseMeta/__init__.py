@@ -56,9 +56,8 @@ def _filter_file(file):
     return file
 
 
-def parse_addon_folder(project_in, output_folder):
+def parse_addon_folder(project_in, project_out):
     project_files = Path(project_in, 'files')
-    project_out = Path(output_folder, project_in.name)
 
     if not Path(project_in, 'index.json').exists():
         print("No index, skipping addon folder.")
@@ -96,7 +95,7 @@ def parse_addon_folder(project_in, output_folder):
         }, f)
 
     # make out/<projectid>/<fileid>.json
-    for j, file in enumerate(project_files.iterdir()):
+    for file in project_files.iterdir():
         if file.name == 'index.json':
             continue
         with file.open(encoding='utf-8') as f:
@@ -130,7 +129,7 @@ def run(input_folder, output_folder):
     print('Parsing addons ...')
     for project in Path(input_folder, 'addon').iterdir():
         if project.is_dir():
-            parse_addon_folder(project, output_folder)
+            parse_addon_folder(project, Path(output_folder, project.name))
 
     with Path(output_folder, 'mods.json').open('w', encoding='utf-8') as f:
         json.dump(mods, f, sort_keys=True)
