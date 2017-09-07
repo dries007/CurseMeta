@@ -56,23 +56,17 @@ def _filter_file(file):
     return file
 
 
-def parse_addon_folder(addon_folder, output_folder, **kwargs):
+def parse_addon_folder(addon_folder, output_folder):
     for i, project in enumerate(addon_folder.iterdir()):
         project_in = Path(addon_folder, project.name)
         project_files = Path(project_in, 'files')
         project_out = Path(output_folder, project.name)
-        project_id = int(project.name)
 
         if not Path(project_in, 'index.json').exists():
             continue
 
         if not project_out.is_dir():
             project_out.mkdir(parents=True)
-        types = []
-        for name, ids in kwargs.items():
-            if project_id in ids:
-                types.append(name)
-        project_type = ','.join(types) if len(types) != 0 else 'UNKNOWN'
 
         # print('Parsing project nr', i, 'id:', project_id, 'type:', project_type)
 
@@ -97,7 +91,7 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         # make out/<projectid>/index.json
         with Path(project_out, 'index.json').open('w', encoding='utf-8') as f:
             json.dump({
-                'type': project_type,
+                'type': project_data['CategorySection']['Name'],
                 'ids': sorted(ids),
                 'Name': project_data['Name'],
                 'PrimaryAuthorName': project_data['PrimaryAuthorName'],
@@ -136,7 +130,7 @@ def run(input_folder, output_folder):
     # print('Parsing complete.json ...')
     # all_ids, _ = parse_top_level_files(Path(input_folder, 'complete.json'))
     print('Parsing addons ...')
-    parse_addon_folder(Path(input_folder, 'addon'), output_folder, mod=mod_ids, modpack=modpack_ids)
+    parse_addon_folder(Path(input_folder, 'addon'), output_folder)
 
     with Path(output_folder, 'mods.json').open('w', encoding='utf-8') as f:
         json.dump(mods, f, sort_keys=True)

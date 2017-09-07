@@ -4,8 +4,12 @@ IDS=(${QUERY_STRING//-/ })
 PROJECT_ID="${IDS[0]}"
 FILE_ID="${IDS[1]}"
 
+# in:
 PROJECT_PATH_1="/data/addon/${PROJECT_ID}"
 FILE_PATH_1="${PROJECT_PATH_1}/files/${FILE_ID}.json"
+FILE_PATH_INDEX="${PROJECT_PATH_1}/files/index.json"
+
+# out:
 PROJECT_PATH_2="/www/${PROJECT_ID}"
 FILE_PATH_2="${PROJECT_PATH_2}/${FILE_ID}.json"
 
@@ -15,12 +19,11 @@ echo "Content-type: text/json"
 echo ""
 
 dotnet /alpacka-meta/out/alpacka-meta.dll get -o /data --filter None --project ${PROJECT_ID} 2>&1  >> /var/log/cron.log
-if [[ -f $FILE_PATH_1 ]]; then
-    python3 -m CurseMeta project $PROJECT_PATH_1 $FILE_PATH_2 2>&1 >> /var/log/cron.log
-fi
-
 dotnet /alpacka-meta/out/alpacka-meta.dll get -o /data --filter None --file ${PROJECT_ID}-${FILE_ID} 2>&1  >> /var/log/cron.log
-if [[ -f $FILE_PATH_1 ]]; then
+
+if [[ -f $FILE_PATH_INDEX ]]; then
+    python3 -m CurseMeta project $PROJECT_PATH_1 $FILE_PATH_2 2>&1 >> /var/log/cron.log
+else
     python3 -m CurseMeta file $FILE_PATH_1 $FILE_PATH_2 2>&1 >> /var/log/cron.log
 fi
 

@@ -22,7 +22,7 @@ import sys
 
 from . import *
 
-functions = {'file': parse_single_file, 'project': run, 'all': parse_addon_folder}
+functions = {'file': parse_single_file, 'project': parse_addon_folder, 'all': run}
 
 
 def main(argv):
