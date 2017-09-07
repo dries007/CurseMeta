@@ -15,7 +15,7 @@ if [[ -f $FILE_PATH_2 ]]; then
     exit 0
 fi
 
-dotnet /alpacka-meta/out/alpacka-meta.dll get -o /out/ --file ${PROJECT_ID}-${FILE_ID} 2>&1 >/dev/null
+dotnet /alpacka-meta/out/alpacka-meta.dll get -o /data --file ${PROJECT_ID}-${FILE_ID} 2>&1 >/dev/null
 
 if [[ -f $FILE_PATH_1 ]]; then
     python3 -m CurseMeta $FILE_PATH_1 $FILE_PATH_2

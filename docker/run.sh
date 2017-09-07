@@ -4,7 +4,7 @@ cd
 
 RUN=$1
 
-echo "Running a $1 from `pwd`"
+echo "Running a $1 from `pwd` at `date`"
 
 if [ -f .working_lock ]; then
     echo Was working already: `date`
