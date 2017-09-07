@@ -115,6 +115,8 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
                 'Name': project_data['Name'],
                 'PrimaryAuthorName': project_data['PrimaryAuthorName'],
                 'Summary': project_data['Summary'],
+                'PackageType': project_data['CategorySection']['PackageType'],
+                'Path': project_data['CategorySection']['Path'],
             }
             with Path(project_out, file.name).open('w', encoding='utf-8') as f:
                 json.dump(data, f, sort_keys=True)

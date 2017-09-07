@@ -16,7 +16,7 @@ echo Downloading...
 dotnet /alpacka-meta/out/alpacka-meta.dll download -o /data --filter None ${RUN}
 
 echo Python magic...
-python3 -m CurseMeta /data /www
+python3 -m CurseMeta all /data /www
 
 function json {
     local file=$1

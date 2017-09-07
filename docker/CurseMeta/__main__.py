@@ -22,21 +22,19 @@ import sys
 
 from . import *
 
+functions = {'file': parse_single_file, 'project': run, 'all': parse_addon_folder}
+
 
 def main(argv):
-    if len(argv) != 2:
-        raise Exception("You need 2 args: in and out.")
-    i = Path(argv[0])
-    o = Path(argv[1])
+    if len(argv) != 3:
+        raise Exception("You need 3 args: mode (file, project, or all), in, and out.")
+    m = argv[0]
+    if m not in functions.keys():
+        raise Exception("Mode is not file, project or all.")
+    i = Path(argv[1])
+    o = Path(argv[2])
 
-    print(i, o)
-
-    if i.is_file():
-        print("Single file")
-        parse_single_file(i, o)
-    else:
-        print("Folder")
-        run(i, o)
+    functions[m](i, o)
 
 
 if __name__ == '__main__':
