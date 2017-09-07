@@ -34,6 +34,8 @@ def main(argv):
     i = Path(argv[1])
     o = Path(argv[2])
 
+    print('CurseMeta post processing on %s: %s -> %s' % (m, i, o))
+
     functions[m](i, o)
 
 

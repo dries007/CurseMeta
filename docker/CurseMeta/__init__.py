@@ -61,12 +61,11 @@ def parse_addon_folder(project_in, output_folder):
     project_out = Path(output_folder, project_in.name)
 
     if not Path(project_in, 'index.json').exists():
+        print("No index, skipping addon folder.")
         return
 
     if not project_out.is_dir():
         project_out.mkdir(parents=True)
-
-    # print('Parsing project nr', i, 'id:', project_id, 'type:', project_type)
 
     # make out/<projectid>.json
     with Path(project_in, 'index.json').open(encoding='utf-8') as f:
@@ -112,6 +111,7 @@ def parse_addon_folder(project_in, output_folder):
         }
         with Path(project_out, file.name).open('w', encoding='utf-8') as f:
             json.dump(data, f, sort_keys=True)
+    print("Done parsing addon", project_in.name)
 
 
 def run(input_folder, output_folder):
@@ -149,6 +149,7 @@ def run(input_folder, output_folder):
             'modpacks': sorted(modpack_ids),
             'ids': sorted(all_ids),
         }, f)
+    print("Done parsing addons")
 
 
 def parse_single_file(i, o):
@@ -159,3 +160,4 @@ def parse_single_file(i, o):
         o.parent.mkdir(parents=True)
     with o.open('w', encoding='utf-8') as f:
         json.dump(file_data, f, sort_keys=True)
+    print('Done parsing single file', i)
