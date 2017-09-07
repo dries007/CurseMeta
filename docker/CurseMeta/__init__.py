@@ -63,6 +63,9 @@ def parse_addon_folder(addon_folder, output_folder, **kwargs):
         project_out = Path(output_folder, project.name)
         project_id = int(project.name)
 
+        if not Path(project_in, 'index.json').exists():
+            continue
+
         if not project_out.is_dir():
             project_out.mkdir(parents=True)
         types = []
