@@ -156,5 +156,7 @@ def parse_single_file(i, o):
     with i.open(encoding='utf-8') as f:
         file_data = json.load(f)
     _filter_file(file_data)
+    if not o.parent.exists():
+        o.parent.mkdir(parents=True)
     with o.open('w', encoding='utf-8') as f:
         json.dump(file_data, f, sort_keys=True)
