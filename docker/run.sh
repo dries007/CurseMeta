@@ -22,6 +22,7 @@ function json {
     local file=$1
     local out_dir=$2
     local filename=`basename $file`
+    cp $file raw_$filename
     gzip < $file > $out_dir/raw_$filename.gz
     bzip2 < $file > $out_dir/raw_$filename.bz2
     xz < $file > $out_dir/raw_$filename.xz

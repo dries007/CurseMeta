@@ -10,6 +10,14 @@ A hosted version is available at [cursemeta.dries007.net](https://cursemeta.drie
 
 The static HTML is generated with the [Markdown.py](Markdown.py) script.
 
+Need to contact me? GH issues work, but [Discord (also good for updates)](https://discord.gg/zCQaCAA) or [Twitter](https://twitter.com/driesk007) are good too.
+
+Documentation
+-------------
+
+- [API v1](api/v1/README.md)
+- [DevInfo](static_md/devinfo.md)
+
 A note on docker
 ----------------
 
