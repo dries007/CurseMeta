@@ -1,0 +1,34 @@
+/*
+ * Heavily based on the Pixyll theme
+ */
+
+#credits {
+    float: right;
+    text-align: right;
+    color: gray;
+}
+
+a {
+    color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Lato, "Helvetica Neue", Helvetica, sans-serif;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+body {
+    font-family: Merriweather, "PT Serif", Georgia, "Times New Roman", STSong, serif;
+    font-weight: 400;
+    margin: 8px;
+}
+
+.piechart {
+    min-width: 800px;
+    min-height: 400px;
+}
+
+.colchart {
+    min-height: 600px;
+}

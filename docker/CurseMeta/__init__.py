@@ -150,6 +150,9 @@ def run(input_folder, output_folder):
         }, f)
     print("Done parsing addons")
 
+    from .stats import run as run_stats
+    run_stats(Path(input_folder, 'complete.json'), output_folder)
+
 
 def parse_single_file(i, o):
     with i.open(encoding='utf-8') as f:
