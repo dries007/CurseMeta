@@ -60,7 +60,10 @@ The JSON data is updated periodically, ideally hourly. (Just as fast as the Twit
     - _Please don't use this file if you only need one file's metadata._
 - The 'raw' data from CurseForge:
   - `raw_complete.json`, `raw_mods.json` and `raw_modpacks.json`.
-    _Only available as compressed files, in gzip (`.gz`), bzip2 (`.bz2`) and xz (`.xz`)._ 
+    _Please use as compressed files, in gzip (`.gz`), bzip2 (`.bz2`) and xz (`.xz`)._
+    
+**Do not use:**
+- `/stats.json` (In progress, not stable.) 
 
 ## Example Links
 

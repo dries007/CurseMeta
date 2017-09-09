@@ -37,6 +37,8 @@ The JSON data is updated periodically, ideally hourly. (Just as fast as the Twit
 
 **Just wanna search Mods and Modpacks?** [Go here.](search)
 
+**Statistics?** [Hell Yea](stats)
+
 Contact me: [Discord (also good for updates)](https://discord.gg/zCQaCAA) or [Twitter](https://twitter.com/driesk007). 
 
 ## Credits
