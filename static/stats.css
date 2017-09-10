@@ -24,11 +24,15 @@ body {
     margin: 8px;
 }
 
-.piechart {
-    min-width: 800px;
-    min-height: 400px;
+table {
+    width: 100%;
 }
 
-.colchart {
-    min-height: 600px;
+td {
+    width: 50%;
+}
+
+.tooltip {
+    padding: 5px;
+    font-size: larger;
 }
