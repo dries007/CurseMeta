@@ -342,9 +342,9 @@ function run() {
 
     $(function () {
 
-        $('#total-projects').text(sumTypes(DATA['project_count']));
-        $('#total-downloads').text(sumTypes(DATA['downloads']));
-        $('#total-authors').text(Object.keys(DATA['authors']).length);
+        $('#total-projects').text(nf.format(sumTypes(DATA['project_count'])));
+        $('#total-downloads').text(nf.format(sumTypes(DATA['downloads'])));
+        $('#total-authors').text(nf.format(Object.keys(DATA['authors']).length));
 
         $('#loading').remove();
     })
