@@ -28,16 +28,24 @@ def run(complete, output_folder):
         del raw
 
     downloads = collections.defaultdict(lambda: 0)
-    projects = collections.defaultdict(lambda: 0)
+    project_count = collections.defaultdict(lambda: 0)
     authors = collections.defaultdict(lambda: Author())
     version = collections.defaultdict(lambda: collections.defaultdict(lambda: 0))
+    projects = {}
 
     for project in data:
         pid = project['Id']
         t = project['CategorySection']['Name']
         dl = project['DownloadCount']
 
-        projects[t] += 1
+        projects[pid] = {
+            'name': project['Name'],
+            'type': t,
+            'downloads': dl,
+            'score': project['PopularityScore'],
+        }
+
+        project_count[t] += 1
         downloads[t] += dl
 
         authors[project['PrimaryAuthorName']].add_project(True, t, pid, dl)
@@ -52,10 +60,11 @@ def run(complete, output_folder):
             'timestamp': calendar.timegm(time.gmtime(timestamp)),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
             'stats': {
-                'projects': projects,
+                'project_count': project_count,
                 'downloads': downloads,
                 'version': version,
                 'authors': authors,
+                'projects': projects,
             }
         }, f, cls=_Encoder)
     print("Stats done.")

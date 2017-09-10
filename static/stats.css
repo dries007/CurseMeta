@@ -24,15 +24,52 @@ body {
     margin: 8px;
 }
 
-table {
-    width: 100%;
+table.graphs {
+    width: 90%;
 }
 
-td {
-    width: 50%;
+table.graphs td {
+    width: 45%;
 }
 
 .tooltip {
     padding: 5px;
     font-size: larger;
+}
+
+.tooltip table {
+    width: auto;
+    border-collapse: separate;
+    border-spacing: 5px 1px;
+}
+
+.tooltip table td {
+    width: auto;
+}
+
+.tooltip tr {
+    border-bottom: 1px dashed lightgray;
+}
+
+.tooltip tr td {
+    text-align: right;
+}
+
+.tooltip tr td:first-child {
+    text-align: left;
+}
+
+dt::after {
+    content: ": ";
+}
+
+dt {
+    display: inline;
+    font-weight: bolder;
+}
+
+dd {
+    display: inline;
+    margin-left: 0;
+    margin-right: 10em;
 }

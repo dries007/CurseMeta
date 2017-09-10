@@ -22,17 +22,26 @@
   <p>Still under construction. Do not use this or <code>/stats.json</code> as part of anything.</p>
   <small>Last update of data: <span id="timestamp">Loading...</span></small>
   <span id="credits"><small>See <a href="https://cursemeta.dries007.net">cursemeta.dries007.net</a> for more info and terms and conditions.</small></span>
+  <p><b>ProTip:</b> You can click on the names in the legend or on a slice to show toggle a tooltip! Click on any element to hide the tooltip again.</p>
 
-  <table>
+  <p id="loading">Loading..... This can take a couple of seconds.</p>
+
+  <dl>
+    <dt>Total number of Projects</dt> <dd id="total-projects">xx</dd>
+    <dt>Total number of Downloads</dt> <dd id="total-downloads">xx</dd>
+    <dt>Total number of Authors</dt> <dd id="total-authors">xx</dd>
+  </dl>
+
+  <table class="graphs">
     <tr><td id="projects"></td><td id="downloads"></td></tr>
   </table>
 
-  <div id="versions"></div>
+  <div id="versions" class="graphs"></div>
 
-  <table>
-    <tr><td id="owned"></td><td id="member"></td></tr>
-    <tr><td id="mod-owned"></td><td id="mod-member"></td></tr>
-    <tr><td id="modpack-owned"></td><td id="modpack-member"></td></tr>
+  <table class="graphs dl">
+    <tr><td class="owned"></td><td class="member"></td></tr>
+    <tr><td class="mod-owned"></td><td class="mod-member"></td></tr>
+    <tr><td class="modpack-owned"></td><td class="modpack-member"></td></tr>
   </table>
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
