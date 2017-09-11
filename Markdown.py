@@ -51,7 +51,7 @@ def run(input_folder, output_folder):
     if not output_folder.is_dir():
         raise IOError("Input not a folder.")
 
-    md = markdown.Markdown(extensions=['markdown.extensions.extra', 'markdown.extensions.meta', 'markdown.extensions.sane_lists'], extension_configs={}, output_format="html5", tab_length=2)
+    md = markdown.Markdown(extensions=['markdown.extensions.extra', 'markdown.extensions.meta', 'markdown.extensions.sane_lists', 'markdown.extensions.toc'], extension_configs={}, output_format="html5", tab_length=2)
 
     for in_file in input_folder.iterdir():
         if not in_file.suffix == ".md":

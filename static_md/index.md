@@ -22,24 +22,21 @@ viewport: width=device-width, initial-scale=1.0
     See the Licence for the specific language governing
     permissions and limitations under the Licence.
 -->
-    
+
 # CurseMeta
 
 This website offers easy access to Minecraft's CurseForge's metadata about mods and modpacks.
 
 The primary purpose is to allow third party modpack downloaders or launchers such as [MultiMC](https://multimc.org) or [CurseModpackDownloader](https://github.com/DoubleDoorDevelopment/CurseModpackDownloader) simple and easy access to said metadata.
 
-All generated with publicly available data from Minecraft's CurseFoge. No mods are being hosted.
+All generated with publicly available data from Minecraft's CurseFoge. *No mods are being hosted.*
 
-The JSON data is updated periodically, ideally hourly. (Just as fast as the Twitch launcher.)  
+The data is updated periodically, ideally hourly.  
 
-**How to use this website?** [More info here.](devinfo)
-
-**Just wanna search Mods and Modpacks?** [Go here.](search)
-
-**Statistics?** [Hell Yea](stats)
-
-Contact me: [Discord (also good for updates)](https://discord.gg/zCQaCAA) or [Twitter](https://twitter.com/driesk007). 
++ How to use this website? [More info here.](devinfo)
++ Just wanna search Mods and Modpacks? [Go here.](search)
++ Statistics? [Hell Yea](stats)
++ Contact: [Discord](https://discord.gg/zCQaCAA) or [Twitter](https://twitter.com/driesk007).
 
 ## Credits
 

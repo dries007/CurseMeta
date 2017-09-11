@@ -12,11 +12,11 @@ class _Encoder(json.JSONEncoder):
 
 class Author:
     def __init__(self):
-        self.owner = collections.defaultdict(lambda: {})
-        self.member = collections.defaultdict(lambda: {})
+        self.owner = collections.defaultdict(lambda: [])
+        self.member = collections.defaultdict(lambda: [])
 
-    def add_project(self, owner, t, pid, dl):
-        (self.owner if owner else self.member)[t][pid] = dl
+    def add_project(self, owner, t, pid):
+        (self.owner if owner else self.member)[t].append(pid)
 
 
 def _do_history(output_folder, timestamp, history_obj):
@@ -28,14 +28,14 @@ def _do_history(output_folder, timestamp, history_obj):
     except IOError:
         history = set()
     history.add(timestamp)
+    with pathlib.Path(output_folder, '{}.json'.format(timestamp)).open('w', encoding='utf-8') as f:
+        json.dump(history_obj, f)
     with pathlib.Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
         json.dump({
             'timestamp': calendar.timegm(time.gmtime(timestamp)),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
             'history': sorted(history)
         }, f)
-    with pathlib.Path(output_folder, '{}.json'.format(timestamp)).open('w', encoding='utf-8') as f:
-        json.dump(history_obj, f)
 
 
 def run(complete, output_folder):
@@ -71,9 +71,9 @@ def run(complete, output_folder):
         project_count[t] += 1
         downloads[t] += dl
 
-        authors[project['PrimaryAuthorName']].add_project(True, t, pid, dl)
+        authors[project['PrimaryAuthorName']].add_project(True, t, pid)
         for author in project['Authors']:
-            authors[author['Name']].add_project(False, t, pid, dl)
+            authors[author['Name']].add_project(False, t, pid)
 
         versions = set(x['GameVesion'] for x in project['GameVersionLatestFiles'])
         for gv in versions:
