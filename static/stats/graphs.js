@@ -37,7 +37,7 @@ var CHARTS = [];
  */
 function nukeTooltips() {
     CHARTS.forEach(function (t) {
-        t.setSelection([{}]);
+        t.setSelection([{}]); // Thanks stackoverflow
     })
 }
 
@@ -56,14 +56,16 @@ function splitNParse(str) {
 
 /**
  * Comparator for version strings, can handle different length version ids
+ * a[0], b[0] contain version strings because input is one row of table .([[version, data, ...], ...])
+ * Lowest version first
  * @param a
  * @param b
  * @returns {number}
  */
 function sortVersions(a, b) {
-    a = splitNParse(a[0]);
+    a = splitNParse(a[0]); // a and b are rows of table, version strings are in col 0
     b = splitNParse(b[0]);
-    while (a.length < b.length) a.push(0);
+    while (a.length < b.length) a.push(0); // Fill with zeroes, so 1.0 can be compared to 1.0.1
     while (b.length < a.length) b.push(0);
     for (var i = 0; i < a.length; i++) {
         if (a[i] === b[i]) continue;
@@ -71,6 +73,17 @@ function sortVersions(a, b) {
         return -1;
     }
     return 0;
+}
+
+/**
+ * High to low dl count, uses global project data
+ * @param a pid
+ * @param b pid
+ * @returns {number}
+ */
+function sortByDownloads(a, b)
+{
+    return DATA['projects'][b]['downloads'] - DATA['projects'][a]['downloads'];
 }
 
 /**
@@ -82,25 +95,26 @@ function sortVersions(a, b) {
 function pieChart(id, title, data, sort) {
     var table = google.visualization.arrayToDataTable(data, false);
     if (sort) {
-        table.sort({column: 1, desc: true});
+        table.sort({column: 1, desc: true}); // not col 0, that is the name.
     }
     var options = {
         title: title,
-        tooltip: {isHtml: true, trigger: 'both'},
+        tooltip: {isHtml: true, trigger: 'both'}, // both allows tooltips to stay
         height: 400,
-        chartArea: {width: '90%', height: '90%'}
+        chartArea: {width: '90%', height: '90%'} // make graph occupy more of the space
     };
     var chart = new google.visualization.PieChart($(id)[0]);
     chart.draw(table, options);
-    CHARTS.push(chart);
+    CHARTS.push(chart); // keep ref so we can nuke tooltips later
 }
 
 /**
  * Sum all types in 1d object
  * @param a `{type: number}`
+ * @param types [string] every type that needs to be added
  * @returns {number}
  */
-function sumTypes(a) {
+function sumTypes(a, types) {
     var total = 0;
     types.forEach(function (t) {
         if (a.hasOwnProperty(t)) {
@@ -116,10 +130,10 @@ function sumTypes(a) {
  * @param index string
  * @returns [...]
  */
-function getDataType1(header, index) {
-    var data = [['Project type', header, {type: 'string', role: 'tooltip', p: {html: true}}]];
-    var total = sumTypes(DATA[index]);
-    types.forEach(function (t) {
+function getGlobalData(header, index) {
+    var data = [['Project type', header, {type: 'string', role: 'tooltip', p: {html: true}}]]; // pre-add header row
+    var total = sumTypes(DATA[index], types);
+    types.forEach(function (t) { // loop over types to preserve order
         var amount = DATA[index][t];
         data.push([
             t,
@@ -134,41 +148,36 @@ function getDataType1(header, index) {
 }
 
 /**
- * DOWNLOADS - All
+ * DOWNLOADS
  * @param key key for each obj
+ * @param types [string] every type that needs to be added
  * @returns [..]
  */
-function getDataType2(key) {
-    var total_dl = sumTypes(DATA['downloads']);
-    var total_prj = sumTypes(DATA['project_count']);
-    var data = [['Username', 'Downloads', {type: 'string', role: 'tooltip', p: {html: true}}]];
+function getPersonalData(key, types) {
+    var total_dl = sumTypes(DATA['downloads'], types);
+    var total_prj = sumTypes(DATA['project_count'], types);
+    var data = [['Username', 'Downloads', {type: 'string', role: 'tooltip', p: {html: true}}]]; // pre-add header row
     $.each(DATA['authors'], function (name, obj) {
-        var downloads = 0; //sumTotal(obj[key]);
-        var projects = 0; //countTotal(obj[key]);
+        var downloads = 0;
+        var projects = 0;
         var projectsTable = '';
-
-        types.forEach(function (t) {
+        types.forEach(function (t) { // loop over types to preserve order for tooltip table
             if (obj[key].hasOwnProperty(t)) {
-                var o = obj[key][t];
-                var pids = [];
-                $.each(o, function (id, dl) {
-                    downloads += dl;
-                    projects += 1;
-                    pids.push(id);
+                var pids = obj[key][t]; // array of pids
+                projects += pids.length;
+                pids.sort(sortByDownloads);
+                pids.forEach(function (id) { // calc dl count
+                    downloads += DATA['projects'][id]['downloads']
                 });
-                pids.sort(function (a, b) {
-                   return o[b] - o[a];
-                });
-                pids.forEach(function (id) {
-                    var dl = o[id];
+                pids.forEach(function (id) { // tooltip table row
                     var p = DATA['projects'][id];
                     projectsTable +=
-                        '<tr>' +
+                        '<tr data-pid="' + id + '">' +
                             '<td>' + p['name'] + '</td>' +
                             '<td>' + p['type'] + '</td>' +
-                            '<td>' + nf.format(dl) + '</td>' +
-                            '<td>' + nf.format(dl*100/total_dl) + '%</td>' +
-                            '<td>' + nf.format(dl*100/downloads) + '%</td>' +
+                            '<td>' + nf.format(p['downloads']) + '</td>' +
+                            '<td>' + nf.format(p['downloads']*100/total_dl) + '%</td>' +
+                            '<td>' + nf.format(p['downloads']*100/downloads) + '%</td>' +
                         '</tr>';
                 });
             }
@@ -188,84 +197,30 @@ function getDataType2(key) {
 }
 
 /**
- * DOWNLOADS - Type specific
- * @param key key for each obj
- * @param type One of types.
- * @returns [..]
- */
-function getDataType3(key, type) {
-    var total_dl = DATA['downloads'][type];
-    var total_prj = DATA['project_count'][type];
-    // var total = DATA['downloads'][type];
-    var data = [['Username', 'Downloads', {type: 'string', role: 'tooltip', p: {html: true}}]];
-    $.each(DATA['authors'], function (name, obj) {
-        var downloads = 0; //sumPartial(obj[key], type);
-        var projects = 0; //countPartial(obj[key], type);
-        var projectsTable = '';
-
-        if (obj[key].hasOwnProperty(type)) {
-            var o = obj[key][type];
-            var pids = [];
-            $.each(o, function (id, dl) {
-                downloads += dl;
-                projects += 1;
-                pids.push(id);
-            });
-            pids.sort(function (a, b) {
-               return o[b] - o[a];
-            });
-            pids.forEach(function (id) {
-                var dl = o[id];
-                var p = DATA['projects'][id];
-                projectsTable +=
-                    '<tr>' +
-                        '<td>' + p['name'] + '</td>' +
-                        '<td>' + p['type'] + '</td>' +
-                        '<td>' + nf.format(dl) + '</td>' +
-                        '<td>' + nf.format(dl*100/total_dl) + '%</td>' +
-                        '<td>' + nf.format(dl*100/downloads) + '%</td>' +
-                    '</tr>';
-            });
-        }
-
-        data.push([
-            name,
-            downloads,
-            '<div class="tooltip">' +
-                '<b>' + name + ':</b> ' + nf.format(downloads) + ' (' + nf.format(downloads*100/total_dl) + '% of ' + nf.format(total_dl) + ')' + '<br/>' +
-                '<b>Projects:</b> ' + nf.format(projects) + ' (' + nf.format(projects*100/total_prj) + '% of ' + total_prj + ')' + '<br/>' +
-                '<table><tr><th>Project</th><th>Type</th><th>Downloads</th><th>Global</th><th>Personal</th></tr>' + projectsTable + '</table>' +
-            '</div>'
-        ]);
-    });
-    return data;
-}
-
-/**
  * MAIN
  */
 function run() {
     // Don't sort the project lists, so the order (and thus colors) is consistent
-    pieChart('#projects', 'Amount of projects', getDataType1('Number', 'project_count'), false);
-    pieChart('#downloads', 'Amount of downloads', getDataType1('Downloads', 'downloads'), false);
+    pieChart('#projects', 'Amount of projects', getGlobalData('Number', 'project_count'), false);
+    pieChart('#downloads', 'Amount of downloads', getGlobalData('Downloads', 'downloads'), false);
 
     // Do sort, so the pies are going large to small
-    pieChart('.dl .owned', 'Total Downloads (Owner only)', getDataType2('owner'), true);
-    pieChart('.dl .member', 'Total Downloads (All members)', getDataType2('member'), true);
+    pieChart('.dl .owned', 'Total Downloads (Owner only)', getPersonalData('owner', types), true);
+    pieChart('.dl .member', 'Total Downloads (All members)', getPersonalData('member', types), true);
 
-    pieChart('.dl .mod-owned', 'Mod Downloads (Owner only)', getDataType3('owner', types[0]), true);
-    pieChart('.dl .mod-member', 'Mod Downloads (All members)', getDataType3('member', types[0]), true);
+    pieChart('.dl .mod-owned', 'Mod Downloads (Owner only)', getPersonalData('owner', [types[0]]), true);
+    pieChart('.dl .mod-member', 'Mod Downloads (All members)', getPersonalData('member', [types[0]]), true);
 
-    pieChart('.dl .modpack-owned', 'Modpack Downloads (Owner only)', getDataType3('owner', types[1]), true);
-    pieChart('.dl .modpack-member', 'Modpack Downloads (All members)', getDataType3('member', types[1]), true);
+    pieChart('.dl .modpack-owned', 'Modpack Downloads (Owner only)', getPersonalData('owner', [types[1]]), true);
+    pieChart('.dl .modpack-member', 'Modpack Downloads (All members)', getPersonalData('member', [types[1]]), true);
 
-    // Start the mess
+    // Start the mess (stacked col graph)
     // cols: Version, [type, tooltip]...
     var table = new google.visualization.DataTable();
-    table.addColumn('string', 'Version');
+    table.addColumn('string', 'Version'); // X axis
     types.forEach(function (t) {
-        table.addColumn('number', t);
-        table.addColumn({type: 'string', role: 'tooltip', p: {html: true}});
+        table.addColumn('number', t); // data
+        table.addColumn({type: 'string', role: 'tooltip', p: {html: true}}); // tooltip
     });
     var data = []; // Cannot be stored directly in a table because we need to sort later
     var total = 0; // Global total
@@ -307,46 +262,45 @@ function run() {
     var options = {
         title: 'Projects per MC version',
         isStacked: true,
-        tooltip: {isHtml: true, trigger: 'both'},
+        tooltip: {isHtml: true, trigger: 'both'}, // Pop up tooltips
         height: 400,
-        chartArea: {left: 75, bottom: 70, width: '85%', height: '75%'}
+        chartArea: {left: 75, bottom: 70, width: '85%', height: '75%'} // magic numbers YEY
 
     };
-    new google.visualization.ColumnChart($('#versions')[0]).draw(table, options);
+    var chart = new google.visualization.ColumnChart($('#versions')[0]);
+    chart.draw(table, options);
+    CHARTS.push(chart);
 
-    $(function () {
+    $('#total-projects').text(nf.format(sumTypes(DATA['project_count'], types)));
+    $('#total-downloads').text(nf.format(sumTypes(DATA['downloads'], types)));
+    $('#total-authors').text(nf.format(Object.keys(DATA['authors']).length));
 
-        $('#total-projects').text(nf.format(sumTypes(DATA['project_count'])));
-        $('#total-downloads').text(nf.format(sumTypes(DATA['downloads'])));
-        $('#total-authors').text(nf.format(Object.keys(DATA['authors']).length));
-
-        $('#loading').remove();
-    })
+    $('#loading').remove();
 }
 
-var isLoadedCharts = false;
-var isLoadedData = false;
+$(function () {
+    var isLoadedCharts = false;
+    var isLoadedData = false;
 
-google.charts.load('current', {'packages':['corechart']});
-google.charts.setOnLoadCallback(function () {
-    isLoadedCharts = true;
-    if (isLoadedData) {
-        run();
-    }
-});
-
-$.ajax({
-    type: "GET",
-    crossDomain: true,
-    url: URL_BASE + "stats.json",
-    cache: false,
-    dataType: "json",
-    success: function(data) {
-        $('#timestamp').text(data["timestamp_human"]);
-        DATA = data['stats'];
-        isLoadedData = true;
-        if (isLoadedCharts) {
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(function () {
+        isLoadedCharts = true;
+        if (isLoadedData) {
             run();
         }
-    }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: URL_BASE + "stats.json",
+        dataType: "json",
+        success: function(data) {
+            $('#timestamp').text(data["timestamp_human"]);
+            DATA = data['stats'];
+            isLoadedData = true;
+            if (isLoadedCharts) {
+                run();
+            }
+        }
+    });
 });
