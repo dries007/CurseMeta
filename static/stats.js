@@ -30,6 +30,16 @@ var types = ['Mods', 'Modpacks', 'Texture Packs', 'Worlds'];
 var nf = new Intl.NumberFormat(undefined, {maximumFractionDigits: 2});
 
 var DATA;
+var CHARTS = [];
+
+/**
+ * Clear the selection of all graphs, to hide the tooltips.
+ */
+function nukeTooltips() {
+    CHARTS.forEach(function (t) {
+        t.setSelection([{}]);
+    })
+}
 
 /**
  * Split version string (n.m[.p, ...]) into a int array
@@ -80,40 +90,9 @@ function pieChart(id, title, data, sort) {
         height: 400,
         chartArea: {width: '90%', height: '90%'}
     };
-    new google.visualization.PieChart($(id)[0]).draw(table, options);
-}
-
-/**
- * Sum all values of 2d object
- * @param obj `{type: {pid: downloads}}`
- * @returns {number}
- */
-function sumTotal(obj) {
-    var total = 0;
-    types.forEach(function (t) {
-        if (obj.hasOwnProperty(t)) {
-            $.each(obj[t], function (id, dl) {
-                total += dl;
-            })
-        }
-    });
-    return total;
-}
-
-/**
- * Sum 1 value of 2d object
- * @param obj `{type: {pid: downloads}}`
- * @param sub type
- * @returns {number}
- */
-function sumPartial(obj, sub) {
-    var total = 0;
-    if (obj.hasOwnProperty(sub)) {
-        $.each(obj[sub], function (id, dl) {
-            total += dl;
-        })
-    }
-    return total;
+    var chart = new google.visualization.PieChart($(id)[0]);
+    chart.draw(table, options);
+    CHARTS.push(chart);
 }
 
 /**
@@ -124,37 +103,11 @@ function sumPartial(obj, sub) {
 function sumTypes(a) {
     var total = 0;
     types.forEach(function (t) {
-        total += a[t];
-    });
-    return total;
-}
-
-/**
- * Count all values of 2d object
- * @param obj `{type: {pid: downloads}}`
- * @returns {number}
- */
-function countTotal(obj) {
-    var total = 0;
-    types.forEach(function (t) {
-        if (obj.hasOwnProperty(t)) {
-            total += Object.keys(obj[t]).length;
+        if (a.hasOwnProperty(t)) {
+            total += a[t];
         }
     });
     return total;
-}
-
-/**
- * Count 1 value of 2d object
- * @param obj `{type: {pid: downloads}}`
- * @param sub type
- * @returns {number}
- */
-function countPartial(obj, sub) {
-    if (obj.hasOwnProperty(sub)) {
-        return Object.keys(obj[sub]).length
-    }
-    return 0;
 }
 
 /**
@@ -172,10 +125,9 @@ function getDataType1(header, index) {
             t,
             amount,
             '<div class="tooltip">' +
-                '<b>' + t + ':</b> ' + nf.format(amount) + '<br/>' +
+                '<b>' + t + ':</b> ' + nf.format(amount) + ' (' + nf.format(amount*100/total) +'%)<br/>' +
                 '<b>Total:</b> ' + nf.format(total) + '<br/>' +
-                nf.format(amount*100/total) + '%<br/>' +
-                '</div>'
+            '</div>'
         ]);
     });
     return data;
@@ -226,13 +178,9 @@ function getDataType2(key) {
             name,
             downloads,
             '<div class="tooltip">' +
-                '<b>' + name + ':</b> ' + nf.format(downloads) + '<br/>' +
-                '<b>Total:</b> ' + nf.format(total_dl) + '<br/>' +
-                nf.format(downloads*100/total_dl) + '%<br/>' +
-                '<b>Projects:</b> ' + nf.format(projects) + ' (' + nf.format(projects*100/total_prj) + '%)' + '<br/>' +
-                '<table>' +
-                '<tr><th>Project</th><th>Type</th><th>Downloads</th><th>Global</th><th>Personal</th></tr>' +
-                projectsTable + '</table>' +
+                '<b>' + name + ':</b> ' + nf.format(downloads) + ' (' + nf.format(downloads*100/total_dl) + '% of ' + nf.format(total_dl) + ')' + '<br/>' +
+                '<b>Projects:</b> ' + nf.format(projects) + ' (' + nf.format(projects*100/total_prj) + '% of ' + total_prj + ')' + '<br/>' +
+                '<table><tr><th>Project</th><th>Type</th><th>Downloads</th><th>Global</th><th>Personal</th></tr>' + projectsTable + '</table>' +
             '</div>'
         ]);
     });
@@ -246,22 +194,48 @@ function getDataType2(key) {
  * @returns [..]
  */
 function getDataType3(key, type) {
-    var total = DATA['downloads'][type];
+    var total_dl = DATA['downloads'][type];
+    var total_prj = DATA['project_count'][type];
+    // var total = DATA['downloads'][type];
     var data = [['Username', 'Downloads', {type: 'string', role: 'tooltip', p: {html: true}}]];
     $.each(DATA['authors'], function (name, obj) {
-        var downloads = sumPartial(obj[key], type);
-        var projects = countPartial(obj[key], type);
+        var downloads = 0; //sumPartial(obj[key], type);
+        var projects = 0; //countPartial(obj[key], type);
+        var projectsTable = '';
 
-        //todo
+        if (obj[key].hasOwnProperty(type)) {
+            var o = obj[key][type];
+            var pids = [];
+            $.each(o, function (id, dl) {
+                downloads += dl;
+                projects += 1;
+                pids.push(id);
+            });
+            pids.sort(function (a, b) {
+               return o[b] - o[a];
+            });
+            pids.forEach(function (id) {
+                var dl = o[id];
+                var p = DATA['projects'][id];
+                projectsTable +=
+                    '<tr>' +
+                        '<td>' + p['name'] + '</td>' +
+                        '<td>' + p['type'] + '</td>' +
+                        '<td>' + nf.format(dl) + '</td>' +
+                        '<td>' + nf.format(dl*100/total_dl) + '%</td>' +
+                        '<td>' + nf.format(dl*100/downloads) + '%</td>' +
+                    '</tr>';
+            });
+        }
 
         data.push([
             name,
             downloads,
             '<div class="tooltip">' +
-                '<b>' + name + ':</b> ' + nf.format(downloads) + '<br/>' +
-                '<b>Total:</b> ' + nf.format(total) + '<br/>' +
-                nf.format(downloads*100/total) + '%<br/>' +
-                '</div>'
+                '<b>' + name + ':</b> ' + nf.format(downloads) + ' (' + nf.format(downloads*100/total_dl) + '% of ' + nf.format(total_dl) + ')' + '<br/>' +
+                '<b>Projects:</b> ' + nf.format(projects) + ' (' + nf.format(projects*100/total_prj) + '% of ' + total_prj + ')' + '<br/>' +
+                '<table><tr><th>Project</th><th>Type</th><th>Downloads</th><th>Global</th><th>Personal</th></tr>' + projectsTable + '</table>' +
+            '</div>'
         ]);
     });
     return data;
