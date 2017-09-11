@@ -19,6 +19,25 @@ class Author:
         (self.owner if owner else self.member)[t][pid] = dl
 
 
+def _do_history(output_folder, timestamp, history_obj):
+    if not output_folder.exists():
+        output_folder.mkdir()
+    try:
+        with pathlib.Path(output_folder, 'index.json').open(encoding='utf-8') as f:
+            history = set(json.load(f)['history'])
+    except IOError:
+        history = set()
+    history.add(timestamp)
+    with pathlib.Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
+        json.dump({
+            'timestamp': calendar.timegm(time.gmtime(timestamp)),
+            'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
+            'history': sorted(history)
+        }, f)
+    with pathlib.Path(output_folder, '{}.json'.format(timestamp)).open('w', encoding='utf-8') as f:
+        json.dump(history_obj, f)
+
+
 def run(complete, output_folder):
     print("Running stats...")
     with complete.open(encoding='utf-8') as f:
@@ -26,6 +45,8 @@ def run(complete, output_folder):
         timestamp = int(raw['Timestamp']/1000)
         data = raw['Data']
         del raw
+
+    history_obj = {}
 
     downloads = collections.defaultdict(lambda: 0)
     project_count = collections.defaultdict(lambda: 0)
@@ -44,6 +65,8 @@ def run(complete, output_folder):
             'downloads': dl,
             'score': project['PopularityScore'],
         }
+
+        history_obj[pid] = dl
 
         project_count[t] += 1
         downloads[t] += dl
@@ -67,6 +90,9 @@ def run(complete, output_folder):
                 'projects': projects,
             }
         }, f, cls=_Encoder)
+
+    _do_history(pathlib.Path(output_folder, 'history'), timestamp, history_obj)
+
     print("Stats done.")
 
 
