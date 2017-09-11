@@ -81,8 +81,7 @@ function sortVersions(a, b) {
  * @param b pid
  * @returns {number}
  */
-function sortByDownloads(a, b)
-{
+function sortByDownloads(a, b) {
     return DATA['projects'][b]['downloads'] - DATA['projects'][a]['downloads'];
 }
 

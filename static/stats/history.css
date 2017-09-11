@@ -1,0 +1,72 @@
+/*
+ * Heavily based on the Pixyll theme
+ */
+
+#credits {
+    float: right;
+    text-align: right;
+    color: gray;
+}
+
+a {
+    color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Lato, "Helvetica Neue", Helvetica, sans-serif;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+body {
+    font-family: Merriweather, "PT Serif", Georgia, "Times New Roman", STSong, serif;
+    font-weight: 400;
+    margin: 8px;
+}
+
+.tooltip {
+    padding: 5px;
+    font-size: larger;
+}
+
+.tooltip table {
+    width: auto;
+    border-collapse: separate;
+    border-spacing: 5px 1px;
+}
+
+.tooltip table td {
+    width: auto;
+}
+
+.tooltip tr {
+    border-bottom: 1px dashed lightgray;
+}
+
+.tooltip tr td {
+    text-align: right;
+}
+
+.tooltip tr td:first-child {
+    text-align: left;
+}
+
+dt::after {
+    content: ": ";
+}
+
+dt {
+    display: inline;
+    font-weight: bolder;
+}
+
+dd {
+    display: inline;
+    margin-left: 0;
+    margin-right: 10em;
+}
+
+#timeline {
+    width: 100%;
+    height: 80vh;
+}
