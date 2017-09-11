@@ -124,6 +124,10 @@ function sumTypes(a, types) {
     return total;
 }
 
+function tooltipLine(name, amount, total) {
+    return '<b>' + name + ':</b> ' + nf.format(amount) + ' (' + nf.format(amount*100/total) +'% of ' +  nf.format(total) + ')'
+}
+
 /**
  * GLOBAL
  * @param header string
@@ -135,14 +139,7 @@ function getGlobalData(header, index) {
     var total = sumTypes(DATA[index], types);
     types.forEach(function (t) { // loop over types to preserve order
         var amount = DATA[index][t];
-        data.push([
-            t,
-            amount,
-            '<div class="tooltip">' +
-                '<b>' + t + ':</b> ' + nf.format(amount) + ' (' + nf.format(amount*100/total) +'%)<br/>' +
-                '<b>Total:</b> ' + nf.format(total) + '<br/>' +
-            '</div>'
-        ]);
+        data.push([t, amount, '<div class="tooltip">' + tooltipLine(t, amount, total) + '</div>']);
     });
     return data;
 }
@@ -187,8 +184,9 @@ function getPersonalData(key, types) {
             name,
             downloads,
             '<div class="tooltip">' +
-                '<b>' + name + ':</b> ' + nf.format(downloads) + ' (' + nf.format(downloads*100/total_dl) + '% of ' + nf.format(total_dl) + ')' + '<br/>' +
-                '<b>Projects:</b> ' + nf.format(projects) + ' (' + nf.format(projects*100/total_prj) + '% of ' + total_prj + ')' + '<br/>' +
+                '<b>' + name + '</b><br/>' +
+                tooltipLine("Downloads", downloads, total_dl) + '<br/>' +
+                tooltipLine("Projects", projects, total_prj) + '<br/>' +
                 '<table><tr><th>Project</th><th>Type</th><th>Downloads</th><th>Global</th><th>Personal</th></tr>' + projectsTable + '</table>' +
             '</div>'
         ]);
@@ -241,19 +239,16 @@ function run() {
     });
     data.sort(sortVersions); // sort based on version string
     data.forEach(function (d) { // tooltip stuff
-        var name = d[0];
-        var r = [name];
+        var version = d[0];
+        var r = [version];
         var total_row = d[d.length - 1];
-        // skip first (name), last(total_row)
+        // skip first (version), last(total_row)
         for (var i = 1; i < d.length - 1; i++) {
             var amount = d[i];
             r.push(amount);
             r.push('<div class="tooltip">' +
-                '<b>' + name + '</b><br/>' +
-                '<b>' + types[i-1] + ':</b> ' + nf.format(amount) + '<br/>' +
-                '<b>Total:</b> ' + nf.format(total_row) + '<br/>' +
-                nf.format(amount*100/total_row) + '% of ' + name + '<br/>' +
-                nf.format(amount*100/total) + '% of total' +
+                tooltipLine(version, total_row, total) + '<br/>' +
+                tooltipLine(types[i-1], amount, total_row) + '<br/>' +
                 '</div>')
         }
         table.addRow(r);

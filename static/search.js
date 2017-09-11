@@ -78,8 +78,6 @@ function fixDownloadLinks(row) {
         var jQe = $(e);
         var download = jQe.find(".download");
         var dependencies = jQe.find(".dependencies");
-        console.log(download);
-        console.log(dependencies);
         getData(row_data["Id"] + '/' + jQe.data('fileid'), function (data) {
             download.replaceWith('<a href="' + data["DownloadURL"] + '" target="_blank">Download</a>');
             dependencies.replaceWith(makedeps(data));
