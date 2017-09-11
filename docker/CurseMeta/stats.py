@@ -75,8 +75,9 @@ def run(complete, output_folder):
         for author in project['Authors']:
             authors[author['Name']].add_project(False, t, pid, dl)
 
-        for gv in project['GameVersionLatestFiles']:
-            version[gv['GameVesion']][t] += 1
+        versions = set(x['GameVesion'] for x in project['GameVersionLatestFiles'])
+        for gv in versions:
+            version[gv][t] += 1
 
     with pathlib.Path(output_folder, 'stats.json').open('w', encoding='utf-8') as f:
         json.dump({
