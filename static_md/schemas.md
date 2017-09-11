@@ -24,68 +24,39 @@ viewport: width=device-width, initial-scale=1.0
 -->
 
 # JSON Schemas
+
+- Any key in any JSON file starting with an underscore is to be treated as optional.
+- Any file/data you find that is not specified in here should be treated as non-stable.
+
+<small>[Credits & Legal](/)</small>
+
 ## Table of content
 
 [TOC]
 
-## Overview
-
-**Any key in any JSON file starting with an underscore is to be treated as optional. It may or may not be present.!**
-
-- JSON based file index: [`index.json`](index.json)
-  - A `timestamp` (and `timestamp_human`) of last update.
-  - Lists of all `mods`, `modpacks` project ids.
-  - A list of all project `ids`.
-- A list of all [`mods.json`](mods.json) and [`modpacks.json`](modpacks.json), for easy searchability.
-  - These files are an `Id` to `Name`, `PrimaryAuthorName`, `Summary`, `WebSiteURL`, `GameVersionLatestFiles` map. ( `ProjectFileName` is removed from the `GameVersionLatestFiles` objects.)
-  - They are meant for search services, to avoid having to download unnecessary data.
-  - If you'd like to see a key added, open an issue with a strong use-case please.
-- A `/projectID.json` JSON file for every project.
-  - Has the (stripped) CurseForge project metadata.
-- A `/projectID/` folder with:
-  - A JSON based index: `/projectid/index.json`
-    - The project `type`
-    - A list of ids of all known files of this project.
-    - The `Name`, `PrimaryAuthorName` and `Summary` items. 
-  - A metadata file per `fileID`: `/projectid/fileID.json`
-    - The `_Project` key contains metadata about the project this file belongs to, to avoid having to make multiple requests. **It is optional.** 
-  - A list of all CurseForge's files metadata: `/projectid/files.json`
-    - _Please don't use this file if you only need one file's metadata._
-- The 'raw' data from CurseForge:
-  - `raw_complete.json`, `raw_mods.json` and `raw_modpacks.json`.
-    - _Please use as compressed files, in gzip (`.gz`), bzip2 (`.bz2`) and xz (`.xz`)._
-
-## Example Links
-
-- [`/index.json`](index.json)
-- [`/mods.json`](mods.json)
-- [`/modpacks.json`](modpacks.json)
-- [`/projectID.json`](/226294.json)
-- [`/projectID/`](/226294/)
-  - [`/projectID/index.json`](/226294/index.json) (same as the directory URL)
-  - [`/projectID/files.json`](/226294/files.json)
-  - [`/projectID/fileid.json`](/226294/2222653.json)
-
 ## Raw data
 
-+ These files are *big*. ~50Mb big.
-+ Please contact me before using this in anything you intend to distribute or make available.
-+ *Please use as compressed files, in gzip (`.gz`), bzip2 (`.bz2`) and xz (`.xz`).*
++ These files are *big*. (+50Mb for complete)
++ Please contact me **before** using this in a project.
++ Please use as compressed files, in gzip (`.gz`), bzip2 (`.bz2`) and xz (`.xz`).
 
-- `raw_complete.json`
-  - [raw_complete.json.gz](/raw_complete.json.gz)
-  - [raw_complete.json.bz2](/raw_complete.json.bz2)
-  - [raw_complete.json.xz](/raw_complete.json.xz)
-- `raw_mods.json`
-  - [raw_mods.json.gz](/raw_mods.json.gz)
-  - [raw_mods.json.bz2](/raw_mods.json.bz2)
-  - [raw_mods.json.xz](/raw_mods.json.xz)
-- `raw_modpacks.json`
-  - [raw_modpacks.json.gz](/raw_modpacks.json.gz)
-  - [raw_modpacks.json.bz2](/raw_modpacks.json.bz2)
-  - [raw_modpacks.json.xz](/raw_modpacks.json.xz)
+Links:
 
-## [`/index.json`](/index.json)
+- [`raw_complete.json`](/raw_complete.json)
+  - [`raw_complete.json.gz`](/raw_complete.json.gz)
+  - [`raw_complete.json.bz2`](/raw_complete.json.bz2)
+  - [`raw_complete.json.xz`](/raw_complete.json.xz)
+- [`raw_mods.json`](/raw_mods.json)
+  - [`raw_mods.json.gz`](/raw_mods.json.gz)
+  - [`raw_mods.json.bz2`](/raw_mods.json.bz2)
+  - [`raw_mods.json.xz`](/raw_mods.json.xz)
+- [`raw_modpacks.json`](/raw_modpacks.json)
+  - [`raw_modpacks.json.gz`](/raw_modpacks.json.gz)
+  - [`raw_modpacks.json.bz2`](/raw_modpacks.json.bz2)
+  - [`raw_modpacks.json.xz`](/raw_modpacks.json.xz)
+
+## List of all ProjectIDs
+[`/index.json`](/index.json)
 
 ```json
 {
@@ -103,7 +74,8 @@ viewport: width=device-width, initial-scale=1.0
 }
 ```
 
-## [`/mods.json`](/mods.json) and [`/modpacks.json`](/modpacks.json)
+## List of all Mods or Modpack ProjectIDs
+[`/mods.json`](/mods.json) and [`/modpacks.json`](/modpacks.json)
 
 ```json
 {
@@ -124,7 +96,8 @@ viewport: width=device-width, initial-scale=1.0
 }
 ```
 
-## [`/stats.json`](/stats.json)
+## Download/owner Statistics
+[`/stats.json`](/stats.json)
 
 'Types' are Curse CategorySection's Names, currently:
 
@@ -202,7 +175,9 @@ Not all keys must be present. May expand in the future.
 ```
 
 ## History
-### [`/history/index.json`](/history/index.json)
+
+### Available data point
+[`/history/index.json`](/history/index.json)
 
 ```json
 {
@@ -211,14 +186,15 @@ Not all keys must be present. May expand in the future.
     "history": [
         // List of every timestamp with data available.
         // Do not cache this without also caching the timestamp data.
-        // Timestamps may be removed when the amount of data becomes too large for hourly snapshots.
+        // Timestamps may be removed.
         1504891405,
         1505127365
     ]
 }
 ```
 
-### [`/history/<timestamp>.json`](/history/1505131870.json)
+### Download count at timestamp
+[`/history/<timestamp>.json`](/history/1505131870.json)
 
 ```json
 {
@@ -230,7 +206,58 @@ Not all keys must be present. May expand in the future.
 }
 ```
 
-## 
+## Project Files
 
+Overview:
 
-<small>[Credits & Legal](/)</small>
+- [`/<ProjectID>.json`](/226294.json)
+- [`/<ProjectID>/`](/226294/)
+  - [`/<ProjectID>/index.json`](/226294/index.json) (same as the directory URL)
+  - [`/<ProjectID>/files.json`](/226294/files.json)
+  - [`/<ProjectID>/fileid.json`](/226294/2222653.json)
+  
+### Project metadata
+[`<ProjectID>.json`](/226294.json)
+
+Curse Project metadata
+
+Removed:
+- `LatestFiles.*.Modules`: Contains (unspecified) fingerprint data per folder inside a package.
+
+Notes:
+- Inside `GameVersionLatestFiles`, `GameVesion` is misspelled. This is a Curse typo.
+
+### Project fileId list
+[`<ProjectID>/index.json`](/226294/index.json) (also served at [`<ProjectID>/`](/226294/) )
+
+```json
+{
+    "ids": [
+        2222367,
+        2222432
+        // List of available FileIDs
+    ],
+    "type": "Mods", // One of the Curse types
+    // Data below is copied from Project metadata (<ProjectID>.json)
+    "Summary": "No more will you need to type out shaped or shapeless recipes.... EVER!",
+    "PrimaryAuthorName": "DoubleDoorDevelopment",
+    "Name": "MineTweaker RecipeMaker"
+}
+```
+
+### Project file object
+[`/<ProjectID>/<FileID>.json`](/226294/2222653.json)
+
+Curse File metadata
+
+Removed:
+- `Modules`: Contains (unspecified) fingerprint data per folder inside a package.
+
+Notes:
+- **Optionally** added `_Project`, to allow limited project info with less requests.
+
+### Project file object list
+[`/<ProjectID>/files.json`](/226294/files.json)
+
+Json array of Project file objects. Don't use this if you just need 1 file's info.
+
