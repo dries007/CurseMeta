@@ -66,8 +66,26 @@ viewport: width=device-width, initial-scale=1.0
   - [`/projectID/files.json`](/226294/files.json)
   - [`/projectID/fileid.json`](/226294/2222653.json)
 
-## Schemas / Examples
-### [`/index.json`](/index.json)
+## Raw data
+
++ These files are *big*. ~50Mb big.
++ Please contact me before using this in anything you intend to distribute or make available.
++ *Please use as compressed files, in gzip (`.gz`), bzip2 (`.bz2`) and xz (`.xz`).*
+
+- `raw_complete.json`
+  - [raw_complete.json.gz](/raw_complete.json.gz)
+  - [raw_complete.json.bz2](/raw_complete.json.bz2)
+  - [raw_complete.json.xz](/raw_complete.json.xz)
+- `raw_mods.json`
+  - [raw_mods.json.gz](/raw_mods.json.gz)
+  - [raw_mods.json.bz2](/raw_mods.json.bz2)
+  - [raw_mods.json.xz](/raw_mods.json.xz)
+- `raw_modpacks.json`
+  - [raw_modpacks.json.gz](/raw_modpacks.json.gz)
+  - [raw_modpacks.json.bz2](/raw_modpacks.json.bz2)
+  - [raw_modpacks.json.xz](/raw_modpacks.json.xz)
+
+## [`/index.json`](/index.json)
 
 ```json
 {
@@ -85,7 +103,7 @@ viewport: width=device-width, initial-scale=1.0
 }
 ```
 
-### [`/mods.json`](/mods.json) and [`/modpacks.json`](/modpacks.json)
+## [`/mods.json`](/mods.json) and [`/modpacks.json`](/modpacks.json)
 
 ```json
 {
@@ -106,7 +124,7 @@ viewport: width=device-width, initial-scale=1.0
 }
 ```
 
-### [`/stats.json`](/stats.json)
+## [`/stats.json`](/stats.json)
 
 'Types' are Curse CategorySection's Names, currently:
 
@@ -129,9 +147,9 @@ Not all keys must be present. May expand in the future.
             "Worlds": 2523,
             "Modpacks": 6524
         },
-        "downloads": { // I think these numbers are floating because of range issues
+        "downloads": {
             // Download count per type
-            "Mods": 2346689297.0, 
+            "Mods": 2346689297.0, // Floating for range. 
             "Texture Packs": 42078333.0,
             "Worlds": 14133278.0,
             "Modpacks": 31279952.0
@@ -183,8 +201,8 @@ Not all keys must be present. May expand in the future.
 }
 ```
 
-### History
-#### [/history/index.json](/history/index.json)
+## History
+### [`/history/index.json`](/history/index.json)
 
 ```json
 {
@@ -200,6 +218,19 @@ Not all keys must be present. May expand in the future.
 }
 ```
 
+### [`/history/<timestamp>.json`](/history/1505131870.json)
+
+```json
+{
+    "32159": 854.0, // Key: ProjectID (int), Value: Downloads (floating for range)
+    "32195": 1063.0,
+    "32274": 23226216.0,
+    "32286": 425.0
+    // One for every projectID
+}
+```
+
+## 
 
 
 <small>[Credits & Legal](/)</small>
