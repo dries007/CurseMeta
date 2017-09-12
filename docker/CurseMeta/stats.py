@@ -22,19 +22,13 @@ class Author:
 def _do_history(output_folder, timestamp, history_obj):
     if not output_folder.exists():
         output_folder.mkdir()
-    try:
-        with pathlib.Path(output_folder, 'index.json').open(encoding='utf-8') as f:
-            history = set(json.load(f)['history'])
-    except IOError:
-        history = set()
-    history.add(timestamp)
     with pathlib.Path(output_folder, '{}.json'.format(timestamp)).open('w', encoding='utf-8') as f:
         json.dump(history_obj, f)
     with pathlib.Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
         json.dump({
             'timestamp': calendar.timegm(time.gmtime(timestamp)),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
-            'history': sorted(history)
+            'history': sorted(int(x.stem) for x in output_folder.iterdir() if x.stem != 'index' and x.suffix == '.json')
         }, f)
 
 
