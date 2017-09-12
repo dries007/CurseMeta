@@ -25,11 +25,11 @@ body {
 }
 
 table.graphs {
-    width: 90%;
+    width: 99%;
 }
 
 table.graphs td {
-    width: 45%;
+    width: 50%;
 }
 
 .tooltip {

@@ -21,20 +21,20 @@ console.info("Copyright 2017 Dries007 - Licensed under the EUPL v1.1 - https://g
 var URL_BASE = "https://cursemeta.dries007.net/";
 
 var HISTORY;
-var PROJECTS;
+var STATS;
 var DATA = {};
-var LIMIT = URIHash.get('limit') || 100;
+var LIMIT = parseInt(URIHash.get('limit')) || 500;
 
 function toInt(t) {
     return parseInt(t);
 }
 
 function sortByDownloads(a, b) {
-    return PROJECTS[b]['downloads'] - PROJECTS[a]['downloads'];
+    return STATS['projects'][b]['downloads'] - STATS['projects'][a]['downloads'];
 }
 
 function mapIdToName(id) {
-    return PROJECTS[id]['name'];
+    return STATS['projects'][id]['name'];
 }
 
 function updateLimit(limit) {
@@ -47,7 +47,7 @@ function draw() {
     $('#loading').show();
     setTimeout(function () {
         HISTORY = Object.keys(DATA).map(toInt).sort();
-        var projects = Object.keys(PROJECTS).sort(sortByDownloads);
+        var projects = Object.keys(STATS['projects']).sort(sortByDownloads);
         if (LIMIT !== 0) {
             projects = projects.slice(0, LIMIT);
         }
@@ -105,7 +105,7 @@ $(function () {
         url: URL_BASE + 'stats.json',
         dataType: 'json',
         success: function(data) {
-            PROJECTS = data['stats']['projects'];
+            STATS = data['stats'];
             loaded -= 1;
             if (loaded === 0) {
                 run();

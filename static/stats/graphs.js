@@ -193,24 +193,7 @@ function getPersonalData(key, types) {
     return data;
 }
 
-/**
- * MAIN
- */
-function run() {
-    // Don't sort the project lists, so the order (and thus colors) is consistent
-    pieChart('#projects', 'Amount of projects', getGlobalData('Number', 'project_count'), false);
-    pieChart('#downloads', 'Amount of downloads', getGlobalData('Downloads', 'downloads'), false);
-
-    // Do sort, so the pies are going large to small
-    pieChart('.dl .owned', 'Total Downloads (Owner only)', getPersonalData('owner', types), true);
-    pieChart('.dl .member', 'Total Downloads (All members)', getPersonalData('member', types), true);
-
-    pieChart('.dl .mod-owned', 'Mod Downloads (Owner only)', getPersonalData('owner', [types[0]]), true);
-    pieChart('.dl .mod-member', 'Mod Downloads (All members)', getPersonalData('member', [types[0]]), true);
-
-    pieChart('.dl .modpack-owned', 'Modpack Downloads (Owner only)', getPersonalData('owner', [types[1]]), true);
-    pieChart('.dl .modpack-member', 'Modpack Downloads (All members)', getPersonalData('member', [types[1]]), true);
-
+function doColGraph() {
     // Start the mess (stacked col graph)
     // cols: Version, [type, tooltip]...
     var table = new google.visualization.DataTable();
@@ -264,6 +247,27 @@ function run() {
     var chart = new google.visualization.ColumnChart($('#versions')[0]);
     chart.draw(table, options);
     CHARTS.push(chart);
+}
+
+/**
+ * MAIN
+ */
+function run() {
+    // Don't sort the project lists, so the order (and thus colors) is consistent
+    pieChart('#projects', 'Amount of projects', getGlobalData('Number', 'project_count'), false);
+    pieChart('#downloads', 'Downloads per type', getGlobalData('Downloads', 'downloads'), false);
+
+    // Do sort, so the pies are going large to small
+    pieChart('.dl .owned', 'Total Downloads (Owner only)', getPersonalData('owner', types), true);
+    pieChart('.dl .member', 'Total Downloads (All members)', getPersonalData('member', types), true);
+
+    pieChart('.dl .mod-owned', 'Mod Downloads (Owner only)', getPersonalData('owner', [types[0]]), true);
+    pieChart('.dl .mod-member', 'Mod Downloads (All members)', getPersonalData('member', [types[0]]), true);
+
+    pieChart('.dl .modpack-owned', 'Modpack Downloads (Owner only)', getPersonalData('owner', [types[1]]), true);
+    pieChart('.dl .modpack-member', 'Modpack Downloads (All members)', getPersonalData('member', [types[1]]), true);
+
+    doColGraph();
 
     $('#total-projects').text(nf.format(sumTypes(DATA['project_count'], types)));
     $('#total-downloads').text(nf.format(sumTypes(DATA['downloads'], types)));
