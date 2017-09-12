@@ -31,7 +31,7 @@ The primary purpose is to allow third party modpack downloaders or launchers suc
 
 All generated with publicly available data from Minecraft's CurseFoge. *No mods are being hosted.*
 
-The data is updated periodically, ideally hourly.  
+The data is updated periodically, ideally hourly.
 
 + How to use this website? [More info here.](devinfo)
 + Just wanna search Mods and Modpacks? [Go here.](search)

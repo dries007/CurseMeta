@@ -27,12 +27,26 @@ viewport: width=device-width, initial-scale=1.0
 
 - Any key in any JSON file starting with an underscore is to be treated as optional.
 - Any file/data you find that is not specified in here should be treated as non-stable.
+- All static content is served gzipped. Accept this whenever possible.
+- There is a 1h cache expiry on all content, content may also be cached by Cloudflare.
+  Don't bypass this when it's not necessary.
 
 <small>[Credits & Legal](/)</small>
 
 ## Table of content
 
 [TOC]
+
+## Routing
+
+- Order of tried files:
+  1. `$uri`
+  2. `$uri.html`
+  3. `$uri/`
+- Indexes:
+  1. `index.html`
+  2. `index.json`
+  3. 403 (Directory indexes are disabled.)
 
 ## Raw data
 
@@ -222,9 +236,11 @@ Overview:
 Curse Project metadata
 
 Removed:
+
 - `LatestFiles.*.Modules`: Contains (unspecified) fingerprint data per folder inside a package.
 
 Notes:
+
 - Inside `GameVersionLatestFiles`, `GameVesion` is misspelled. This is a Curse typo.
 
 ### Project fileId list
@@ -251,13 +267,21 @@ Notes:
 Curse File metadata
 
 Removed:
+
 - `Modules`: Contains (unspecified) fingerprint data per folder inside a package.
 
 Notes:
+
 - **Optionally** added `_Project`, to allow limited project info with less requests.
+- It's possible to request archived or deleted files with this endpoint.
+  Those files will generate some behind the scenes requests that cause a load time of up to a few seconds.
+  Increase your timeouts accordingly.
 
 ### Project file object list
 [`/<ProjectID>/files.json`](/226294/files.json)
 
 Json array of Project file objects. Don't use this if you just need 1 file's info.
 
+Notes:
+
+- Only available (non-archived or deleted) files are listed here.
