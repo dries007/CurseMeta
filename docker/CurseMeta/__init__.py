@@ -45,7 +45,8 @@ def parse_top_level_files(file):
             'PrimaryAuthorName': project['PrimaryAuthorName'],
             'Summary': project['Summary'],
             'WebSiteURL': project['WebSiteURL'],
-            'GameVersionLatestFiles': [_filter_latest(x) for x in project['GameVersionLatestFiles']]
+            'GameVersionLatestFiles': [_filter_latest(x) for x in project['GameVersionLatestFiles']],
+            'PopularityScore': project['PopularityScore']
         }
 
     return ids, summery
