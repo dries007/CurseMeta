@@ -17,7 +17,7 @@ dotnet /alpacka-meta/out/alpacka-meta.dll download -o /data --filter None ${RUN}
 
 echo Python magic...
 python3 -m CurseMeta all /data /www
-python3 CurseMeta/CurseMetaDB/CleanInjest.py /data/addon/ /www/cleaned_raw.json
+python3 CurseMeta/CurseMetaDB/CleanInjest.py /data/addon/ /data/cleaned_raw.json
 
 function json {
     local file=$1

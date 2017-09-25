@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/docker" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/api/tmp/python-wcfbin-develop" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/api/tmp/pyWCFBin" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/docker/CurseMeta/CurseMetaDB" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/in" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
