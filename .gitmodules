@@ -1,3 +1,6 @@
 [submodule "docker/alpacka-meta-fork"]
 	path = docker/alpacka-meta-fork
 	url = https://github.com/dries007/alpacka-meta
+[submodule "docker/CurseMeta/CurseMetaDB"]
+	path = docker/CurseMeta/CurseMetaDB
+	url = https://github.com/dries007/CurseMetaDB.git
