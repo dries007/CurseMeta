@@ -73,7 +73,7 @@ def parse_addon_folder(project_in, project_out, log=True):
     for file in project_data['LatestFiles']:
         _filter_file(file)
     with Path(project_out.parent, project_in.name).with_suffix('.json').open('w', encoding='utf-8') as f:
-        json.dump(project_data, f, sort_keys=True)
+        json.dump(project_data, f, sort_keys=True, separators=(",", ":"))
 
     ids = set()
     # make out/<projectid>/files.json
@@ -83,7 +83,7 @@ def parse_addon_folder(project_in, project_out, log=True):
         _filter_file(file)
         ids.add(file['Id'])
     with Path(project_out, 'files.json').open('w', encoding='utf-8') as f:
-        json.dump(data, f, sort_keys=True)
+        json.dump(data, f, sort_keys=True, separators=(",", ":"))
 
     # make out/<projectid>/index.json
     with Path(project_out, 'index.json').open('w', encoding='utf-8') as f:
@@ -93,7 +93,7 @@ def parse_addon_folder(project_in, project_out, log=True):
             'Name': project_data['Name'],
             'PrimaryAuthorName': project_data['PrimaryAuthorName'],
             'Summary': project_data['Summary'],
-        }, f)
+        }, f, separators=(",", ":"))
 
     # make out/<projectid>/<fileid>.json
     for file in project_files.iterdir():
@@ -110,7 +110,7 @@ def parse_addon_folder(project_in, project_out, log=True):
             'Path': project_data['CategorySection']['Path'],
         }
         with Path(project_out, file.name).open('w', encoding='utf-8') as f:
-            json.dump(data, f, sort_keys=True)
+            json.dump(data, f, sort_keys=True, separators=(",", ":"))
     if log:
         print("Done parsing addon", project_in.name)
 
@@ -134,10 +134,10 @@ def run(input_folder, output_folder):
             parse_addon_folder(project, Path(output_folder, project.name), log=False)
 
     with Path(output_folder, 'mods.json').open('w', encoding='utf-8') as f:
-        json.dump(mods, f, sort_keys=True)
+        json.dump(mods, f, sort_keys=True, separators=(",", ":"))
 
     with Path(output_folder, 'modpacks.json').open('w', encoding='utf-8') as f:
-        json.dump(modpacks, f, sort_keys=True)
+        json.dump(modpacks, f, sort_keys=True, separators=(",", ":"))
 
     with Path(input_folder, 'complete.json').open(encoding='utf-8') as f:
         timestamp = int(json.load(f)['Timestamp']/1000)
@@ -149,7 +149,7 @@ def run(input_folder, output_folder):
             'mods': sorted(mod_ids),
             'modpacks': sorted(modpack_ids),
             'ids': sorted(all_ids),
-        }, f)
+        }, f, separators=(",", ":"))
     print("Done parsing addons")
 
     from .stats import run as run_stats
@@ -163,5 +163,5 @@ def parse_single_file(i, o):
     if not o.parent.exists():
         o.parent.mkdir(parents=True)
     with o.open('w', encoding='utf-8') as f:
-        json.dump(file_data, f, sort_keys=True)
+        json.dump(file_data, f, sort_keys=True, separators=(",", ":"))
     print('Done parsing single file', i)

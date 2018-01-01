@@ -23,13 +23,13 @@ def _do_history(output_folder, timestamp, history_obj):
     if not output_folder.exists():
         output_folder.mkdir()
     with pathlib.Path(output_folder, '{}.json'.format(timestamp)).open('w', encoding='utf-8') as f:
-        json.dump(history_obj, f)
+        json.dump(history_obj, f, separators=(",", ":"))
     with pathlib.Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
         json.dump({
             'timestamp': calendar.timegm(time.gmtime(timestamp)),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
             'history': sorted(int(x.stem) for x in output_folder.iterdir() if x.stem != 'index' and x.suffix == '.json')
-        }, f)
+        }, f, separators=(",", ":"))
 
 
 def run(complete, output_folder):
@@ -84,7 +84,7 @@ def run(complete, output_folder):
                 'authors': authors,
                 'projects': projects,
             }
-        }, f, cls=_Encoder)
+        }, f, cls=_Encoder, separators=(",", ":"))
 
     _do_history(pathlib.Path(output_folder, 'history'), timestamp, history_obj)
 
