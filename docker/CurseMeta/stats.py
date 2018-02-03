@@ -38,15 +38,9 @@ def _do_history(output_folder, timestamp, history_obj):
 
 
 def _do_delta(output_file, history_folder, now, offset, current_data, timestamps):
-    print(output_file)
-    print(timestamps)
-    target = min(timestamps, key=lambda x: abs(x - now + offset)) # Thanks https://stackoverflow.com/a/12141207/4355781
-    print(now)
-    print(target)
-    print(offset)
+    target = min(timestamps, key=lambda x: abs(x - now + offset))  # Thanks https://stackoverflow.com/a/12141207/4355781
     with pathlib.Path(history_folder, '{}.json'.format(target)).open(encoding='utf-8') as f:
         historic_data = json.load(f)
-    print(historic_data)
     with output_file.open('w', encoding='utf-8') as f:
         json.dump({
             'now_timestamp': calendar.timegm(time.gmtime(now)),
