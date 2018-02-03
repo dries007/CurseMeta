@@ -4,6 +4,8 @@ import pathlib
 import collections
 import time
 
+_SECONDS_IN_DAY = 60 * 60 * 24
+
 
 class _Encoder(json.JSONEncoder):
     def default(self, o):
@@ -24,11 +26,34 @@ def _do_history(output_folder, timestamp, history_obj):
         output_folder.mkdir()
     with pathlib.Path(output_folder, '{}.json'.format(timestamp)).open('w', encoding='utf-8') as f:
         json.dump(history_obj, f, separators=(",", ":"))
+    # List of all timestamps we know off
+    timestamps = sorted(int(x.stem) for x in output_folder.iterdir() if x.stem != 'index' and x.suffix == '.json')
     with pathlib.Path(output_folder, 'index.json').open('w', encoding='utf-8') as f:
         json.dump({
             'timestamp': calendar.timegm(time.gmtime(timestamp)),
             'timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(timestamp)),
-            'history': sorted(int(x.stem) for x in output_folder.iterdir() if x.stem != 'index' and x.suffix == '.json')
+            'history': timestamps
+        }, f, separators=(",", ":"))
+    return timestamps
+
+
+def _do_delta(output_file, history_folder, now, offset, current_data, timestamps):
+    print(output_file)
+    print(timestamps)
+    target = min(timestamps, key=lambda x: abs(x - now + offset)) # Thanks https://stackoverflow.com/a/12141207/4355781
+    print(now)
+    print(target)
+    print(offset)
+    with pathlib.Path(history_folder, '{}.json'.format(target)).open(encoding='utf-8') as f:
+        historic_data = json.load(f)
+    print(historic_data)
+    with output_file.open('w', encoding='utf-8') as f:
+        json.dump({
+            'now_timestamp': calendar.timegm(time.gmtime(now)),
+            'now_timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(now)),
+            'then_timestamp': calendar.timegm(time.gmtime(target)),
+            'then_timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(target)),
+            'delta': {k: round(v - (historic_data[str(k)] if str(k) in historic_data else 0)) for k, v in current_data.items()}
         }, f, separators=(",", ":"))
 
 
@@ -86,7 +111,11 @@ def run(complete, output_folder):
             }
         }, f, cls=_Encoder, separators=(",", ":"))
 
-    _do_history(pathlib.Path(output_folder, 'history'), timestamp, history_obj)
+    history_folder = pathlib.Path(output_folder, 'history')
+    timestamps = _do_history(history_folder, timestamp, history_obj)
+    _do_delta(pathlib.Path(output_folder, 'daily.json'), history_folder, timestamp, _SECONDS_IN_DAY, history_obj, timestamps)
+    _do_delta(pathlib.Path(output_folder, 'weekly.json'), history_folder, timestamp, 7 * _SECONDS_IN_DAY, history_obj, timestamps)
+    _do_delta(pathlib.Path(output_folder, 'monthly.json'), history_folder, timestamp, 30 * _SECONDS_IN_DAY, history_obj, timestamps)
 
     print("Stats done.")
 

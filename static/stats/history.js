@@ -24,6 +24,8 @@ var HISTORY;
 var STATS;
 var DATA = {};
 var LIMIT = parseInt(URIHash.get('limit')) || 500;
+var POINTS = parseInt(URIHash.get('points')) || 150;
+var START = parseInt(URIHash.get('start')) || Math.floor((Date.now()/1000) - (30 * 24 * 60 * 60));
 
 function toInt(t) {
     return parseInt(t);
@@ -43,16 +45,28 @@ function updateLimit(limit) {
     draw();
 }
 
+function updateStart(start) {
+    URIHash.set('start', start);
+    START = parseInt(start);
+    run();
+}
+
+function updatePoints(points) {
+    URIHash.set('points', points);
+    START = parseInt(points);
+    run();
+}
+
 function draw() {
     $('#loading').show();
     setTimeout(function () {
-        HISTORY = Object.keys(DATA).map(toInt).sort();
+        var keys = Object.keys(DATA).map(toInt).sort();
         var projects = Object.keys(STATS['projects']).sort(sortByDownloads);
         if (LIMIT !== 0) {
             projects = projects.slice(0, LIMIT);
         }
         var data = [[{type: 'datetime', id: 'time', label: 'Time', format: 'long'}].concat(projects.map(mapIdToName))];
-        HISTORY.forEach(function (timestamp) {
+        keys.forEach(function (timestamp) {
             data.push([new Date(timestamp * 1000)].concat(projects.map(function (id) {return DATA[timestamp][id]})));
         });
 
@@ -71,9 +85,14 @@ function draw() {
  * MAIN
  */
 function run() {
+    DATA = {};
+
     // do ALL of the requests at once
     var requests = [];
+    var n = 0;
     HISTORY.forEach(function (t) {
+        if (t < START) return;
+        n++;
         requests.push($.ajax({
             type: 'GET',
             url: URL_BASE + 'history/' + t + '.json',
@@ -83,12 +102,25 @@ function run() {
             }
         }));
     });
+    // reduce to POINTS requests
+    if (n > POINTS) {
+        // thanks https://stackoverflow.com/a/2451363/4355781
+        var step = (n - 1) / (POINTS - 1);
+        var requests_ = [];
+        for (var i = 0; i < POINTS; i ++) {
+            requests_.push(requests[Math.round(step * i)]);
+        }
+        requests = requests_;
+    }
+    console.info('Requesting ' + requests.length + ' datapoints.');
     // When every request is done
     $.when.apply(undefined, requests).done(draw);
 }
 
 $(function () {
     $('#limit').val(LIMIT);
+    $('#start').val(START);
+    $('#points').val(POINTS);
 
     var loaded = 3;
 

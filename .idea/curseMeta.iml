@@ -6,9 +6,11 @@
       <sourceFolder url="file://$MODULE_DIR$/api/tmp/python-wcfbin-develop" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/api/tmp/pyWCFBin" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/docker/CurseMeta/CurseMetaDB" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/in" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/www" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6.0 (/usr/bin/python3.6)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

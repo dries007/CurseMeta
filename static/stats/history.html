@@ -21,7 +21,11 @@
   <noscript><h1><b>You need JavaScript for this page.</b></h1></noscript>
   <small>Last update of data: <span id="timestamp">Loading...</span></small>
   <span id="credits"><small>See <a href="https://cursemeta.dries007.net">cursemeta.dries007.net</a> for more info and terms and conditions.</small></span>
-  <p><label>Limit number of loading projects: <input id="limit" type="number" onchange="updateLimit(this.value)"/></label></p>
+  <p>
+    <label>Limit number of loading projects: <input id="limit" type="number" onchange="updateLimit(this.value)"/></label><br/>
+    <label>Set starting timestamp: <input id="start" type="number" onchange="updateStart(this.value)"/></label><br/>
+    <label>Limit dataset to n points: <input id="points" type="number" onchange="updatePoints(this.value)"/></label>
+  </p>
 
   <h2 id="loading">Loading..... All graphs are generated in your browser, this can take a couple of seconds...</h2>
 
