@@ -188,6 +188,31 @@ Not all keys must be present. May expand in the future.
 }
 ```
 
+## Daily, weekly, monthly downloads
+[`/daily.json`](/daily.json), [`/weekly.json`](/weekly.json) and [`/monthly.json`](/monthly.json)
+
+Projects with 0 downloads in the time span may be omitted.
+The actual delta may vary from 1, 7 or 30 days, you can calculate it with the provided timestamps.
+
+```json
+{
+    "then_timestamp": 1515102689,  // Start timestamp
+    "now_timestamp": 1517695648, // End timestamp
+    "then_timestamp_human": "2018-01-04 21:51:29 UTC",  // Do not parse this!
+    "now_timestamp_human": "2018-02-03 22:07:28 UTC",  // Do not parse this!
+    "delta": {
+        // Map of projectID -> download count.
+        // if count is 0, the project may be omitted
+        "32080": 58842,
+        "32123": 55504,
+        "32195": 26,
+        "32274": 748078,
+        "32286": 7,
+        "32392": 53
+    }
+}
+```
+
 ## History
 
 ### Available data point

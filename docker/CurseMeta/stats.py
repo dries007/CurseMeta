@@ -41,13 +41,15 @@ def _do_delta(output_file, history_folder, now, offset, current_data, timestamps
     target = min(timestamps, key=lambda x: abs(x - now + offset))  # Thanks https://stackoverflow.com/a/12141207/4355781
     with pathlib.Path(history_folder, '{}.json'.format(target)).open(encoding='utf-8') as f:
         historic_data = json.load(f)
+    delta = {k: round(v - (historic_data[str(k)] if str(k) in historic_data else 0)) for k, v in current_data.items()}
+    delta = {k: v for k, v in delta.items() if v != 0}
     with output_file.open('w', encoding='utf-8') as f:
         json.dump({
             'now_timestamp': calendar.timegm(time.gmtime(now)),
             'now_timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(now)),
             'then_timestamp': calendar.timegm(time.gmtime(target)),
             'then_timestamp_human': time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(target)),
-            'delta': {k: round(v - (historic_data[str(k)] if str(k) in historic_data else 0)) for k, v in current_data.items()}
+            'delta': delta
         }, f, separators=(",", ":"))
 
 
