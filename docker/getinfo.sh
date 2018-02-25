@@ -18,6 +18,10 @@ echo "getinfo.sh request to $QUERY_STRING, parsed as $PROJECT_ID $FILE_ID" >>/va
 echo "Content-type: text/json"
 echo ""
 
+curl https://cursemeta.nikky.moe/api/addon/${PROJECT_ID}/files/${FILE_ID}
+
+exit 0
+
 dotnet /alpacka-meta/out/alpacka-meta.dll get -o /data --filter None --project ${PROJECT_ID} >>/var/log/getinfo.log 2>>/var/log/getinfo.error
 dotnet /alpacka-meta/out/alpacka-meta.dll get -o /data --filter None --file ${PROJECT_ID}-${FILE_ID} >>/var/log/getinfo.log 2>>/var/log/getinfo.error
 
