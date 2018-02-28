@@ -1,25 +1,30 @@
 import requests
 import zeep
 import lxml.etree as etree
-
-
-_URL = 'https://logins-v1.curseapp.net/login'
+import datetime
 
 
 class LoginClient(zeep.Plugin):
     def __init__(self, username, password):
-        self.username = username
-        self.password = password
+        self.__username = username
+        self.__password = password
         self.session = None
+        self.renewAfter = None
 
-    def auth(self):
-        resp = requests.post(_URL, json={'Username': self.username, 'Password': self.password})
+    def login(self):
+        resp = requests.post('https://logins-v1.curseapp.net/login', json={'Username': self.__username, 'Password': self.__password})
         json = resp.json()
         self.session = json['Session']
+        self.renewAfter = datetime.datetime.fromtimestamp(self.session['RenewAfter'] / 1000)
+
+    def checklogin(self):
+        if self.session is None or self.renewAfter > datetime.datetime.now():
+            self.login()
+            return True
+        return False
 
     def soap_token(self):
-        if self.session is None:
-            self.auth()
+        self.checklogin()
         root = etree.Element('AuthenticationToken', xmlns='urn:Curse.FriendsService:v1')
         for k in ['Token', 'UserID']:
             tmp = etree.Element(k)

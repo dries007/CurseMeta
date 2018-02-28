@@ -4,13 +4,8 @@ import json
 
 
 def main(*args):
-    print('ARGS:')
-    print(*args, sep='\n')
-    print()
-    with open('account.json', 'r') as f:
-        account = json.load(f)
-        login = Login.LoginClient(account['username'], account['password'])
-        login.auth()
+    client = CurseClient.from_file()
+    client.debug()
 
 
 if __name__ == '__main__':

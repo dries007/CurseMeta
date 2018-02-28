@@ -1,6 +1,6 @@
 # CurseMeta v2
 
-Now with 100% C# voodoo.
+Now with 100% LESS C# voodoo.
 
 Work in progress.
 
