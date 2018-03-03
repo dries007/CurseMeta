@@ -1,11 +1,11 @@
 from . import *
 
-import json
-
 
 def main(*args):
-    client = CurseClient.from_file()
+    client: CurseClient = CurseClient.from_file()
     client.debug()
+    for k, v in client.service.items():
+        print(k, v)
 
 
 if __name__ == '__main__':
