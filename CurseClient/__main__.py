@@ -1,11 +1,9 @@
-from . import *
+from . import CurseClient
 
 
 def main(*args):
     client: CurseClient = CurseClient.from_file()
-    client.debug()
-    for k, v in client.service.items():
-        print(k, v)
+    print(client.__doc__)
 
 
 if __name__ == '__main__':
