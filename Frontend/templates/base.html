@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %} | CurseMeta</title>
+    {% block head %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    {% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('page') }}">CurseMeta</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('page') }}">Home</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+    {% block messages %}
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+            <div class="messages">
+            {% for cat, message in messages %}
+            <div class="alert alert-{{ cat if cat in ['primary', 'secondary', 'success', 'info', 'warning', 'danger'] else 'secondary' }} alert-dismissible fade show" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              {{ message }}
+            </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+    {% endblock %}
+    {% block content %}
+        <h1>{{ self.title() }}</h1>
+    {% endblock %}
+    </div>
+
+
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted"><a class="hide" href="https://dries007.net"><span class="fal fa-copyright"></span> Dries007</a> -
+                <a href="{{ url_for('page', p='about') }}" class="hide"><span class="fal fa-money-bill"></span> This service costs money to run, please consider supporting it.</a> -
+                <a href="{{ url_for('page', p='about') }}" class="hide"><span class="fal fa-at"></span> About &amp; Legal</a></span>
+        </div>
+    </footer>
+
+
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome-all.js') }}"></script>
+    {% block script %}
+    <script>
+        "use strict";
+
+        /**
+         * Json syntax highlighting
+         * Give this guy all the credit: http://stackoverflow.com/questions/4810841/how-can-i-pretty-print-json-using-javascript/7220510#7220510
+         */
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') json = JSON.stringify(json, undefined, 2);
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) cls = 'key';
+                    else cls = 'string';
+                }
+                else if (/true|false/.test(match)) cls = 'boolean';
+                else if (/null/.test(match)) cls = 'null';
+                return '<span class="json_' + cls + '">' + match + '</span>';
+            });
+        }
+
+        $(function () {
+            var loc = window.location.href.replace(/#.*$/, '');
+            $('.navbar').find('.navbar-nav a').each(function (i, e) {
+                console.info(e.href);
+                if (e.href != loc) return;
+                $(e).addClass("active").parents(".nav-item").addClass("active");
+            });
+            $('.json').each(function (i, e) {
+                e = $(e);
+                e.html(syntaxHighlight(e.html()));
+            });
+        })
+    </script>{% endblock %}
+    {% if config.GOOGLE_ANALYTICS %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.GOOGLE_ANALYTICS }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ config.GOOGLE_ANALYTICS }}');
+    </script>
+    {% endif %}
+</body>
+</html>
