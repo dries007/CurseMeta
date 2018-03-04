@@ -2,17 +2,40 @@
 {% block title %}Documentation{% endblock %}
 {% block content %}
     {{ super() }}
-    <p>Warning: There is a typo in the API. It is present in the CurseAPI and is not corrected here. <code>GameVersion</code> is missing an 'r'.</p>
+    <h2>Required reading</h2>
+    <p>
+        You <b>MUST</b> set your <code>User-Agent</code> header to something unique and identifiable to your project.
+        Including a website or email address is highly encouraged.
+    </p>
+    <p>
+        There is a typo in the API. It is present in the underlying API and is not corrected here.
+        The key <code>GameVesion</code> is missing an 'r', present in <code>GameVersionLatestFiles</code>.
+    </p>
+    <p>
+        You must handle <code>null</code> values everywhere, but in particular in array/object fields.
+        The API is not consistent about returning <code>null</code> or empty arrays/objects.
+        Sometimes, when invalid data is provided, the API may return a non-sensical object,
+        for example with all fields set to <code>null</code>.
+    </p>
 
-    <h2>Endpoints</h2>
+    <h2>Direct Curse Access</h2>
+    <p></p>
     <p>This is automatically generated documentation.</p>
+    <p>
+        In the case of <code>GET</code> endpoints, data is passed via URL parameters.<br/>
+        In the case of <code>POST</code> endpoints, data must be provided via a <code>application/json</code> encoded body.
+    </p>
+    <p>List of endpoints:</p>
     <ul>
         {% for name in endpoints %}<li><a href="#{{ name|lower }}">{{ name }}</a></li>{% endfor %}
     </ul>
 
     {% for name, doc in endpoints.items() %}
         <h3 id="{{ name|lower }}">{{ name }}</h3>
-        <code>{{ doc.method }} {{ doc.url }}</code>
+        <code>{{ doc.rules|join('</code><br/><code>'|safe) }}</code>
+        <h4>Input</h4>
+        <pre class="json">{{ doc.inp|tojson(indent=4) }}</pre>
+        <h4>Output</h4>
         <pre class="json">{{ doc.outp|tojson(indent=4) }}</pre>
     {% endfor %}
 {% endblock %}

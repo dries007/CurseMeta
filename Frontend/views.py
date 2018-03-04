@@ -3,13 +3,13 @@ import logging
 import werkzeug.exceptions as exceptions
 
 from . import app
-from . import views_api_v2
+from . import curse
+from . import views_api_v2_direct
+from .helpers import to_json_response
 
 
 _LOGGER = logging.getLogger("Views")
 _LOGGER.setLevel(logging.DEBUG)
-
-views_api_v2.add_views()
 
 
 @app.errorhandler(Exception)
@@ -33,4 +33,21 @@ def page(p='index'):
 
 @app.route('/docs')
 def docs():
-    return flask.render_template('docs.html', endpoints=views_api_v2.DOCS)
+    return flask.render_template('docs.html', endpoints=views_api_v2_direct.DOCS)
+
+
+# todo: patch MultiMC to not use this endpoint
+@app.route('/<int:addonID>/<int:fileID>.json')
+def deprecated_project_file_json(addonID: int, fileID: int):
+    return to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
+
+
+@app.route('/api/')
+def api_root():
+    return to_json_response({
+        'status': 'OK',
+        'message': None,
+        'apis': [
+            views_api_v2_direct.URL_PREFIX,
+        ],
+    })
