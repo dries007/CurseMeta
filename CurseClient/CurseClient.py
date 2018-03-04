@@ -33,10 +33,10 @@ class CurseClient:
                         '\n      '.join(self.operations)
 
     @classmethod
-    def from_file(cls, file='account.json'):
+    def from_file(cls, file='account.json', cached=3600):
         with open(file, 'r') as f:
             account = json.load(f)
-            return cls(account['Username'], account['Password'])
+            return cls(account['Username'], account['Password'], cached=cached)
 
     def __str__(self) -> str:
         return str(self.__doc__)

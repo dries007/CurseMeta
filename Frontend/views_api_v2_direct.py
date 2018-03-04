@@ -1,5 +1,10 @@
 """
-Direct access to (a subset of) the internal Curse API
+Direct access to (a subset of) the internal Curse API.
+
+In the case of `GET` endpoints, data is passed via URL parameters.
+In the case of `POST` endpoints, data must be provided via a `application/json` encoded body.
+
+The fingerprint algorithm used is a MurmurHash2, but with whitespace normalized. [Reference.](https://github.com/thiakil/CurseApi/blob/master/src/main/java/com/thiakil/curseapi/Murmur2Hash.java)
 """
 import collections
 
@@ -11,6 +16,8 @@ import werkzeug.exceptions as exceptions
 from . import app
 from . import curse
 from .helpers import to_json_response
+from .helpers import Documentation
+
 
 URL_PREFIX = '/api/v2/direct'
 WHITELIST = [
@@ -47,17 +54,12 @@ WHITELIST = [
     # 'ResetFeeds'
 ]
 
-Documentation = collections.namedtuple('Documentation', ['rules', 'inp', 'outp'])
 DOCS = collections.OrderedDict()
 _TYPES = {
     str: 'string',
     int: 'int',
     float: 'float',
 }
-
-
-class ComplexTypeException(Exception):
-    pass
 
 
 def resolve_types(t: zeep.xsd.Any):
@@ -115,13 +117,3 @@ for name in curse.operations:
         rules.insert(0, 'GET ' + get_rule)
 
     DOCS[name] = Documentation(rules=rules, inp=parameters, outp=output)
-
-
-@app.route(URL_PREFIX)
-def api_v2_root():
-    # noinspection PyProtectedMember
-    return to_json_response({
-        'status': 'OK',
-        'message': None,
-        'apis': {k: v._asdict() for k, v in DOCS.items()},
-    })

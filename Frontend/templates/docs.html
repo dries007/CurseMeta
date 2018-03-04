@@ -2,7 +2,7 @@
 {% block title %}Documentation{% endblock %}
 {% block content %}
     {{ super() }}
-    <h2>Required reading</h2>
+    <h2 id="must-read">Required reading</h2>
     <p>
         You <b>MUST</b> set your <code>User-Agent</code> header to something unique and identifiable to your project.
         Including a website or email address is highly encouraged.
@@ -18,24 +18,32 @@
         for example with all fields set to <code>null</code>.
     </p>
 
-    <h2>Direct Curse Access</h2>
-    <p></p>
-    <p>This is automatically generated documentation.</p>
-    <p>
-        In the case of <code>GET</code> endpoints, data is passed via URL parameters.<br/>
-        In the case of <code>POST</code> endpoints, data must be provided via a <code>application/json</code> encoded body.
-    </p>
-    <p>List of endpoints:</p>
+    <h2 id="toc">Table of content</h2>
     <ul>
-        {% for name in endpoints %}<li><a href="#{{ name|lower }}">{{ name }}</a></li>{% endfor %}
+    {% for api_name, api, docs in apis %}
+        <li><a href="#{{ api_name|slugify }}">{{ api_name }}</a></li>
+        <ul>
+            {% for ep_name in docs %}<li><a href="#{{ api_name|slugify }}-{{ ep_name|slugify }}">{{ ep_name }}</a></li>{% endfor %}
+        </ul>
+    {% endfor %}
     </ul>
-
-    {% for name, doc in endpoints.items() %}
-        <h3 id="{{ name|lower }}">{{ name }}</h3>
-        <code>{{ doc.rules|join('</code><br/><code>'|safe) }}</code>
-        <h4>Input</h4>
-        <pre class="json">{{ doc.inp|tojson(indent=4) }}</pre>
-        <h4>Output</h4>
-        <pre class="json">{{ doc.outp|tojson(indent=4) }}</pre>
+    {% for api_name, api, docs in apis %}
+        <h2 id="{{ api_name|slugify }}">{{ api_name }}</h2>
+        <div class="float-right"><a href="#top" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> top</a></div>
+        {{ api|markdown(2) or '' }}
+        <h3>List of endpoints</h3>
+        <p class="text-muted">This is automatically generated.</p>
+        <ul>
+            {% for ep_name in docs %}<li><a href="#{{ api_name|slugify }}-{{ ep_name|slugify }}">{{ ep_name }}</a></li>{% endfor %}
+        </ul>
+        {% for ep_name, doc in docs.items() %}
+            <h4 id="{{ api_name|slugify }}-{{ ep_name|slugify }}">{{ ep_name }}</h4>
+            <div class="float-right"><a href="#{{ api_name|slugify }}" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> up</a></div>
+            <code>{{ doc.rules|join('</code><br/><code>'|safe) }}</code>
+            <h5>Input</h5>
+            <pre class="json">{{ doc.inp|tojson(indent=4) }}</pre>
+            <h5>Output</h5>
+            <pre class="json">{{ doc.outp|tojson(indent=4) }}</pre>
+        {% endfor %}
     {% endfor %}
 {% endblock %}

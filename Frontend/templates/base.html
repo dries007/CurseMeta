@@ -40,7 +40,7 @@
         {%- endblock -%}
         {# Actual page content #}
         {%- block content -%}
-            <h1>{{ self.title() }}</h1>
+            <h1 id="top">{{ self.title() }}</h1>
         {%- endblock -%}
     </div>
 
@@ -69,7 +69,6 @@
          */
         function syntaxHighlight(json) {
             if (typeof json != 'string') json = JSON.stringify(json, undefined, 2);
-            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
                 var cls = 'number';
                 if (/^"/.test(match)) {
@@ -93,7 +92,13 @@
                 e = $(e);
                 e.html(syntaxHighlight(e.html()));
             });
-        })
+
+            <!-- todo: Scroll to element instead of top, cause now navbar is in the way. -->
+            <!-- todo: This only works once. -->
+            var shiftWindow = function() { scrollBy(0, -50) };
+            if (location.hash) shiftWindow();
+            window.addEventListener("hashchange", shiftWindow);
+        });
     </script>{% endblock %}
     {% if config.GOOGLE_ANALYTICS %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.GOOGLE_ANALYTICS }}"></script>

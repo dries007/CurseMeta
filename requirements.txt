@@ -16,6 +16,7 @@ isodate==0.6.0
 itsdangerous==0.24
 Jinja2==2.10
 lxml==4.1.1
+Markdown==2.6.11
 MarkupSafe==1.0
 multidict==4.1.0
 pytz==2018.3

@@ -1,7 +1,11 @@
+import collections
 import json
 
 from . import app
 from CurseClient.helpers import encode_json
+
+
+Documentation = collections.namedtuple('Documentation', ['rules', 'inp', 'outp'])
 
 
 def to_json_response(obj):
