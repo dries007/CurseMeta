@@ -1,6 +1,7 @@
 import zeep
 import zeep.cache
 import json
+import collections
 
 from .Login import LoginClient
 from .OperationWrapper import OperationWrapper
@@ -10,6 +11,8 @@ class CurseClient:
     """
     Curse SOAP API client
     """
+
+    # noinspection PyProtectedMember
     def __init__(self, username, password, cached=3600):
         cache = zeep.cache.SqliteCache(timeout=cached) if cached else None
         # todo: Custom transport to enable binary encoding
@@ -21,15 +24,13 @@ class CurseClient:
             plugins=[LoginClient(username, password)],
             transport=transport
         )
-        # noinspection PyProtectedMember
-        self.service = {
-            k: OperationWrapper(k, self.client)
-            for k in self.client.service._binding._operations
-        }
+        self.operations = list(self.client.service._binding._operations.keys())
+        service_type = collections.namedtuple('Service', self.operations)
+        self.service = service_type(**{k: OperationWrapper(k, self.client) for k in self.operations})
         if self.__doc__ is None:
             self.__doc__ = ''
         self.__doc__ += 'List of available service functions: \n      ' + \
-                        '\n      '.join(map(str, self.service.values()))
+                        '\n      '.join(self.operations)
 
     @classmethod
     def from_file(cls, file='account.json'):

@@ -14,38 +14,30 @@
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('page') }}">CurseMeta</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('page') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('docs') }}">Documentation</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('page', p='about') }}">About</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
     <div class="container">
-    {% block messages %}
-        {% with messages = get_flashed_messages(with_categories=True) %}
-            {% if messages %}
-            <div class="messages">
-            {% for cat, message in messages %}
-            <div class="alert alert-{{ cat if cat in ['primary', 'secondary', 'success', 'info', 'warning', 'danger'] else 'secondary' }} alert-dismissible fade show" role="alert">
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              {{ message }}
-            </div>
-            {% endfor %}
-            </div>
-            {% endif %}
-        {% endwith %}
-    {% endblock %}
-    {% block content %}
-        <h1>{{ self.title() }}</h1>
-    {% endblock %}
+    <div class="alert alert-danger" role="alert">Work In Progress. Not all API endpoints are available.</div>
+    {% block messages -%}
+        {%- with messages = get_flashed_messages(with_categories=True) -%}
+        {%- if messages -%}<div class="messages">
+        {% for cat, message in messages %}
+        <div class="alert alert-{{ cat if cat in ['primary', 'secondary', 'success', 'info', 'warning', 'danger'] else 'secondary' }} alert-dismissible fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>{{ message }}</div>
+        {% endfor %}
+        </div>{%- endif -%}
+        {%- endwith -%}
+    {%- endblock -%}
+    {%- block content %}<h1>{{ self.title() }}</h1>{% endblock -%}
     </div>
-
 
     <footer class="footer">
         <div class="container">

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Documentation{% endblock %}
+{% block content %}
+    {{ super() }}
+    <p>Warning: There is a typo in the API. It is present in the CurseAPI and is not corrected here. <code>GameVersion</code> is missing an 'r'.</p>
+
+    <h2>Endpoints</h2>
+    <p>This is automatically generated documentation.</p>
+    <ul>
+        {% for name in endpoints %}<li><a href="#{{ name|lower }}">{{ name }}</a></li>{% endfor %}
+    </ul>
+
+    {% for name, doc in endpoints.items() %}
+        <h3 id="{{ name|lower }}">{{ name }}</h3>
+        <code>{{ doc.method }} {{ doc.url }}</code>
+        <pre class="json">{{ doc.outp|tojson(indent=4) }}</pre>
+    {% endfor %}
+{% endblock %}

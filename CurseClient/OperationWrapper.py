@@ -1,5 +1,8 @@
+import collections
+
 import zeep
-from .helpers import document_type
+import zeep.wsdl
+import zeep.wsdl.bindings
 
 
 class OperationWrapper:
@@ -14,8 +17,7 @@ class OperationWrapper:
         self.proxy: zeep.client.OperationProxy = client.service[name]
         self.operation: zeep.wsdl.bindings.soap.SoapOperation = client.service._binding._operations[name]
         self.parameters = self.operation.input.body.type.elements
-
-        self.__doc__ = "{}: {} -> {}".format(self.name, document_type(self.operation.input.body.type), document_type(self.operation.input.body.type))
+        self.output = self.operation.output.body.type.elements[0][1].type
 
     @classmethod
     def parse_args(cls, parameters, *args, **kwargs):
@@ -56,7 +58,7 @@ class OperationWrapper:
         for k, v in kwargs.items():
             if k in typed:
                 raise TypeError("Duplicate kwarg: {}".format(k))
-            typed[v] = assign(k, v)
+            typed[k] = assign(k, v)
 
         return typed
 
@@ -65,18 +67,21 @@ class OperationWrapper:
         if isinstance(obj, list):
             return [cls.serialize_object(sub) for sub in obj]
 
-        if isinstance(obj, (dict, zeep.xsd.valueobjects.CompoundValue)):
+        if isinstance(obj, (dict, zeep.xsd.AnyObject)):
+            print(repr(obj), 'ANY')
+
+        if isinstance(obj, (dict, zeep.xsd.CompoundValue)):
+            # print(repr(obj), obj._xsd_type)
             # noinspection PyProtectedMember
-            if obj._xsd_type.name.startswith('ArrayOf') and len(dir(obj)) == 1:
-                return obj[dir(obj)[0]]
+            if obj._xsd_type.name.startswith('ArrayOf'):
+                if len(dir(obj)) == 1:
+                    return cls.serialize_object(obj[dir(obj)[0]])
             return {k: cls.serialize_object(obj[k]) for k in obj}
 
         return obj
 
     def __call__(self, *args, **kwargs):
-        reply = self.proxy(**self.parse_args(self.parameters, *args, **kwargs))
-        print(reply)
-        return self.serialize_object(reply)
+        return self.serialize_object(self.proxy(**self.parse_args(self.parameters, *args, **kwargs)))
 
     def __str__(self) -> str:
         return str(self.__doc__)
