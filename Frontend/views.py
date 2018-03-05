@@ -28,9 +28,9 @@ __SLUG_SPLIT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 @app.before_request
 def before_request():
     if app.config.get('STAGING', False):
-        flask.flash('**Warning**: You are in the staging environment. This is unstable!', category='danger')
+        flask.flash('<b>Warning</b>: You are in the staging environment. This is unstable!', category='danger')
     # todo: remove
-    flask.flash('**Warning**: This service is still in beta.', category='danger')
+    flask.flash('<b>Warning</b>: This service is still in beta.', category='danger')
 
 # ===== FILTERS =====
 

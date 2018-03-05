@@ -33,7 +33,7 @@
             {%- with messages = get_flashed_messages(with_categories=True) -%}
             {%- if messages -%}<div class="messages">
             {% for cat, message in messages %}
-            <div class="alert alert-{{ cat if cat in ['primary', 'secondary', 'success', 'info', 'warning', 'danger'] else 'secondary' }} alert-dismissible fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>{{ message }}</div>
+            <div class="alert alert-{{ cat if cat in ['primary', 'secondary', 'success', 'info', 'warning', 'danger'] else 'secondary' }} alert-dismissible fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>{{ message|safe }}</div>
             {% endfor %}
             </div>{%- endif -%}
             {%- endwith -%}
