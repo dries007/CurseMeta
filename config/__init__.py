@@ -4,6 +4,7 @@ GOOGLE_ANALYTICS = '115047102-1'
 SOAP_CACHE = 3600
 PREFERRED_URL_SCHEME = 'https'
 STAGING = False
+LOGGER_NAME = 'Flask'
 
 try:
     with open('secret-key.bin', 'rb') as f:

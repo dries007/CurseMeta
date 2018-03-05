@@ -5,14 +5,15 @@ import CurseClient
 from flask import Flask
 from flask_script import Manager
 
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("zeep").setLevel(logging.INFO)
-logging.getLogger("MARKDOWN").setLevel(logging.INFO)
+logging.basicConfig(level=logging.WARN)
 
 mimetypes.init()
 
 app = Flask(__name__)
 app.config.from_object('config')
+
+if app.config.get('STAGING', False):
+    logging.basicConfig(logging=logging.DEBUG)
 
 manager = Manager(app)
 
