@@ -1,5 +1,5 @@
 """
-Direct access to (a subset of) the internal Curse API.
+Direct (but cached) access to (a subset of) the internal Curse API.
 
 In the case of `GET` endpoints, data is passed via URL parameters.
 In the case of `POST` endpoints, data must be provided via a `application/json` encoded body.
