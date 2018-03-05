@@ -48,9 +48,10 @@
     <footer class="footer">
         <div class="container">
             <span class="text-muted">
-                <a class="hide" href="https://dries007.net"><span class="fal fa-copyright"></span> Dries007</a> -
-                <a href="{{ url_for('page', p='about') }}" class="hide"><span class="fal fa-money-bill"></span> This service costs money to run, please consider supporting it.</a> -
-                <a href="{{ url_for('page', p='about') }}" class="hide"><span class="fal fa-at"></span> About &amp; Legal</a>
+                <a class="text-muted" href="https://dries007.net"><i class="fal fa-copyright"></i> Dries007</a>&emsp;&mdash;&emsp;
+                <a href="https://github.com/dries007/CurseMeta{% if config.LONG_COMMIT_HASH %}/commit/{{ config.LONG_COMMIT_HASH }}{% endif %}" class="text-muted"><i class="far fa-code-branch"></i> {{ config.SHORT_COMMIT_HASH or 'live-edit' }}</a>&emsp;&mdash;&emsp;
+                <a href="{{ url_for('page', p='about') }}" class="text-muted"><i class="fal fa-at"></i> About &amp; Legal</a>&emsp;&mdash;&emsp;
+                <a href="{{ url_for('page', p='about') }}" class="text-muted"><i class="fal fa-money-bill"></i> This service costs money to run, please consider supporting it.</a>
             </span>
         </div>
     </footer>

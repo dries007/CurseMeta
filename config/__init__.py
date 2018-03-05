@@ -5,6 +5,16 @@ SOAP_CACHE = 3600
 PREFERRED_URL_SCHEME = 'https'
 STAGING = False
 LOGGER_NAME = 'Flask'
+SHORT_COMMIT_HASH = None
+LONG_COMMIT_HASH = None
+
+try:
+    import subprocess
+    SHORT_COMMIT_HASH = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode()
+    LONG_COMMIT_HASH = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode()
+    print("Git commit:", SHORT_COMMIT_HASH, LONG_COMMIT_HASH)
+except subprocess.CalledProcessError:
+    pass
 
 try:
     with open('secret-key.bin', 'rb') as f:
@@ -22,7 +32,7 @@ with open('account.json', 'r') as f:
     CURSE_PASS = t['Password']
     del t
 
-if 'CONFIG_ENV' in os.environ and os.environ['CONFIG_ENV'] == 'staging':
+if os.environ.get('CONFIG_ENV', None) == 'staging':
     TEMPLATES_AUTO_RELOAD = True
     DEBUG = True
     SOAP_CACHE = None

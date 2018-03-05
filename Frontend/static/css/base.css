@@ -20,39 +20,10 @@ body {
 body > .container {
     padding: 60px 15px 0;
 }
+
 .footer > .container {
   padding-right: 15px;
   padding-left: 15px;
-}
-
-
-.table td, .table th {
-    vertical-align: middle;
-}
-
-a.hide:link {
-    text-decoration: inherit;
-    color: inherit;
-}
-a.hide:visited {
-    text-decoration: inherit;
-    color: inherit;
-}
-a.hide:hover {
-    text-decoration: underline;
-    color: inherit;
-}
-a.hide:active {
-    text-decoration: underline;
-    color: inherit;
-}
-
-.pre {
-    white-space: pre-wrap;
-    font-family: monospace;
-}
-.block {
-    display: block;
 }
 
 .json_string { color: green; }
