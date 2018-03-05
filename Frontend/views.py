@@ -5,9 +5,10 @@ import unicodedata
 
 import flask
 import logging
-import markdown
 import textwrap
 import werkzeug.exceptions as exceptions
+
+from markdown import markdown
 
 from . import app
 from . import curse
@@ -19,6 +20,19 @@ from .helpers import to_json_response
 ROOT_DOCS = collections.OrderedDict()
 _LOGGER = logging.getLogger("Views")
 _LOGGER.setLevel(logging.DEBUG)
+__SLUG_SPLIT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+# ===== CONTEXT =====
+
+
+@app.before_request
+def before_request():
+    if app.config.get('STAGING', False):
+        flask.flash('**Warning**: You are in the staging environment. This is unstable!', category='danger')
+    # todo: remove
+    flask.flash('**Warning**: This service is still in beta.', category='danger')
+
+# ===== FILTERS =====
 
 
 @app.template_filter('tojson')
@@ -32,21 +46,30 @@ def filter_docstring(obj) -> str or None:
 
 
 @app.template_filter('markdown')
-def filter_markdown(md: str or None, header_base=1) -> str or None:
-    extensions = ('markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.fenced_code', 'markdown.extensions.toc')
-    extension_configs = {'markdown.extensions.toc':  {
-        'baselevel': header_base,
-        'slugify': lambda x, y: ''
-    }}
-    return None if md is None else flask.Markup(markdown.markdown(md, extensions=extensions, extension_configs=extension_configs, output_format='html5'))
-
-
-_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+def filter_markdown(md: str or None, header_base=1, idprefix='md') -> str or None:
+    if md is None:
+        return None
+    extensions = (
+        'markdown.extensions.nl2br',  # \n to <br/>
+        'markdown.extensions.sane_lists',  # Make lists behave more like GFmd
+        'markdown.extensions.fenced_code',  # Add code fencing with ```
+        'markdown.extensions.toc',  # Allow [toc], but also re-map header numbers
+    )
+    extension_configs = {
+        'markdown.extensions.toc':  {
+            'baselevel': header_base,  # Remap headers
+            'slugify': lambda x, y: slugify(x, y, idprefix),  # Use same slugify as slugify filter
+        },
+    }
+    return flask.Markup(markdown(md, extensions=extensions, extension_configs=extension_configs, output_format='html5'))
 
 
 @app.template_filter('slugify')
-def slugify(text, delim='-'):
-    return delim.join(filter(None, (unicodedata.normalize('NFKD', x) for x in _punct_re.split(text.lower()))))
+def slugify(text, delimiter='-', prefix=None):
+    split = (unicodedata.normalize('NFKD', x) for x in __SLUG_SPLIT_RE.split(text))
+    return delimiter.join(filter(None, (prefix, *split))).lower()
+
+# ===== ALL CASE ERROR HANDLER =====
 
 
 @app.errorhandler(Exception)
@@ -60,6 +83,8 @@ def any_error(e: Exception):
         _LOGGER.exception("Error handler non HTTPException: %s", e)
 
     return flask.jsonify({'error': True, 'status': e.code, 'description': e.description}), e.code
+
+# ===== NON - API ROUTES =====
 
 
 @app.route('/<path:p>')
@@ -76,6 +101,8 @@ def docs():
     ]
     return flask.render_template('docs.html', apis=apis)
 
+# ===== API ROUTES =====
+
 
 # todo: patch MultiMC to not use this endpoint
 @app.route('/<int:addonID>/<int:fileID>.json')
@@ -84,7 +111,6 @@ def deprecated_project_file_json(addonID: int, fileID: int):
 
 
 ROOT_DOCS['Api root'] = Documentation(['GET /api/'], {}, {'status': 'string', 'message': 'string', 'apis': ['string']})
-ROOT_DOCS['Api v2 direct'] = Documentation(['GET ' + views_api_v2_direct.URL_PREFIX], {}, {'status': 'string', 'message': 'string', 'apis': {'<Endpoint name>': {'inp': '<Input type>', 'outp': '<Output type>', 'rules': ['string']}}})
 
 
 @app.route('/api/')
@@ -96,6 +122,9 @@ def api_root():
             views_api_v2_direct.URL_PREFIX,
         ],
     })
+
+
+ROOT_DOCS['Api v2 direct'] = Documentation(['GET ' + views_api_v2_direct.URL_PREFIX], {}, {'status': 'string', 'message': 'string', 'apis': {'<Endpoint name>': {'inp': '<Input type>', 'outp': '<Output type>', 'rules': ['string']}}})
 
 
 @app.route(views_api_v2_direct.URL_PREFIX)

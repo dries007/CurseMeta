@@ -1,14 +1,13 @@
 import logging
 import mimetypes
+import CurseClient
 
 from flask import Flask
 from flask_script import Manager
 
-import CurseClient
-
-# logging.basicConfig(level=logging.DEBUG)
-# logging.getLogger("zeep").setLevel(logging.INFO)
-# logging.getLogger("MARKDOWN").setLevel(logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("zeep").setLevel(logging.INFO)
+logging.getLogger("MARKDOWN").setLevel(logging.INFO)
 
 mimetypes.init()
 

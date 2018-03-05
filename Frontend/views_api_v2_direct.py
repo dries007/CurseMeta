@@ -7,7 +7,6 @@ In the case of `POST` endpoints, data must be provided via a `application/json` 
 The fingerprint algorithm used is a MurmurHash2, but with whitespace normalized. [Reference.](https://github.com/thiakil/CurseApi/blob/master/src/main/java/com/thiakil/curseapi/Murmur2Hash.java)
 """
 import collections
-
 import flask
 import zeep.xsd.types
 
@@ -103,7 +102,6 @@ for name in curse.operations:
 
     # GET only if parameters are 'simple'
     if all(map(lambda x: isinstance(x, str), parameters.values())):
-        print(name, list(parameters.values()), *map(lambda x: isinstance(x, str), parameters.values()))
         parameter_types = []
         for k, t in service.parameters:
             parameters[k] = resolve_types(t.type)

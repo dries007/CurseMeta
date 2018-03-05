@@ -68,10 +68,10 @@ class OperationWrapper:
             return [cls.serialize_object(sub) for sub in obj]
 
         if isinstance(obj, (dict, zeep.xsd.AnyObject)):
-            print(repr(obj), 'ANY')
+            # todo: handle
+            pass
 
         if isinstance(obj, (dict, zeep.xsd.CompoundValue)):
-            # print(repr(obj), obj._xsd_type)
             # noinspection PyProtectedMember
             if obj._xsd_type.name.startswith('ArrayOf'):
                 if len(dir(obj)) == 1:
