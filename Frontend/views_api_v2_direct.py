@@ -4,6 +4,9 @@ Direct (but cached) access to (a subset of) the internal Curse API.
 In the case of `GET` endpoints, data is passed via URL parameters.
 In the case of `POST` endpoints, data must be provided via a `application/json` encoded body.
 
+There is a typo in the API. It is present in the underlying API and is not corrected here.
+The key `GameVesion` is missing an `r` (present in `GameVersionLatestFiles`).
+
 The fingerprint algorithm used is a MurmurHash2, but with whitespace normalized. [Reference.](https://github.com/thiakil/CurseApi/blob/master/src/main/java/com/thiakil/curseapi/Murmur2Hash.java)
 """
 import collections

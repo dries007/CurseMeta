@@ -106,7 +106,9 @@ def docs():
 @app.route('/<int:addonID>/<int:fileID>.json')
 @cache()
 def deprecated_project_file_json(addonID: int, fileID: int):
-    return to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
+    r = to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
+    r.headers.add('Warning', '299 - "Deprecated API"')
+    return r
 
 
 ROOT_DOCS['Api root'] = Documentation(['GET /api/'], {}, {'status': 'string', 'message': 'string', 'apis': ['string']})

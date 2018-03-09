@@ -12,14 +12,12 @@
         Including a website or email address is highly encouraged.
     </p>
     <p>
-        There is a typo in the API. It is present in the underlying API and is not corrected here.
-        The key <code>GameVesion</code> is missing an 'r', present in <code>GameVersionLatestFiles</code>.
+        All data is cached for (up to) 4 hours. Please do not make more frequent requests if it can be avoided.
     </p>
     <p>
-        You must handle <code>null</code> values everywhere, but in particular in array/object fields.
+        You must handle <code>null</code> values <b>everywhere</b>, but in particular in array/object fields.
         The API is not consistent about returning <code>null</code> or empty arrays/objects.
-        Sometimes, when invalid data is provided, the API may return a non-sensical object,
-        for example with all fields set to <code>null</code>.
+        If invalid data is provided the response may be an error or a <code>null</code>, or an object with all <code>null</code> values.
     </p>
     <p>
         Any endpoint from CurseMeta v1 is now <b>deprecated</b> and/or <b>removed</b>.<br/>

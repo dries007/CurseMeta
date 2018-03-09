@@ -68,6 +68,7 @@ class OperationWrapper:
             return [cls.serialize_object(sub) for sub in obj]
 
         if isinstance(obj, (dict, zeep.xsd.AnyObject)):
+            raise ValueError('Illegal Type')
             # todo: handle
             pass
 
@@ -81,7 +82,8 @@ class OperationWrapper:
         return obj
 
     def __call__(self, *args, **kwargs):
-        return self.serialize_object(self.proxy(**self.parse_args(self.parameters, *args, **kwargs)))
+        r = self.serialize_object(self.proxy(**self.parse_args(self.parameters, *args, **kwargs)))
+        return None if isinstance(r, dict) and all(x is None for x in r.values()) else r
 
     def __str__(self) -> str:
         return str(self.__doc__)
