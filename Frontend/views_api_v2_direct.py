@@ -15,6 +15,7 @@ import werkzeug.exceptions as exceptions
 from . import app
 from . import curse
 from .helpers import to_json_response
+from .helpers import cache
 from .helpers import Documentation
 
 
@@ -73,12 +74,14 @@ def resolve_types(t: zeep.xsd.Any):
 
 
 def get_call(n):
+    @cache()
     def _f(**kwargs):
         return to_json_response(getattr(curse.service, n)(**kwargs))
     return _f
 
 
 def post_call(n):
+    @cache()
     def _f():
         if flask.request.get_json() is None:
             raise exceptions.BadRequest('No JSON data provided.')

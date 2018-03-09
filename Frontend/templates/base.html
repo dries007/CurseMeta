@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>{% block title %}{% endblock %} | CurseMeta</title>
+    <title>{% block title %}{% endblock %} | CurseMeta{{ ' Staging' if config.STAGING }}</title>
     {% block head %}
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
@@ -14,7 +14,7 @@
     {# Navbar #}
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('page') }}">CurseMeta</a>
+            <a class="navbar-brand" href="{{ url_for('page') }}">CurseMeta{{ ' Staging' if config.STAGING }}</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">

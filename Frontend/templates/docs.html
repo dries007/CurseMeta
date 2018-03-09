@@ -2,6 +2,10 @@
 {% block title %}Documentation{% endblock %}
 {% block content %}
     {{ super() }}
+    <div class="alert alert-warning fade show">
+        <b>Warning: </b>Still beta.
+        {% if config.STAGING %}<br/><b>Warning: </b>Staging environment. Live edit & unstable.{% endif %}
+    </div>
     <h2 id="must-read">Required reading</h2>
     <p>
         You <b>MUST</b> set your <code>User-Agent</code> header to something unique and identifiable to your project.

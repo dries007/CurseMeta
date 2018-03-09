@@ -15,6 +15,7 @@ from . import curse
 from . import views_api_v2_direct
 from .helpers import Documentation
 from .helpers import to_json_response
+from .helpers import cache
 
 
 ROOT_DOCS = collections.OrderedDict()
@@ -27,10 +28,7 @@ __SLUG_SPLIT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
 @app.before_request
 def before_request():
-    if app.config.get('STAGING', False):
-        flask.flash('<b>Warning</b>: You are in the staging environment. This is unstable!', category='danger')
-    # todo: remove
-    flask.flash('<b>Warning</b>: This service is still in beta.', category='danger')
+    pass
 
 # ===== FILTERS =====
 
@@ -106,6 +104,7 @@ def docs():
 
 # todo: patch MultiMC to not use this endpoint
 @app.route('/<int:addonID>/<int:fileID>.json')
+@cache()
 def deprecated_project_file_json(addonID: int, fileID: int):
     return to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
 
