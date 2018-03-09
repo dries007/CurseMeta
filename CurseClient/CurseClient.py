@@ -22,7 +22,8 @@ class CurseClient:
             port_name='WsHttpAddOnServiceEndpoint',
             service_name='AddOnService',
             plugins=[LoginClient(username, password)],
-            transport=transport
+            transport=transport,
+            strict=False,
         )
         self.operations = list(self.client.service._binding._operations.keys())
         service_type = collections.namedtuple('Service', self.operations)

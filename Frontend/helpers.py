@@ -3,7 +3,6 @@ import json
 import flask
 import werkzeug.datastructures
 
-from . import app
 from CurseClient.helpers import encode_json
 
 
@@ -11,7 +10,7 @@ Documentation = collections.namedtuple('Documentation', ['rules', 'inp', 'outp']
 
 
 def to_json_response(obj) -> flask.Response:
-    return app.response_class(json.dumps(obj, default=encode_json), mimetype=app.config['JSONIFY_MIMETYPE'])
+    return flask.Response(json.dumps(obj, default=encode_json, separators=(',', ':')))
 
 
 def cache(time=4*60*60):

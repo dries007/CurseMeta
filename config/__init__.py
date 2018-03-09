@@ -7,6 +7,8 @@ STAGING = False
 LOGGER_NAME = 'Flask'
 SHORT_COMMIT_HASH = None
 LONG_COMMIT_HASH = None
+JSONIFY_PRETTYPRINT_REGULAR = False
+
 
 try:
     import subprocess
@@ -37,5 +39,6 @@ if os.environ.get('CONFIG_ENV', None) == 'staging':
     DEBUG = True
     SOAP_CACHE = None
     STAGING = True
+    JSONIFY_PRETTYPRINT_REGULAR = True
 
 del os

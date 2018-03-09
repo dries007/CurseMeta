@@ -4,6 +4,16 @@ import lxml.etree as etree
 import datetime
 
 
+def post_json_retry(json, timeout=30, attempts=3):
+    while attempts > 0:
+        try:
+            return requests.post('https://logins-v1.curseapp.net/login', json=json, timeout=timeout).json()
+        except ConnectionError:
+            attempts -= 1
+            if attempts == 0:
+                raise
+
+
 class LoginClient(zeep.Plugin):
     def __init__(self, username, password):
         self.__username = username
@@ -12,9 +22,7 @@ class LoginClient(zeep.Plugin):
         self.renewAfter = None
 
     def login(self):
-        resp = requests.post('https://logins-v1.curseapp.net/login', json={'Username': self.__username, 'Password': self.__password})
-        json = resp.json()
-        self.session = json['Session']
+        self.session = post_json_retry({'Username': self.__username, 'Password': self.__password})['Session']
         self.renewAfter = datetime.datetime.fromtimestamp(self.session['RenewAfter'] / 1000)
 
     def checklogin(self):
