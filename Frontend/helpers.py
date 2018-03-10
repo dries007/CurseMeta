@@ -10,7 +10,7 @@ Documentation = collections.namedtuple('Documentation', ['rules', 'inp', 'outp']
 
 
 def to_json_response(obj) -> flask.Response:
-    return flask.Response(json.dumps(obj, default=encode_json, separators=(',', ':')))
+    return flask.Response(json.dumps(obj, default=encode_json, separators=(',', ':')), mimetype="application/json")
 
 
 def cache(time=4*60*60):
