@@ -1,0 +1,4 @@
+Frontend/static/css/bootstrap* linguist-vendored
+Frontend/static/js/bootstrap* linguist-vendored
+Frontend/static/js/jquery* linguist-vendored
+Frontend/static/js/popper* linguist-vendored

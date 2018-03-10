@@ -3,6 +3,9 @@ import collections
 import zeep
 import zeep.wsdl
 import zeep.wsdl.bindings
+import json
+
+from .helpers import encode_json
 
 
 class OperationWrapper:
@@ -11,9 +14,11 @@ class OperationWrapper:
     Outputs normalized dict
     """
     # noinspection PyProtectedMember
-    def __init__(self, name: str, client: zeep.Client):
+    def __init__(self, name: str, client: zeep.Client, redis):
         self.name = name
         self.client = client
+        self.redis = redis
+        self.redis_pefix = 'zeep-operationcache-{}-'.format(name)
         self.proxy: zeep.client.OperationProxy = client.service[name]
         self.operation: zeep.wsdl.bindings.soap.SoapOperation = client.service._binding._operations[name]
         self.parameters = self.operation.input.body.type.elements
@@ -82,8 +87,24 @@ class OperationWrapper:
         return obj
 
     def __call__(self, *args, **kwargs):
-        r = self.serialize_object(self.proxy(**self.parse_args(self.parameters, *args, **kwargs)))
-        return None if isinstance(r, dict) and all(x is None for x in r.values()) else r
+        input_args = self.parse_args(self.parameters, *args, **kwargs)
+        if self.redis:
+            key = self.redis_pefix + json.dumps(input_args, separators=(',', ':'), default=encode_json)
+            output = self.redis.get(key)
+            if output is not None:
+                # noinspection PyBroadException
+                try:
+                    return json.loads(output)
+                except BaseException:  # This is just in case the value got corrupted somehow
+                    self.redis.expire(key, 0)
+                    pass
+
+        output = self.serialize_object(self.proxy(**input_args))
+        output = None if isinstance(output, dict) and all(x is None for x in output.values()) else output
+        if output and self.redis:
+            # noinspection PyUnboundLocalVariable
+            self.redis.set(key, json.dumps(output, separators=(',', ':'), default=encode_json), ex=60*60)
+        return output
 
     def __str__(self) -> str:
         return str(self.__doc__)
