@@ -9,17 +9,25 @@ from .models import FileModel
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
-    sender.add_periodic_task(60*60, curse_login.s())
+    sender.add_periodic_task(60*60, periodic_curse_login.s())
+    sender.add_periodic_task(15*60, periodic_ill_missing_addons.s())
 
 
 @celery.task
-def curse_login():
+def periodic_curse_login():
     return curse.login_client.checklogin()
 
 
 @celery.task
+def periodic_ill_missing_addons():
+    for x in AddonModel.query.filter(AddonModel.name is None).all():
+        curse.service.GetAddOn(x.id)
+
+
+@celery.task
 def fill_missing_addon(addon_id: int):
-    if AddonModel.query.get(addon_id) is None:
+    addon = AddonModel.query.get(addon_id)
+    if addon is None or addon.name is None:
         curse.service.GetAddOn(addon_id)
         return True
     return False
