@@ -21,7 +21,7 @@ class AuthorModel(BaseRecord):
     name = db.Column(db.String, primary_key=True)
 
     primary_addons = db.relationship('AddonModel', backref='primary_author', lazy='dynamic')
-    addons = db.relationship('AddonModel', secondary=author_addon_table, backref='author', lazy='dynamic')
+    addons = db.relationship('AddonModel', secondary=author_addon_table, backref='authors', lazy='dynamic')
 
     def __init__(self, name: str):
         super().__init__()
@@ -29,8 +29,11 @@ class AuthorModel(BaseRecord):
 
     @classmethod
     def update(cls, data: dict):
-        if cls.query.get(data['Name']) is None:
-            db.session.add(cls(data['Name']))
+        obj = cls.query.get(data['Name'])
+        if obj is None:
+            obj = cls(data['Name'])
+        db.session.add(obj)
+        return obj
 
 
 class AddonModel(BaseRecord):
@@ -51,12 +54,12 @@ class AddonModel(BaseRecord):
 
     @classmethod
     def update(cls, data: dict):
-        for author in data['Authors']:
-            AuthorModel.update(author)
-
         obj = cls.query.get(data['Id'])
         if obj is None:
             obj = cls(data['Id'])
+
+        for author in data['Authors']:
+            obj.authors.append(AuthorModel.update(author))
 
         obj.name = data['Name']
         obj.game_id = data['GameId']
@@ -68,6 +71,8 @@ class AddonModel(BaseRecord):
 
         for file in data['LatestFiles']:
             FileModel.update(data['Id'], file)
+
+        return obj
 
 
 class FileModel(BaseRecord):
@@ -84,6 +89,7 @@ class FileModel(BaseRecord):
         super().__init__()
         self.id = id_
         self.addon_id = addon_id
+
         if AddonModel.query.get(addon_id) is None:
             db.session.add(AddonModel(addon_id))
             tasks.fill_missing_addon.delay(addon_id)
@@ -97,3 +103,4 @@ class FileModel(BaseRecord):
         obj.name = data['FileNameOnDisk']
 
         db.session.add(obj)
+        return obj
