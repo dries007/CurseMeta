@@ -10,7 +10,8 @@ from .models import FileModel
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(60*60, periodic_curse_login.s())
-    sender.add_periodic_task(15*60, periodic_ill_missing_addons.s())
+    sender.add_periodic_task(15*60, periodic_fill_missing_addons.s())
+    periodic_fill_missing_addons.apply_async(countdown=30)
 
 
 @celery.task
@@ -19,9 +20,9 @@ def periodic_curse_login():
 
 
 @celery.task
-def periodic_ill_missing_addons():
-    for x in AddonModel.query.filter(AddonModel.name is None).all():
-        curse.service.GetAddOn(x.id)
+def periodic_fill_missing_addons():
+    # noinspection PyComparisonWithNone
+    return sum(fill_missing_addon(x.id) for x in AddonModel.query.filter(AddonModel.name == None).all())
 
 
 @celery.task
