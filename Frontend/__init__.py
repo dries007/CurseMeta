@@ -7,13 +7,15 @@ from celery import Celery
 from flask import Flask
 from flask_script import Manager
 from flask_redis import FlaskRedis
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate, MigrateCommand
 
 # Init code
 logging.basicConfig(level=logging.WARN)
 mimetypes.init()
 
 # Flask app init & config
-app = Flask(__name__)
+app = Flask('CurseMeta')
 app.config.from_object('config')
 
 if app.config.get('STAGING', False):
@@ -21,6 +23,11 @@ if app.config.get('STAGING', False):
 
 # Manager (for CLI)
 manager = Manager(app)
+
+# Postgres DB
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 # Redis
 redis_store = FlaskRedis(app)
@@ -49,6 +56,8 @@ celery.Task = ContextTask
 # Import all tasks (must be done for the periodic tasks to have effect)
 from . import tasks
 
+# Import all views
+from . import models
 
 # Import all views
 from . import views

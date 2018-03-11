@@ -10,12 +10,13 @@ import werkzeug.exceptions as exceptions
 
 from markdown import markdown
 
-from . import app
-from . import curse
-from . import views_api_v2_direct
-from .helpers import Documentation
-from .helpers import to_json_response
-from .helpers import cache
+from .. import app
+from .. import curse
+from ..helpers import Documentation
+from ..helpers import to_json_response
+from ..helpers import cache
+
+from . import api_v2_direct
 
 
 ROOT_DOCS = collections.OrderedDict()
@@ -95,7 +96,7 @@ def page(p='index'):
 def docs():
     apis = [
         ('Status API', None, ROOT_DOCS),
-        ('Direct Curse Access', views_api_v2_direct.__doc__, views_api_v2_direct.DOCS),
+        ('Direct Curse Access', api_v2_direct.__doc__, api_v2_direct.DOCS),
     ]
     return flask.render_template('docs.html', apis=apis)
 
@@ -103,6 +104,7 @@ def docs():
 
 
 # todo: patch MultiMC to not use this endpoint
+# todo: maybe add user-agent check to make sure noone else still uses it?
 @app.route('/<int:addonID>/<int:fileID>.json')
 @cache()
 def deprecated_project_file_json(addonID: int, fileID: int):
@@ -120,19 +122,19 @@ def api_root():
         'status': 'OK',
         'message': None,
         'apis': [
-            views_api_v2_direct.URL_PREFIX,
+            api_v2_direct.URL_PREFIX,
         ],
     })
 
 
-ROOT_DOCS['Api v2 direct'] = Documentation(['GET ' + views_api_v2_direct.URL_PREFIX], {}, {'status': 'string', 'message': 'string', 'apis': {'<Endpoint name>': {'inp': '<Input type>', 'outp': '<Output type>', 'rules': ['string']}}})
+ROOT_DOCS['Api v2 direct'] = Documentation(['GET ' + api_v2_direct.URL_PREFIX], {}, {'status': 'string', 'message': 'string', 'apis': {'<Endpoint name>': {'inp': '<Input type>', 'outp': '<Output type>', 'rules': ['string']}}})
 
 
-@app.route(views_api_v2_direct.URL_PREFIX)
+@app.route(api_v2_direct.URL_PREFIX)
 def api_v2_root():
     # noinspection PyProtectedMember
     return to_json_response({
         'status': 'OK',
         'message': None,
-        'apis': {k: v._asdict() for k, v in views_api_v2_direct.DOCS.items()},
+        'apis': {k: v._asdict() for k, v in api_v2_direct.DOCS.items()},
     })

@@ -15,12 +15,11 @@ import zeep.xsd.types
 
 import werkzeug.exceptions as exceptions
 
-from . import app
-from . import curse
-from .helpers import to_json_response
-from .helpers import cache
-from .helpers import Documentation
-
+from .. import app
+from .. import curse
+from ..helpers import Documentation
+from ..helpers import to_json_response
+from ..helpers import cache
 
 URL_PREFIX = '/api/v2/direct'
 WHITELIST = [
@@ -36,25 +35,11 @@ WHITELIST = [
     # 'GetFingerprintMatches',
     'v2GetFingerprintMatches',
     'GetFuzzyMatches',
-    # 'GetDownloadToken',
-    # 'GetSecureDownloadToken',
-    # 'GetSyncProfile',
-    # 'CreateSyncGroup',
-    # 'JoinSyncGroup',
-    # 'LeaveSyncGroup',
-    # 'SaveSyncSnapshot',
-    # 'SaveSyncTransactions',
-    # 'GetAddOnDump',
-    # # 'ResetAllAddonCache',
-    # # 'ResetSingleAddonCache',
     'HealthCheck',
     'ServiceHealthCheck',
     'CacheHealthCheck',
     'GetAllFilesForAddOn',
     'GetAddOnFiles',
-    # # 'LogDump',
-    # 'ListFeeds',
-    # 'ResetFeeds'
 ]
 
 DOCS = collections.OrderedDict()
@@ -75,6 +60,8 @@ def resolve_types(t: zeep.xsd.Any):
     else:
         raise ValueError('Illegal type')
 
+# todo: Handle errors more gracefully (convert exceptions/errors into HTTP exceptions)
+
 
 def get_call(n):
     @cache()
@@ -92,32 +79,36 @@ def post_call(n):
     return _f
 
 
-for name in curse.operations:
-    if name not in WHITELIST:
-        continue
-    service = getattr(curse.service, name)
+def _register():
+    for name in curse.operations:
+        if name not in WHITELIST:
+            continue
+        service = getattr(curse.service, name)
 
-    parameters = collections.OrderedDict((k, resolve_types(t.type)) for k, t in service.parameters)
-    output = resolve_types(service.output)
+        parameters = collections.OrderedDict((k, resolve_types(t.type)) for k, t in service.parameters)
+        output = resolve_types(service.output)
 
-    # POST is always available
-    post_rule = '/'.join((URL_PREFIX, name))
-    post_endpoint = '_'.join((URL_PREFIX, name, 'POST')).replace('/', '_').lower()
-    app.add_url_rule(rule=post_rule, endpoint=post_endpoint, view_func=post_call(name), methods=['POST'])
-    rules = ['POST ' + post_rule]
+        # POST is always available
+        post_rule = '/'.join((URL_PREFIX, name))
+        post_endpoint = '_'.join((URL_PREFIX, name, 'POST')).replace('/', '_').lower()
+        app.add_url_rule(rule=post_rule, endpoint=post_endpoint, view_func=post_call(name), methods=['POST'])
+        rules = ['POST ' + post_rule]
 
-    # GET only if parameters are 'simple'
-    if all(map(lambda x: isinstance(x, str), parameters.values())):
-        parameter_types = []
-        for k, t in service.parameters:
-            parameters[k] = resolve_types(t.type)
-            # Idk if this is a good idea, now it will only accept the first type
-            t = t.type.accepted_types[0]
-            parameter_types.append('<{}:{}>'.format(_TYPES[t], k) if t in _TYPES else '<{}>'.format(k))
+        # GET only if parameters are 'simple'
+        if all(map(lambda x: isinstance(x, str), parameters.values())):
+            parameter_types = []
+            for k, t in service.parameters:
+                parameters[k] = resolve_types(t.type)
+                # Idk if this is a good idea, now it will only accept the first type
+                t = t.type.accepted_types[0]
+                parameter_types.append('<{}:{}>'.format(_TYPES[t], k) if t in _TYPES else '<{}>'.format(k))
 
-        get_rule = '/'.join((URL_PREFIX, name, *parameter_types))
-        get_endpoint = '_'.join((URL_PREFIX, name, 'GET')).replace('/', '_').lower()
-        app.add_url_rule(rule=get_rule, endpoint=get_endpoint, view_func=get_call(name), methods=['GET'])
-        rules.insert(0, 'GET ' + get_rule)
+            get_rule = '/'.join((URL_PREFIX, name, *parameter_types))
+            get_endpoint = '_'.join((URL_PREFIX, name, 'GET')).replace('/', '_').lower()
+            app.add_url_rule(rule=get_rule, endpoint=get_endpoint, view_func=get_call(name), methods=['GET'])
+            rules.insert(0, 'GET ' + get_rule)
 
-    DOCS[name] = Documentation(rules=rules, inp=parameters, outp=output)
+        DOCS[name] = Documentation(rules=rules, inp=parameters, outp=output)
+
+
+_register()

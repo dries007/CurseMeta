@@ -1,18 +1,18 @@
 GOOGLE_ANALYTICS = '115047102-1'
 PREFERRED_URL_SCHEME = 'https'
-LOGGER_NAME = 'Flask'
 CACHE_TYPE = 'redis'
 
 import os
 STAGING = os.environ.get('CONFIG_ENV', None) == 'staging'
-del os
 
+LOGGER_NAME = 'CurseMeta' if not STAGING else 'CurseMetaStaging'
 TEMPLATES_AUTO_RELOAD = False if not STAGING else True
 DEBUG = False if not STAGING else True
 JSONIFY_PRETTYPRINT_REGULAR = False if not STAGING else True
 SOAP_CACHE = 3600 if not STAGING else None
 CELERY_BROKER_URL = CELERY_RESULT_BACKEND = 'redis+socket:///run/redis/redis.sock?virtual_host={}'.format(1 if not STAGING else 2)
 REDIS_URL = 'unix:///run/redis/redis.sock?db={}'.format(1 if not STAGING else 2)
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 SHORT_COMMIT_HASH = None
 LONG_COMMIT_HASH = None
@@ -42,3 +42,8 @@ with open('account.json', 'r') as f:
     CURSE_USER = t['Username']
     CURSE_PASS = t['Password']
     del t
+
+with open(os.path.expanduser('~/db.pwd'), 'r') as f:
+    SQLALCHEMY_DATABASE_URI = 'postgresql://cursemeta:{}@localhost:5432/cursemeta_{}'.format(f.read().strip(), ('live' if not STAGING else 'staging'))
+
+del os
