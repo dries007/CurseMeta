@@ -102,11 +102,12 @@ class OperationWrapper:
             if output is not None:
                 # noinspection PyBroadException
                 try:
-                    output = json.loads(output)
-                    # # todo: remove !!!!
-                    # from Frontend import tasks
-                    # tasks.analyse_direct_result.delay(self.name, input_args, output)
-                    return output
+                    return json.loads(output)
+                    # output = json.loads(output)
+                    # if output:
+                    #     from Frontend import tasks
+                    #     tasks.analyse_direct_result.delay(self.name, input_args, output)
+                    # return output
                 except BaseException:  # This is just in case the value got corrupted somehow
                     LOG.exception('Corrupt json on __call__ for {} with {}'.format(self.name, input_args))
                     self.redis.expire(key, 0)
@@ -120,8 +121,9 @@ class OperationWrapper:
 
         # noinspection PyBroadException
         try:
-            from Frontend import tasks
-            tasks.analyse_direct_result.delay(self.name, input_args, output)
+            if output:
+                from Frontend import tasks
+                tasks.analyse_direct_result.delay(self.name, input_args, output)
         except BaseException:
             LOG.exception('analyse_data error for {} with {} -> {}'.format(self.name, input_args, output))
 
