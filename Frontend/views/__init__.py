@@ -117,6 +117,7 @@ ROOT_DOCS['Api root'] = Documentation(['GET /api/'], {}, {'status': 'string', 'm
 
 
 @app.route('/api/')
+@cache(None)
 def api_root():
     return to_json_response({
         'status': 'OK',
@@ -131,6 +132,7 @@ ROOT_DOCS['Api v2 direct'] = Documentation(['GET ' + api_v2_direct.URL_PREFIX], 
 
 
 @app.route(api_v2_direct.URL_PREFIX)
+@cache(None)
 def api_v2_root():
     # noinspection PyProtectedMember
     return to_json_response({

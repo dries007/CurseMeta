@@ -18,8 +18,12 @@ def cache(time=4*60*60):
         def wrapper(*args, **kwargs):
             r: flask.Response = f(*args, **kwargs)
             cc: werkzeug.datastructures.ResponseCacheControl = r.cache_control
-            cc.public = True
-            cc.max_age = time
+            if time is None:
+                cc.private = True
+                cc.no_cache = True
+            else:
+                cc.public = True
+                cc.max_age = time
             return r
         return wrapper
     return decorator
