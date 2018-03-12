@@ -73,9 +73,14 @@ def get_call(n):
 def post_call(n):
     @cache()
     def _f():
-        if flask.request.get_json() is None:
+        data = flask.request.get_json()
+        if data is None:
             raise exceptions.BadRequest('No JSON data provided.')
-        return to_json_response(getattr(curse.service, n)(**flask.request.get_json()))
+        if isinstance(data, dict):
+            return to_json_response(getattr(curse.service, n)(**data))
+        if isinstance(data, (list, tuple)):
+            return to_json_response(getattr(curse.service, n)(*data))
+        return to_json_response(getattr(curse.service, n)(data))
     return _f
 
 

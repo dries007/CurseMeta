@@ -1,4 +1,5 @@
 from celery import Celery
+from redis.exceptions import LockError
 
 from CurseFeeds.BaseFeed import FeedException
 from . import celery
@@ -56,7 +57,10 @@ def periodic_addon_feed(timespan: str, gameid: int):
             return False
     finally:
         if have_lock:
-            lock.release()
+            try:
+                lock.release()
+            except LockError:
+                pass
 
 
 @celery.task
@@ -74,7 +78,10 @@ def periodic_addon_feeds(timespan: str):
             return False
     finally:
         if have_lock:
-            lock.release()
+            try:
+                lock.release()
+            except LockError:
+                pass
 
 
 @celery.task
