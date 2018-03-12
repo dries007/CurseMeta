@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.WARN)
 mimetypes.init()
 
 # Flask app init & config
-app = Flask('CurseMeta')
+app = Flask(__name__)
 app.config.from_object('config')
 
 if app.config.get('STAGING', False):
