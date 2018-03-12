@@ -25,5 +25,6 @@ def cache(time=4*60*60):
                 cc.public = True
                 cc.max_age = time
             return r
+        wrapper.__name__ = f.__name__
         return wrapper
     return decorator
