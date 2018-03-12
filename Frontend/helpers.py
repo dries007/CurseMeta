@@ -13,7 +13,7 @@ def to_json_response(obj) -> flask.Response:
     return flask.Response(json.dumps(obj, default=encode_json, separators=(',', ':')), mimetype="application/json")
 
 
-def cache(time=4*60*60):
+def cache(time=4*60*60, browser_time=None):
     def decorator(f):
         def wrapper(*args, **kwargs):
             r: flask.Response = f(*args, **kwargs)
@@ -24,6 +24,7 @@ def cache(time=4*60*60):
             else:
                 cc.public = True
                 cc.max_age = time
+                cc.s_maxage = time if browser_time is None else browser_time
             return r
         wrapper.__name__ = f.__name__
         return wrapper
