@@ -5,3 +5,4 @@ from .GameLookupFeed import GameLookupFeed
 from .GamesFeed import GamesFeed
 from .MinecraftGameVersionsFeed import MinecraftGameVersionsFeed
 from .MinecraftModLoadersFeed import MinecraftModLoadersFeed
+from .BaseFeed import FeedException

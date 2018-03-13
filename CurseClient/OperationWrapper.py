@@ -121,7 +121,7 @@ class OperationWrapper:
 
         # noinspection PyBroadException
         try:
-            if output:
+            if output and self.redis:
                 from Frontend import tasks
                 tasks.analyse_direct_result.delay(self.name, input_args, output)
         except BaseException:

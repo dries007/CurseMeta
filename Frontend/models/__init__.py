@@ -69,8 +69,9 @@ class AddonModel(BaseRecord):
 
         db.session.add(obj)
 
-        for file in data['LatestFiles']:
-            FileModel.update(data['Id'], file)
+        if data['LatestFiles'] is not None:
+            for file in data['LatestFiles']:
+                FileModel.update(data['Id'], file)
 
         return obj
 
@@ -92,7 +93,8 @@ class FileModel(BaseRecord):
 
         if AddonModel.query.get(addon_id) is None:
             db.session.add(AddonModel(addon_id))
-            tasks.fill_missing_addon.delay(addon_id)
+            # generates excessive load, periodic cleanup is better
+            # tasks.fill_missing_addon.delay(addon_id)
 
     @classmethod
     def update(cls, addon_id: int, data: dict):
