@@ -99,7 +99,7 @@ class FileModel(BaseRecord):
 
     @classmethod
     def update(cls, addon_id: int, data: dict):
-        obj = cls.query.get((addon_id, data['Id']))
+        obj = cls.query.get((data['Id'], addon_id))
         if obj is None:
             obj = cls(data['Id'], addon_id)
 

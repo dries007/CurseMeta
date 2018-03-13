@@ -78,7 +78,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     last = redis_store.get('periodic-find_hidden_addons-last')
     if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
-        periodic_find_hidden_addons.apply_async(countdown=120)
+        periodic_find_hidden_addons.apply_async(countdown=60*60)
 
 
 @celery.task
@@ -186,34 +186,42 @@ def periodic_find_hidden_addons():
 @celery.task
 def analyse_direct_result(name: str, inp: dict, outp: dict):
     # Deconstructs the return types of complex data returns into 'core' components for analysis
-    if name == 'GetAddOn':
-        AddonModel.update(outp)
-    elif name == 'GetRepositoryMatchFromSlug':
-        for f in outp['LatestFiles']:
-            FileModel.update(outp['Id'], f)
-    elif name == 'GetAddOnFile':
-        FileModel.update(inp['addonID'], outp)
-    elif name == 'v2GetAddOns':
-        for f in outp:
-            AddonModel.update(f)
-    elif name == 'v2GetFingerprintMatches':
-        for x in ('ExactMatches', 'PartialMatches'):
-            o = outp[x]
-            FileModel.update(o['Id'], o['File'])
-            for f in o['LatestFiles']:
-                FileModel.update(o['Id'], f)
-    elif name == 'GetFuzzyMatches':
-        for o in outp:
-            FileModel.update(o['Id'], o['File'])
-            for f in o['LatestFiles']:
-                FileModel.update(o['Id'], f)
-    elif name == 'GetAllFilesForAddOn':
-        for o in outp:
-            FileModel.update(inp['addOnID'], o)
-    elif name == 'GetAddOnFiles':
-        for o in outp:
-            if o['Value']:
-                FileModel.update(o['Key'], o['Value'])
-    else:
-        return False
-    db.session.commit()
+    # noinspection PyBroadException
+    try:
+        if name == 'GetAddOn':
+            AddonModel.update(outp)
+        elif name == 'GetRepositoryMatchFromSlug':
+            if outp['LatestFiles'] is not None:
+                for f in outp['LatestFiles']:
+                    FileModel.update(outp['Id'], f)
+        elif name == 'GetAddOnFile':
+            FileModel.update(inp['addonID'], outp)
+        elif name == 'v2GetAddOns':
+            for f in outp:
+                AddonModel.update(f)
+        elif name == 'v2GetFingerprintMatches':
+            for x in ('ExactMatches', 'PartialMatches'):
+                o = outp[x]
+                FileModel.update(o['Id'], o['File'])
+                if o['LatestFiles'] is not None:
+                    for f in o['LatestFiles']:
+                        FileModel.update(o['Id'], f)
+        elif name == 'GetFuzzyMatches':
+            for o in outp:
+                FileModel.update(o['Id'], o['File'])
+                if o['LatestFiles'] is not None:
+                    for f in o['LatestFiles']:
+                        FileModel.update(o['Id'], f)
+        elif name == 'GetAllFilesForAddOn':
+            for o in outp:
+                FileModel.update(inp['addOnID'], o)
+        elif name == 'GetAddOnFiles':
+            for o in outp:
+                if o['Value']:
+                    FileModel.update(o['Key'], o['Value'])
+        else:
+            return False
+        db.session.commit()
+    except Exception:
+        logger.exception('Error analyse_direct_result with {}: {} -> {}'.format(name, inp, outp))
+
