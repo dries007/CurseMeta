@@ -218,7 +218,8 @@ def analyse_direct_result(name: str, inp: dict, outp: dict):
         elif name == 'GetAddOnFiles':
             for o in outp:
                 if o['Value']:
-                    FileModel.update(o['Key'], o['Value'])
+                    for f in o['Value']:
+                        FileModel.update(o['Key'], f)
         else:
             return False
         db.session.commit()
