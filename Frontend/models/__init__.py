@@ -102,6 +102,9 @@ class FileModel(BaseRecord):
         if obj is None:
             obj = cls(data['Id'], addon_id)
 
+        if obj.addon_id != addon_id:
+            raise ValueError('FileID belongs to another addon already!')
+
         obj.name = data['FileNameOnDisk']
 
         db.session.add(obj)
