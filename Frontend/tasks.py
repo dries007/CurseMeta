@@ -25,6 +25,8 @@ redis_store: Redis = redis_store
 
 logger = get_task_logger(__name__)
 
+MAX_ADDONS_PER_REQUEST = 8000
+
 
 def locked_task(name_: str or callable, timeout=10*60):
     def lock_task(fun):
@@ -89,13 +91,13 @@ def periodic_curse_login():
 @locked_task('periodic-fill_missing_addons')
 def periodic_fill_missing_addons():
     # noinspection PyComparisonWithNone
-    missing_addon_ids = list(x[0] for x in db.session.query(AddonModel.id).filter(AddonModel.name == None).all())
+    missing_addon_ids = list(x[0] for x in db.session.query(AddonModel.addon_id).filter(AddonModel.name == None).all())
     if len(missing_addon_ids) == 0:
         return 0
     logger.info('Looking for {} addons with info missing'.format(len(missing_addon_ids)))
     found_count = 0
-    for i in range(0, len(missing_addon_ids), 16000):
-        ids = missing_addon_ids[i:i + 16000]
+    for i in range(0, len(missing_addon_ids), MAX_ADDONS_PER_REQUEST):
+        ids = missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST]
         logger.info('Batch {}, id {} to {}'.format(i, ids[0], ids[-1]))
         # noinspection PyBroadException
         try:
@@ -142,9 +144,9 @@ def periodic_find_hidden_addons():
     start_id = redis_store.get('periodic-find_hidden_addons-start_id')
     start_id = int(start_id) if start_id is not None else 1
     from sqlalchemy import func
-    end_id = db.session.query(func.max(AddonModel.id)).scalar() + 1000
+    end_id = db.session.query(func.max(AddonModel.addon_id)).scalar() + 1000
     logger.info('Finding hidden addons between id {} and {}'.format(start_id, end_id))
-    known_ids = set(x[0] for x in db.session.query(AddonModel.id).all())
+    known_ids = set(x[0] for x in db.session.query(AddonModel.addon_id).all())
     missing_ids = list(set(range(start_id, end_id)) - known_ids)
     if len(missing_ids) == 0:
         return 0
@@ -152,8 +154,8 @@ def periodic_find_hidden_addons():
     sleep(10)
     last_found_id = start_id
     found_count = 0
-    for i in range(0, len(missing_ids), 16000):
-        ids = missing_ids[i:i+16000]
+    for i in range(0, len(missing_ids), MAX_ADDONS_PER_REQUEST):
+        ids = missing_ids[i:i+MAX_ADDONS_PER_REQUEST]
         logger.info('Batch {}, id {} to {}'.format(i, ids[0], ids[-1]))
         # noinspection PyBroadException
         try:

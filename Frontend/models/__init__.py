@@ -1,9 +1,9 @@
+import sqlalchemy as sa
 import sqlalchemy_utils as sau
 
 from datetime import datetime
 
 from .. import db
-from .. import tasks
 
 
 class BaseRecord(db.Model):
@@ -13,7 +13,7 @@ class BaseRecord(db.Model):
 
 author_addon_table = db.Table('author_addon', db.Model.metadata,
                               db.Column('author', db.String, db.ForeignKey('author.name')),
-                              db.Column('addon', db.Integer, db.ForeignKey('addon.id')))
+                              db.Column('addon', db.Integer, db.ForeignKey('addon.addon_id')))
 
 
 class AuthorModel(BaseRecord):
@@ -38,7 +38,7 @@ class AuthorModel(BaseRecord):
 
 class AddonModel(BaseRecord):
     __tablename__ = 'addon'
-    id = db.Column(db.Integer, primary_key=True)
+    addon_id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, nullable=True)
     name = db.Column(db.String, nullable=True)
     category = db.Column(db.String, nullable=True)
@@ -50,7 +50,7 @@ class AddonModel(BaseRecord):
 
     def __init__(self, id_: int):
         super().__init__()
-        self.id = id_
+        self.addon_id = id_
 
     @classmethod
     def update(cls, data: dict):
@@ -78,17 +78,18 @@ class AddonModel(BaseRecord):
 
 class FileModel(BaseRecord):
     __tablename__ = 'file'
-    id = db.Column(db.Integer, primary_key=True)
+    file_id = db.Column(db.Integer, primary_key=True)
+    addon_id = db.Column(db.Integer, db.ForeignKey(AddonModel.addon_id, onupdate='cascade', ondelete='cascade'), primary_key=True)
     name = db.Column(db.String, nullable=True)
     # The API doesn't think alts exists, so meh
     # alt_id = db.Column(db.Integer, db.ForeignKey(id), primary_key=True)
 
-    addon_id = db.Column(db.Integer, db.ForeignKey(AddonModel.id, onupdate='cascade', ondelete='cascade'))
+    url = db.Column(sau.URLType, nullable=True)
     # alt = db.relationship('file', backref='primary', lazy='dynamic')
 
     def __init__(self, id_: int, addon_id: int):
         super().__init__()
-        self.id = id_
+        self.file_id = id_
         self.addon_id = addon_id
 
         if AddonModel.query.get(addon_id) is None:
@@ -98,14 +99,12 @@ class FileModel(BaseRecord):
 
     @classmethod
     def update(cls, addon_id: int, data: dict):
-        obj = cls.query.get(data['Id'])
+        obj = cls.query.get((addon_id, data['Id']))
         if obj is None:
             obj = cls(data['Id'], addon_id)
 
-        if obj.addon_id != addon_id:
-            raise ValueError('FileID belongs to another addon already!')
-
         obj.name = data['FileNameOnDisk']
+        obj.url = data['DownloadURL']
 
         db.session.add(obj)
         return obj
