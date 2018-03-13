@@ -68,6 +68,8 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(24*60*60, periodic_find_hidden_addons.s())  # daily
 
+    sender.add_periodic_task(24*60*60, periodic_request_all_files.s())  # daily
+
     periodic_fill_missing_addons.apply_async(countdown=30)
 
     # Mainly for staging, so we don't redo a full dl every time the env restart if it's been less than a day.
@@ -79,6 +81,10 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
     last = redis_store.get('periodic-find_hidden_addons-last')
     if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
         periodic_find_hidden_addons.apply_async(countdown=60*60)
+
+    last = redis_store.get('periodic-request_all_files-last')
+    if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
+        periodic_request_all_files.apply_async(countdown=4*60*60)
 
 
 @celery.task
@@ -138,7 +144,7 @@ def periodic_addon_feeds(timespan: str):
 
 
 @celery.task
-@locked_task('periodic-find_hidden_addons')
+@locked_task('periodic-find_hidden_addons', timeout=30*60)
 def periodic_find_hidden_addons():
     redis_store.set('periodic-find_hidden_addons-last', int(datetime.now().timestamp()))
     start_id = redis_store.get('periodic-find_hidden_addons-start_id')
@@ -172,6 +178,20 @@ def periodic_find_hidden_addons():
     logger.info('Foud {} hidden addons, last id: {}'.format(found_count, last_found_id))
     redis_store.set('periodic-find_hidden_addons-start_id', last_found_id)
     return found_count
+
+
+@celery.task
+@locked_task('periodic-request_all_files', timeout=2*60*60)
+def periodic_request_all_files():
+    redis_store.set('periodic-request_all_files-last', int(datetime.now().timestamp()))
+    known_ids = list(x[0] for x in db.session.query(AddonModel.addon_id).all())
+    for id_ in known_ids:
+        # noinspection PyBroadException
+        try:
+            curse.service.GetAllFilesForAddOn(id_)
+            db.session.commit()
+        except Exception:
+            logger.exception('Error in batch')
 
 
 # @celery.task
