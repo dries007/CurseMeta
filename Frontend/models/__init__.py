@@ -33,6 +33,7 @@ class AuthorModel(BaseRecord):
         if obj is None:
             obj = cls(data['Name'])
         db.session.add(obj)
+        db.session.commit()
         return obj
 
 
@@ -68,6 +69,7 @@ class AddonModel(BaseRecord):
         obj.downloads = data['DownloadCount']
 
         db.session.add(obj)
+        db.session.commit()
 
         if data['LatestFiles'] is not None:
             for file in data['LatestFiles']:
@@ -107,4 +109,5 @@ class FileModel(BaseRecord):
         obj.url = data['DownloadURL']
 
         db.session.add(obj)
+        db.session.commit()
         return obj
