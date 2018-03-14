@@ -13,6 +13,12 @@ The old version is under the `full_docker` branch.
 
 [EUPL v1.2](LICENCE.txt)
 
+## Notes
+
+For some random notes about this project,
+including what tools you might find useful, see [NOTES.md](NOTES.md).
+
+A (partial) history of CurseMeta sits in [this](https://gist.github.com/dries007/10d8dc05a6fc5d1e700404cdd4446d21) gist.
 
 ## Web icons
 
@@ -22,7 +28,6 @@ The FA files must be added in `Frontend/static`, to `css` and `js`.
 They CAN NOT be checked into version control. 
 
 Some of the icons may be missing with the free version.
-
 
 ## Maintaining a live environment
 

@@ -61,6 +61,11 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(15*60, periodic_fill_missing_addons.s())
 
+    if app.config['STAGING']:
+        # How about we don't, there is no need for staging to be complete.
+        # Manual runs are always possible via FlaskManager's shell
+        return
+
     sender.add_periodic_task(25*60, periodic_addon_feeds.s(Timespan.HOURLY.value))  # 25 mintes
     sender.add_periodic_task(11*60*60, periodic_addon_feeds.s(Timespan.DAILY.value))  # 11 hours
     sender.add_periodic_task(3*24*60*60, periodic_addon_feeds.s(Timespan.WEEKLY.value))  # 3 days
@@ -68,7 +73,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(24*60*60, periodic_find_hidden_addons.s())  # daily
 
-    sender.add_periodic_task(24*60*60, periodic_request_all_files.s())  # daily
+    sender.add_periodic_task(7*24*60*60, periodic_request_all_files.s())  # weekly
 
     periodic_fill_missing_addons.apply_async(countdown=30)
 
@@ -144,7 +149,7 @@ def periodic_addon_feeds(timespan: str):
 
 
 @celery.task
-@locked_task('periodic-find_hidden_addons', timeout=30*60)
+@locked_task('periodic-find_hidden_addons-lock', timeout=30*60)
 def periodic_find_hidden_addons():
     redis_store.set('periodic-find_hidden_addons-last', int(datetime.now().timestamp()))
     start_id = redis_store.get('periodic-find_hidden_addons-start_id')
@@ -181,7 +186,7 @@ def periodic_find_hidden_addons():
 
 
 @celery.task
-@locked_task('periodic-request_all_files', timeout=2*60*60)
+@locked_task('periodic-request_all_files-lock', timeout=2*60*60)
 def periodic_request_all_files():
     redis_store.set('periodic-request_all_files-last', int(datetime.now().timestamp()))
     known_ids = list(x[0] for x in db.session.query(AddonModel.addon_id).all())
