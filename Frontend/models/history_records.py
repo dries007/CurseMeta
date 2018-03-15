@@ -22,10 +22,6 @@ class HistoricRecord(db.Model):
         self.downloads = downloads
         self.score = score
 
-        if AddonModel.query.get(addon_id) is None:
-            db.session.add(AddonModel(addon_id))
-            db.session.commit()
-
     @classmethod
     def add(cls, timestamp: datetime, addon_id: int, downloads: int, score: float):
         last: HistoricRecord = cls.query\
@@ -33,6 +29,9 @@ class HistoricRecord(db.Model):
             .filter(HistoricRecord.timestamp <= timestamp) \
             .order_by(HistoricRecord.timestamp.desc()) \
             .first()
+
+        if AddonModel.query.get(addon_id) is None:
+            return
 
         if last is None or last.downloads != downloads or last.score != score:
             db.session.add(HistoricRecord(timestamp, addon_id, downloads, score))

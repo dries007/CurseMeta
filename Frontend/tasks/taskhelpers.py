@@ -9,7 +9,7 @@ from .. import db
 from .. import redis_store
 
 
-MAX_ADDONS_PER_REQUEST = 8000
+MAX_ADDONS_PER_REQUEST = 16000
 
 logger = get_task_logger(__name__)
 

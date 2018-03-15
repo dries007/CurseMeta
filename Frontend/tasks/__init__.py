@@ -7,6 +7,7 @@ from celery.schedules import crontab
 from .analysis import analyse_direct_result
 from .feeds import periodic_addon_feed, periodic_addon_feeds, Timespan
 from .find import periodic_fill_missing_addons, periodic_find_hidden_addons, periodic_request_all_files
+from .find import manual_request_all_addons
 from .history import periodic_keep_history
 from .login import periodic_curse_login
 from .. import celery
