@@ -40,14 +40,27 @@ class HistoricRecord(db.Model):
 def read_old_history_folder(basepath):
     with open(os.path.join(basepath, 'index.json'), 'r') as f:
         data = json.load(f)['history']
+
+    indexes = {}
+    downloads = {}
+
     n = len(data)
     print('Found', n, 'timestamps')
     for i, timestamp in enumerate(sorted(data)):
         print('Working on', i, 'of', n, ':', timestamp)
-        try:
-            read_old_history_file(basepath, timestamp)
-        except Exception as e:
-            print(e)
+        with open(os.path.join(basepath, '{}.json'.format(timestamp)), 'r') as f:
+            data = json.load(f)
+        timestamp = datetime.fromtimestamp(timestamp)
+        for k, v in data.items():
+            k = int(k)
+            if k not in indexes:
+                indexes[k] = AddonModel.query.get(k) is not None
+            if not indexes[k]:
+                continue
+            if k not in downloads or downloads[k] != v:
+                downloads[k] = v
+                db.session.merge(HistoricRecord(timestamp, k, v, None))
+                db.session.commit()
 
 
 def read_old_history_file(basepath, timestamp: int):
