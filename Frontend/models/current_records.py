@@ -1,7 +1,13 @@
 import sqlalchemy_utils as sau
 
+from datetime import datetime
+
 from .. import db
-from .BaseModel import BaseModel
+
+
+class BaseModel(db.Model):
+    __abstract__ = True  # Tells SQLAlchemy not to make a table for this class
+    last_update = db.Column(db.DateTime, nullable=False, onupdate=datetime.now, default=datetime.now)
 
 
 author_addon_table = db.Table('author_addon', db.Model.metadata,
@@ -50,6 +56,7 @@ class FileModel(BaseModel):
             db.session.add(AddonModel(addon_id))
             # generates excessive load, periodic cleanup is better
             # tasks.fill_missing_addon.delay(addon_id)
+            db.session.commit()
 
     @classmethod
     def update(cls, addon_id: int, data: dict):
@@ -72,6 +79,7 @@ class AddonModel(BaseModel):
     name = db.Column(db.String, nullable=True)
     category = db.Column(db.String, nullable=True)
     downloads = db.Column(db.BigInteger, nullable=True)
+    score = db.Column(db.Float, nullable=True)
 
     primary_author_name = db.Column(db.String, db.ForeignKey(AuthorModel.name, onupdate='cascade', ondelete='cascade'), nullable=True)
 
@@ -95,6 +103,7 @@ class AddonModel(BaseModel):
         obj.primary_author_name = data['PrimaryAuthorName']
         obj.category = data['CategorySection']['Name']
         obj.downloads = data['DownloadCount']
+        obj.score = data['PopularityScore']
 
         db.session.add(obj)
         db.session.commit()
