@@ -45,6 +45,7 @@
         {% for ep_name, doc in docs.items() %}
             <h4 id="{{ api_name|slugify }}-{{ ep_name|slugify }}">{{ ep_name }}</h4>
             <div class="float-right"><a href="#{{ api_name|slugify }}" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> up</a></div>
+            {{ doc.extra|markdown(5) or '' }}
             <code>{{ doc.rules|join('</code><br/><code>'|safe) }}</code>
             <h5>Input</h5>
             <pre class="json">{{ doc.inp|tojson(indent=4) }}</pre>

@@ -27,13 +27,30 @@ class HistoricRecord(db.Model):
         return cls.add(timestamp, addon.addon_id, addon.downloads, addon.score)
 
     @classmethod
-    def add(cls, timestamp: datetime, addon_id: int, downloads: int, score: float):
-        last: HistoricRecord = cls.query \
+    def get_all_last_before(cls, timestamp: datetime):
+        if timestamp is None:
+            timestamp = datetime.now()
+        return cls.query \
+            .distinct(HistoricRecord.addon_id) \
+            .filter(HistoricRecord.timestamp <= timestamp) \
+            .order_by(HistoricRecord.addon_id, HistoricRecord.timestamp.desc()) \
+            .all()
+
+    @classmethod
+    def get_last_before(cls, timestamp: datetime, addon_id: int):
+        if timestamp is None:
+            timestamp = datetime.now()
+        return cls.query \
             .filter(HistoricRecord.addon_id == addon_id) \
             .filter(HistoricRecord.timestamp <= timestamp) \
             .order_by(HistoricRecord.timestamp.desc()) \
             .first()
 
+    @classmethod
+    def add(cls, timestamp: datetime, addon_id: int, downloads: int, score: float):
+        if timestamp is None:
+            timestamp = datetime.now()
+        last = cls.get_last_before(timestamp, addon_id)
         if last is None or last.downloads != downloads or last.score != score:
             db.session.add(HistoricRecord(timestamp, addon_id, downloads, score))
             db.session.commit()

@@ -21,11 +21,6 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(15*60, periodic_fill_missing_addons.s())
 
-    if app.config['STAGING']:
-        # How about we don't, there is no need for staging to be complete.
-        # Manual runs are always possible via FlaskManager's shell
-        return
-
     sender.add_periodic_task(25*60, periodic_addon_feeds.s(Timespan.HOURLY.value))  # 25 minutes
     sender.add_periodic_task(11*60*60, periodic_addon_feeds.s(Timespan.DAILY.value))  # 11 hours
     sender.add_periodic_task(3*24*60*60, periodic_addon_feeds.s(Timespan.WEEKLY.value))  # 3 days
@@ -35,7 +30,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(7*24*60*60, periodic_request_all_files.s())  # weekly
 
-    sender.add_periodic_task(crontab(minute='0', hour='*/4'), periodic_keep_history.s())  # every 4 hours at XX:00
+    sender.add_periodic_task(crontab(minute='0', hour='*'), periodic_keep_history.s())  # every hour at XX:00
 
     periodic_fill_missing_addons.apply_async(countdown=30)
 

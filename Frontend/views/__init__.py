@@ -17,6 +17,7 @@ from ..helpers import to_json_response
 from ..helpers import cache
 
 from . import api_v2_direct
+from . import api_v2_history
 
 
 ROOT_DOCS = collections.OrderedDict()
@@ -95,8 +96,9 @@ def page(p='index'):
 @app.route('/docs')
 def docs():
     apis = [
-        ('Status API', None, ROOT_DOCS),
+        ('API Status & Layout', None, ROOT_DOCS),
         ('Direct Curse Access', api_v2_direct.__doc__, api_v2_direct.DOCS),
+        ('Historic data', api_v2_history.__doc__, api_v2_history.DOCS),
     ]
     return flask.render_template('docs.html', apis=apis)
 
@@ -113,7 +115,7 @@ def deprecated_project_file_json(addonID: int, fileID: int):
     return r
 
 
-ROOT_DOCS['Api root'] = Documentation(['GET /api/'], {}, {'status': 'string', 'message': 'string', 'apis': ['string']})
+ROOT_DOCS['API Status'] = Documentation(['GET /api/'], {}, {'status': 'string (OK = good)', 'message': 'string|None', 'apis': ['url']})
 
 
 @app.route('/api/')
@@ -125,18 +127,4 @@ def api_root():
         'apis': [
             api_v2_direct.URL_PREFIX,
         ],
-    })
-
-
-ROOT_DOCS['Api v2 direct'] = Documentation(['GET ' + api_v2_direct.URL_PREFIX], {}, {'status': 'string', 'message': 'string', 'apis': {'<Endpoint name>': {'inp': '<Input type>', 'outp': '<Output type>', 'rules': ['string']}}})
-
-
-@app.route(api_v2_direct.URL_PREFIX)
-@cache(None)
-def api_v2_root():
-    # noinspection PyProtectedMember
-    return to_json_response({
-        'status': 'OK',
-        'message': None,
-        'apis': {k: v._asdict() for k, v in api_v2_direct.DOCS.items()},
     })

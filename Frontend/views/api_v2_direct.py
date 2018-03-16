@@ -49,6 +49,19 @@ _TYPES = {
     float: 'float',
 }
 
+DOCS['API Root'] = Documentation(['GET ' + URL_PREFIX], {}, {'status': 'string (OK = good)', 'message': 'string|null', 'apis': {'<Endpoint name>': {'inp': '<Input type>', 'outp': '<Output type>', 'rules': ['METHOD + template url'], 'extra': 'string|null'}}})
+
+
+@app.route(URL_PREFIX)
+@cache(None)
+def api_v2_direct():
+    # noinspection PyProtectedMember
+    return to_json_response({
+        'status': 'OK',
+        'message': None,
+        'apis': {k: v._asdict() for k, v in DOCS.items()},
+    })
+
 
 def resolve_types(t: zeep.xsd.Any):
     if isinstance(t, zeep.xsd.AnySimpleType):

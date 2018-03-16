@@ -6,7 +6,8 @@ import werkzeug.datastructures
 from CurseClient.helpers import encode_json
 
 
-Documentation = collections.namedtuple('Documentation', ['rules', 'inp', 'outp'])
+Documentation = collections.namedtuple('Documentation', ['rules', 'inp', 'outp', 'extra'])
+Documentation.__new__.__defaults__ = (None, )
 
 
 def to_json_response(obj) -> flask.Response:
