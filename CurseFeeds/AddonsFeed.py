@@ -21,3 +21,6 @@ class AddonsFeed(BaseFeed):
 
     def get_feed_url(self) -> str:
         return super().get_feed_url() % self.timespan.value
+
+    def __repr__(self) -> str:
+        return '-'.join((super().__repr__(), str(self.timespan.value)))

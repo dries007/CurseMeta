@@ -39,4 +39,4 @@ class BaseFeed:
         return json.loads(requests.get(url, timeout=10).content)
 
     def __repr__(self) -> str:
-        return '<{} gameID={}>'.format(self.FEED_NAME, self.gameID)
+        return '-'.join((self.FEED_NAME, str(self.gameID)))
