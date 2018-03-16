@@ -100,4 +100,3 @@ def manual_request_all_addons():
             db.session.commit()
         except Exception:
             logger.exception('Error in batch')
-

@@ -23,18 +23,22 @@ class HistoricRecord(db.Model):
         self.score = score
 
     @classmethod
+    def add_from_model(cls, timestamp: datetime, addon: AddonModel):
+        return cls.add(timestamp, addon.addon_id, addon.downloads, addon.score)
+
+    @classmethod
     def add(cls, timestamp: datetime, addon_id: int, downloads: int, score: float):
-        last: HistoricRecord = cls.query\
+        last: HistoricRecord = cls.query \
             .filter(HistoricRecord.addon_id == addon_id) \
             .filter(HistoricRecord.timestamp <= timestamp) \
             .order_by(HistoricRecord.timestamp.desc()) \
             .first()
 
-        if AddonModel.query.get(addon_id) is None:
-            return
-
         if last is None or last.downloads != downloads or last.score != score:
             db.session.add(HistoricRecord(timestamp, addon_id, downloads, score))
+            db.session.commit()
+            return True
+        return False
 
 
 def read_old_history_folder(basepath):
