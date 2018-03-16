@@ -35,7 +35,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(7*24*60*60, periodic_request_all_files.s())  # weekly
 
-    sender.add_periodic_task(crontab(minute='0'), periodic_keep_history.s())  # hourly, but always at xx:00
+    sender.add_periodic_task(crontab(minute='0', hour='*/4'), periodic_keep_history.s())  # every 4 hours at XX:00
 
     periodic_fill_missing_addons.apply_async(countdown=30)
 
