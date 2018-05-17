@@ -22,6 +22,7 @@ from ..helpers import cache
 from . import api_v2_direct
 from . import api_v2_history
 
+
 ROOT_DOCS = collections.OrderedDict()
 _LOGGER = logging.getLogger("Views")
 _LOGGER.setLevel(logging.DEBUG)
@@ -60,7 +61,7 @@ def filter_markdown(md: str or None, header_base=1, idprefix='md') -> str or Non
         'markdown.extensions.toc',  # Allow [toc], but also re-map header numbers
     )
     extension_configs = {
-        'markdown.extensions.toc': {
+        'markdown.extensions.toc':  {
             'baselevel': header_base,  # Remap headers
             'slugify': lambda x, y: slugify(x, y, idprefix),  # Use same slugify as slugify filter
         },
@@ -122,8 +123,7 @@ def deprecated_project_file_json(addonID: int, fileID: int):
     return r
 
 
-ROOT_DOCS['API Status'] = Documentation(['GET /api/'], {},
-                                        {'status': 'string (OK = good)', 'message': 'string|None', 'apis': ['url']})
+ROOT_DOCS['API Status'] = Documentation(['GET /api/'], {}, {'status': 'string (OK = good)', 'message': 'string|None', 'apis': ['url']})
 
 
 @app.route('/api/')
@@ -141,6 +141,15 @@ def api_root():
 app.add_url_rule('/api/graphql',
                  view_func=GraphQLView.as_view(
                      'graphql',
+                     schema=schema,
+                     graphiql=False,
+                     context_value={'session': db.session}
+                 )
+                 )
+
+app.add_url_rule('/api/graphiql',
+                 view_func=GraphQLView.as_view(
+                     'graphiql',
                      schema=schema,
                      graphiql=True,
                      context_value={'session': db.session}
