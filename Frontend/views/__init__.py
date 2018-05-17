@@ -8,9 +8,12 @@ import logging
 import textwrap
 import werkzeug.exceptions as exceptions
 
+from flask_graphql import GraphQLView
+
 from markdown import markdown
 
-from .. import app
+from Frontend.graphql.schema import schema
+from .. import app, db
 from .. import curse
 from ..helpers import Documentation
 from ..helpers import to_json_response
@@ -19,11 +22,11 @@ from ..helpers import cache
 from . import api_v2_direct
 from . import api_v2_history
 
-
 ROOT_DOCS = collections.OrderedDict()
 _LOGGER = logging.getLogger("Views")
 _LOGGER.setLevel(logging.DEBUG)
 __SLUG_SPLIT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
 
 # ===== CONTEXT =====
 
@@ -31,6 +34,7 @@ __SLUG_SPLIT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 @app.before_request
 def before_request():
     pass
+
 
 # ===== FILTERS =====
 
@@ -56,7 +60,7 @@ def filter_markdown(md: str or None, header_base=1, idprefix='md') -> str or Non
         'markdown.extensions.toc',  # Allow [toc], but also re-map header numbers
     )
     extension_configs = {
-        'markdown.extensions.toc':  {
+        'markdown.extensions.toc': {
             'baselevel': header_base,  # Remap headers
             'slugify': lambda x, y: slugify(x, y, idprefix),  # Use same slugify as slugify filter
         },
@@ -68,6 +72,7 @@ def filter_markdown(md: str or None, header_base=1, idprefix='md') -> str or Non
 def slugify(text, delimiter='-', prefix=None):
     split = (unicodedata.normalize('NFKD', x) for x in __SLUG_SPLIT_RE.split(text))
     return delimiter.join(filter(None, (prefix, *split))).lower()
+
 
 # ===== ALL CASE ERROR HANDLER =====
 
@@ -83,6 +88,7 @@ def any_error(e: Exception):
         _LOGGER.exception("Error handler non HTTPException: %s", e)
 
     return flask.jsonify({'error': True, 'status': e.code, 'description': e.description}), e.code
+
 
 # ===== NON - API ROUTES =====
 
@@ -102,6 +108,7 @@ def docs():
     ]
     return flask.render_template('docs.html', apis=apis)
 
+
 # ===== API ROUTES =====
 
 
@@ -115,7 +122,8 @@ def deprecated_project_file_json(addonID: int, fileID: int):
     return r
 
 
-ROOT_DOCS['API Status'] = Documentation(['GET /api/'], {}, {'status': 'string (OK = good)', 'message': 'string|None', 'apis': ['url']})
+ROOT_DOCS['API Status'] = Documentation(['GET /api/'], {},
+                                        {'status': 'string (OK = good)', 'message': 'string|None', 'apis': ['url']})
 
 
 @app.route('/api/')
@@ -128,3 +136,13 @@ def api_root():
             api_v2_direct.URL_PREFIX,
         ],
     })
+
+
+app.add_url_rule('/api/graphql',
+                 view_func=GraphQLView.as_view(
+                     'graphql',
+                     schema=schema,
+                     graphiql=True,
+                     context_value={'session': db.session}
+                 )
+                 )
