@@ -100,12 +100,21 @@ def page(p='index'):
 def docs():
     apis = [
         ('API Status & Layout', None, ROOT_DOCS),
-        ('Direct Curse Access', api_v2_direct.__doc__, api_v2_direct.DOCS),
-        ('Historic data', api_v2_history.__doc__, api_v2_history.DOCS),
+        # ('Direct Curse Access', api_v2_direct.__doc__, api_v2_direct.DOCS),
+        # ('Historic data', api_v2_history.__doc__, api_v2_history.DOCS),
     ]
     return flask.render_template('docs.html', apis=apis)
 
 # ===== API ROUTES =====
+
+
+def _case_dict(d):
+    new = {}
+    for k, v in d.iteritems():
+        if isinstance(v, dict):
+            v = _case_dict(v)
+        new[k[0].upper() + k[1:]] = v
+    return new
 
 
 # todo: patch MultiMC to not use this endpoint
@@ -113,10 +122,11 @@ def docs():
 @app.route('/<int:addonID>/<int:fileID>.json')
 @cache()
 def deprecated_project_file_json(addonID: int, fileID: int):
-    return to_json_response(requests.get('https://addons-v2.forgesvc.net/api/addon/%d/file/%d' % (addonID, fileID),
-                                         timeout=60,
-                                         headers={'AuthenticationToken': curse_login.get_token()}
-                                         ).json())
+    data = requests.get('https://addons-v2.forgesvc.net/api/addon/%d/file/%d' % (addonID, fileID),
+                        timeout=60,
+                        headers={'AuthenticationToken': curse_login.get_token()}
+                        ).json()
+    return to_json_response(_case_dict(data))
     # token =
     # r = to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
     # r.headers.add('Warning', '299 - "Deprecated API"')
@@ -133,6 +143,6 @@ def api_root():
         'status': 'OK',
         'message': None,
         'apis': [
-            api_v2_direct.URL_PREFIX,
+            # api_v2_direct.URL_PREFIX,
         ],
     })
