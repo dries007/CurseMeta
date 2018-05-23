@@ -23,12 +23,7 @@ def _download_feed(records: {int: HistoricRecord}, addons: [AddonModel], game_id
     return {x.addon_id: _delta_dl(records, x) for x in addons if x.game_id == game_id}
 
 
-def _score_feed(records: {int: HistoricRecord}, addons: [AddonModel], game_id: int):
-    return {x.addon_id: x.score for x in addons if x.game_id == game_id}
-
-
 FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
-FEEDS_TYPES = {'downloads': _download_feed, 'score': _score_feed}
 
 
 @celery.task

@@ -45,6 +45,7 @@ def periodic_find_hidden_addons():
 @celery.task
 @locked_task('periodic-fill_missing_addons')
 def periodic_fill_missing_addons():
+    # todo: remove any addon with no info after checking it for a while?
     # noinspection PyComparisonWithNone
     missing_addon_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).filter(AddonModel.name == None).all())
     if len(missing_addon_ids) == 0:

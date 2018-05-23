@@ -33,7 +33,7 @@ DOCS['API Root'] = Documentation(['GET ' + URL_PREFIX],
 DOCS['Downloads'] = Documentation(['GET ' + URL_PREFIX + '/downloads/<int:game_id>/<string:interval>'],
                                   {'game_id': 'int', 'interval': 'string'},
                                   {'addon_id': 'long|float'},
-                                  'If an addon_id is not present in this feed, it has not gotten any downloads since timestamp.\n'
+                                  'If an addon_id is not present in this feed, it has not gotten any downloads.\n'
                                   'Assume data gathering started 2018-03-15. Data from before is inaccurate.')
 
 

@@ -18,6 +18,7 @@ from ..helpers import cache
 
 from . import api_v2_direct
 from . import api_v2_history
+from . import api_v2_stats
 
 
 ROOT_DOCS = collections.OrderedDict()
