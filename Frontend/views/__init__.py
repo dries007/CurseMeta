@@ -108,13 +108,14 @@ def docs():
 # ===== API ROUTES =====
 
 
-def _case_dict(d):
-    new = {}
-    for k, v in d.items():
-        if isinstance(v, dict):
-            v = _case_dict(v)
-        new[k[0].upper() + k[1:]] = v
-    return new
+def _fix_names(obj):
+    for key in obj.keys():
+        new_key = key[0].upper() + key[1:]
+        new_key = new_key.replace('Url', 'URL')
+        if new_key != key:
+            obj[new_key] = obj[key]
+            del obj[key]
+    return obj
 
 
 # todo: patch MultiMC to not use this endpoint
@@ -126,7 +127,7 @@ def deprecated_project_file_json(addonID: int, fileID: int):
                         timeout=60,
                         headers={'AuthenticationToken': curse_login.get_token()}
                         ).json()
-    return to_json_response(_case_dict(data))
+    return to_json_response(json.loads(json.dumps(data), object_hook=_fix_names))
     # token =
     # r = to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
     # r.headers.add('Warning', '299 - "Deprecated API"')
