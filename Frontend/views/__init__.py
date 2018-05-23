@@ -126,8 +126,8 @@ def deprecated_project_file_json(addonID: int, fileID: int):
     data = requests.get('https://addons-v2.forgesvc.net/api/addon/%d/file/%d' % (addonID, fileID),
                         timeout=60,
                         headers={'AuthenticationToken': curse_login.get_token()}
-                        ).json()
-    return to_json_response(json.loads(json.dumps(data), object_hook=_fix_names))
+                        ).json(object_hook=_fix_names)
+    return to_json_response(data)
     # token =
     # r = to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
     # r.headers.add('Warning', '299 - "Deprecated API"')
