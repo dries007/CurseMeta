@@ -13,22 +13,25 @@ class CurseClient:
     """
 
     # noinspection PyProtectedMember
-    def __init__(self, username, password, redis_store=None):
+    def __init__(self, login_client, redis_store=None):
+    # def __init__(self, username, password, redis_store=None):
         cache = RedisCache(redis_store) if redis_store else None
         # todo: Custom transport to enable binary encoding
         transport = zeep.transports.Transport(cache=cache)
-        self.login_client = LoginClient(username, password, redis_store)
-        self.client = zeep.Client(
-            wsdl='https://addons.forgesvc.net/AddOnService.svc?singleWsdl',
-            port_name='WsHttpAddOnServiceEndpoint',
-            service_name='AddOnService',
-            plugins=[self.login_client],
-            transport=transport,
-            strict=False,
-        )
-        self.operations = list(self.client.service._binding._operations.keys())
-        service_type = collections.namedtuple('Service', self.operations)
-        self.service = service_type(**{k: OperationWrapper(k, self.client, redis_store) for k in self.operations})
+        self.login_client = login_client
+        #self.client = zeep.Client(
+        #    wsdl='https://addons.forgesvc.net/AddOnService.svc?singleWsdl',
+        #    port_name='WsHttpAddOnServiceEndpoint',
+        #    service_name='AddOnService',
+        #    plugins=[self.login_client],
+        #    transport=transport,
+        #    strict=False,
+        #)
+        # self.operations = list(self.client.service._binding._operations.keys())
+        # service_type = collections.namedtuple('Service', self.operations)
+        # self.service = service_type(**{k: OperationWrapper(k, self.client, redis_store) for k in self.operations})
+        self.service = []
+        self.operations = []
         if self.__doc__ is None:
             self.__doc__ = ''
         self.__doc__ += 'List of available service functions: \n      ' + \

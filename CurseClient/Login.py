@@ -54,6 +54,10 @@ class LoginClient(zeep.Plugin):
             root.append(tmp)
         return root
 
+    def get_token(self):
+        self.checklogin()
+        return self.session['Token']
+
     def ingress(self, envelope, http_headers, operation):
         return envelope, http_headers
 

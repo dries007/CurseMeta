@@ -17,6 +17,9 @@ from .. import app
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
+
+    return # todo: fixeme!
+
     sender.add_periodic_task(60*60, periodic_curse_login.s())
 
     sender.add_periodic_task(15*60, periodic_fill_missing_addons.s())

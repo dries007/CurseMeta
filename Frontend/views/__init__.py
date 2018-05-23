@@ -6,19 +6,21 @@ import unicodedata
 import flask
 import logging
 import textwrap
+import requests
 import werkzeug.exceptions as exceptions
 
 from markdown import markdown
 
 from .. import app
 from .. import curse
+from .. import curse_login
 from ..helpers import Documentation
 from ..helpers import to_json_response
 from ..helpers import cache
 
-from . import api_v2_direct
-from . import api_v2_history
-from . import api_v2_stats
+# from . import api_v2_direct
+# from . import api_v2_history
+# from . import api_v2_stats
 
 
 ROOT_DOCS = collections.OrderedDict()
@@ -111,9 +113,14 @@ def docs():
 @app.route('/<int:addonID>/<int:fileID>.json')
 @cache()
 def deprecated_project_file_json(addonID: int, fileID: int):
-    r = to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
-    r.headers.add('Warning', '299 - "Deprecated API"')
-    return r
+    return to_json_response(requests.get('https://addons-v2.forgesvc.net/api/addon/%d/file/%d' % (addonID, fileID),
+                                         timeout=60,
+                                         headers={'AuthenticationToken': curse_login.get_token()}
+                                         ).json())
+    # token =
+    # r = to_json_response(curse.service.GetAddOnFile(addonID=addonID, fileID=fileID))
+    # r.headers.add('Warning', '299 - "Deprecated API"')
+    # return r
 
 
 ROOT_DOCS['API Status'] = Documentation(['GET /api/'], {}, {'status': 'string (OK = good)', 'message': 'string|None', 'apis': ['url']})

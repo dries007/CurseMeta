@@ -34,7 +34,9 @@ redis_store = FlaskRedis(app)
 redis_store.ping()  # Just to make sure the config is OK
 
 # Curse Client
-curse = CurseClient.CurseClient(app.config['CURSE_USER'], app.config['CURSE_PASS'], redis_store)
+curse_login = CurseClient.LoginClient(app.config['CURSE_USER'], app.config['CURSE_PASS'], redis_store)
+curse = CurseClient.CurseClient(curse_login, redis_store)
+
 
 # Celery
 celery = Celery(app.import_name, backend=app.config['CELERY_RESULT_BACKEND'], broker=app.config['CELERY_BROKER_URL'])
