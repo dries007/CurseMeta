@@ -1,7 +1,7 @@
 import logging
 import mimetypes
-
-import flask
+import datetime
+import requests_cache
 
 from celery import Celery
 from flask import Flask
@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.WARN)
 mimetypes.init()
 
 # Main Flask magic
-app = flask.Flask(__name__)
+app = Flask(__name__)
 app.config.from_object('config')
 
 if app.config.get('DEBUG', False):
@@ -29,8 +29,12 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # Redis
+# todo: make redis optional
 redis_store = FlaskRedis(app)
 redis_store.ping()  # Just to make sure the config is OK
+# Monkey patch! To bypass use `with requests_cache.disabled():`
+requests_cache.install_cache(backend='redis', expire_after=datetime.timedelta(hours=24), connection=redis_store)
+
 
 # Curse Client
 curse_login = CurseClient.LoginClient(app.config['CURSE_USER'], app.config['CURSE_PASS'], redis_store)
@@ -53,7 +57,12 @@ class ContextTask(TaskBase):
 
 celery.Task = ContextTask
 
-from .tasks import *
-from .routes import *
-from .models import *
 
+# Import all tasks (must be done for the periodic tasks to have effect)
+from . import tasks
+
+# Import all views
+from . import models
+
+# Import all views
+from . import views

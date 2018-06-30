@@ -1,4 +1,3 @@
-import collections
 import re
 import json
 import unicodedata
@@ -14,17 +13,19 @@ import werkzeug.exceptions as exceptions
 
 from markdown import markdown
 
-from . import app
-from . import curse_login
-from .helpers import to_json_response
-from .helpers import cache
+from .. import app
+from .. import curse_login
+from ..helpers import to_json_response
+from ..helpers import cache
+from ..helpers import get_curse_api
+from ..helpers import CURSE_HOST
+from ..models import *
 
 
 _LOGGER = logging.getLogger('Views')
 _LOGGER.setLevel(logging.DEBUG)
 __SLUG_SPLIT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 __LINK_FIX_RE = re.compile(r'href="/linkout\?remoteUrl=([\w%.]+)"')
-__CURSE_HOST = 'https://addons-v2.forgesvc.net/'
 
 html2text.config.PAD_TABLES = True
 html2text.config.USE_AUTOMATIC_LINKS = False
@@ -116,15 +117,6 @@ def missing_api(p):
 
 # ===== General 1:1 API mapping =====
 
-def _get_curse_api(url, params=None):
-    """
-    todo: better error handling
-    todo: cache this in redis?
-    """
-    r = requests.get(__CURSE_HOST + url, params, timeout=60, headers=curse_login.get_headers())
-    r.raise_for_status()
-    return r
-
 
 # ----- Addons -----
 
@@ -135,8 +127,8 @@ def api_v3_direct_get_addon(addon_id: int):
     Required:
     - `addon_id`: A single addon ID
     """
-    data = _get_curse_api('api/addon/%d' % addon_id).json()
-    # todo: analyse data
+    data = get_curse_api('api/addon/%d' % addon_id).json()
+    AddonModel.update(data)
     return to_json_response(data)
 
 
@@ -151,8 +143,9 @@ def api_v3_direct_get_search():
     Optional:
     - TODO: add optional parameters to docs, see http://ix.io/1bll/C#
     """
-    data = _get_curse_api('api/addon/search', flask.request.args).json()
-    # todo: analyse data
+    data = get_curse_api('api/addon/search', flask.request.args).json()
+    for x in data:
+        AddonModel.update(x)
     return to_json_response(data)
 
 
@@ -167,7 +160,7 @@ def api_v3_direct_get_addon_description(addon_id: int):
     - GET: `fixlinks`: If present, replace `/linkout?=<url>` with the actual direct url.
     Return type: HTML!
     """
-    data = _get_curse_api('api/addon/%d/description' % addon_id).text
+    data = get_curse_api('api/addon/%d/description' % addon_id).text
     if 'fixlinks' in flask.request.args:
         data = re.sub(__LINK_FIX_RE, lambda x: 'href="%s"' % url_decode(url_decode(x.group(1))), data)
     if 'md' in flask.request.args or 'markdown' in flask.request.args:
@@ -187,7 +180,7 @@ def api_v3_direct_get_addon_changelog(addon_id: int, file_id: int):
     - GET: `fixlinks`: If present, replace `/linkout?=<url>` with the actual direct url.
     Return type: HTML!
     """
-    data = _get_curse_api('api/addon/%d/file/%d/changelog' % (addon_id, file_id)).text
+    data = get_curse_api('api/addon/%d/file/%d/changelog' % (addon_id, file_id)).text
     if 'fixlinks' in flask.request.args:
         data = re.sub(__LINK_FIX_RE, lambda x: 'href="%s"' % url_decode(url_decode(x.group(1))), data)
     if 'md' in flask.request.args or 'markdown' in flask.request.args:
@@ -203,8 +196,8 @@ def api_v3_direct_get_addon_file(addon_id: int, file_id: int):
     - `addon_id`: A single addon ID
     - `file_id`: A single file ID
     """
-    data = _get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json()
-    # todo: analyse data
+    data = get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json()
+    FileModel.update(addon_id, data)
     return to_json_response(data)
 
 
@@ -215,8 +208,9 @@ def api_v3_direct_get_addon_files(addon_id: int):
     Required:
     - `addon_id`: A single addon ID
     """
-    data = _get_curse_api('api/addon/%d/files' % addon_id).json()
-    # todo: analyse data
+    data = get_curse_api('api/addon/%d/files' % addon_id).json()
+    for x in data:
+        FileModel.update(addon_id, x)
     return to_json_response(data)
 
 # todo: Add POST(?) endpoint for 'api/addon/files' This is based on 'AddonFileKey's
@@ -231,7 +225,7 @@ def api_v3_direct_get_repo_from_slug():
     - GET `gameSlug`: A string. todo: find out what this means
     - GET `addonSlug`: A string. todo: find out what this means
     """
-    return to_json_response(_get_curse_api('api/addon/slug', flask.request.args).json())
+    return to_json_response(get_curse_api('api/addon/slug', flask.request.args).json())
 
 
 @app.route('/api/v3/direct/addon/featured')
@@ -247,7 +241,7 @@ def api_v3_direct_get_featured():
     - GET: `excluded`: Exclude an addon ID. Can be specified multiple times.
     """
     # todo: cache in redis?
-    r = requests.post(__CURSE_HOST + 'api/addon/featured', json={
+    r = requests.post(CURSE_HOST + 'api/addon/featured', json={
         'GameId': flask.request.args.get('gameId'),
         'FeaturedCount': flask.request.args.get('featuredCount', 6),
         'PopularCount': flask.request.args.get('popularCount', 14),
@@ -256,14 +250,15 @@ def api_v3_direct_get_featured():
     }, timeout=60, headers=curse_login.get_headers())
     r.raise_for_status()
     data = r.json()
-    # todo: analyse data ?
+    for k, v in data.items():
+        AddonModel.update(v)
     return to_json_response(data)
 
 
 @app.route('/api/v3/direct/addon/timestamp')
 @cache()
 def api_v3_direct_get_timestamp():
-    return _get_curse_api('api/addon/timestamp').text
+    return get_curse_api('api/addon/timestamp').text
 
 
 # ----- MC Modloaders -----
@@ -271,26 +266,26 @@ def api_v3_direct_get_timestamp():
 @app.route('/api/v3/direct/minecraft/modloader')
 @cache()
 def api_v3_direct_get_mc_modloader():
-    return to_json_response(_get_curse_api('api/minecraft/modloader').json())
+    return to_json_response(get_curse_api('api/minecraft/modloader').json())
 
 
 @app.route('/api/v3/direct/minecraft/modloader/<string:key>')
 @cache()
 def api_v3_direct_get_mc_modloader_by_key(key: str):
-    return to_json_response(_get_curse_api('api/minecraft/modloader/%s' % key).json())
+    return to_json_response(get_curse_api('api/minecraft/modloader/%s' % key).json())
 
 
 @app.route('/api/v3/direct/minecraft/modloader/<string:key>')
 @cache()
 def api_v3_direct_get_mc_modloader_by_version(key: str):
     # todo: how does this work? it's the same url and endpoint.
-    return to_json_response(_get_curse_api('api/minecraft/modloader/%s' % key).json())
+    return to_json_response(get_curse_api('api/minecraft/modloader/%s' % key).json())
 
 
 @app.route('/api/v3/direct/minecraft/modloader/timestamp')
 @cache()
 def api_v3_direct_get_mc_modloader_timestamp():
-    return _get_curse_api('api/minecraft/modloader/timestamp').text
+    return get_curse_api('api/minecraft/modloader/timestamp').text
 
 
 # ----- MC Versions -----
@@ -298,19 +293,19 @@ def api_v3_direct_get_mc_modloader_timestamp():
 @app.route('/api/v3/direct/minecraft/version')
 @cache()
 def api_v3_direct_get_mc_versions():
-    return to_json_response(_get_curse_api('api/minecraft/version').json())
+    return to_json_response(get_curse_api('api/minecraft/version').json())
 
 
 @app.route('/api/v3/direct/minecraft/version/timestamp')
 @cache()
 def api_v3_direct_get_mc_version_timestamp():
-    return _get_curse_api('api/minecraft/version/timestamp').text
+    return get_curse_api('api/minecraft/version/timestamp').text
 
 
 @app.route('/api/v3/direct/minecraft/version/<string:game_version>')
 @cache()
 def api_v3_direct_get_mc_version(game_version: str):
-    return to_json_response(_get_curse_api('api/minecraft/version/%s' % game_version).json())
+    return to_json_response(get_curse_api('api/minecraft/version/%s' % game_version).json())
 
 
 # ----- Games -----
@@ -322,7 +317,7 @@ def api_v3_direct_get_games():
     Optional:
     - GET `supportsAddons`: Defaults to False.
     """
-    return to_json_response(_get_curse_api('api/game', flask.request.args).json())
+    return to_json_response(get_curse_api('api/game', flask.request.args).json())
 
 
 @app.route('/api/v3/direct/game/<int:game_id>')
@@ -332,13 +327,13 @@ def api_v3_direct_get_game(game_id: int):
     Required:
     - `game_id`: A single game id.
     """
-    return to_json_response(_get_curse_api('api/game/%d' % game_id).json())
+    return to_json_response(get_curse_api('api/game/%d' % game_id).json())
 
 
 @app.route('/api/v3/direct/game/timestamp')
 @cache()
 def api_v3_direct_get_game_timestamp():
-    return _get_curse_api('api/game/timestamp').text
+    return get_curse_api('api/game/timestamp').text
 
 
 # ----- Categories -----
@@ -351,7 +346,7 @@ def api_v3_direct_get_categories():
     Optional:
     - GET `slug`: Search by slug
     """
-    return to_json_response(_get_curse_api('api/category', flask.request.args).json())
+    return to_json_response(get_curse_api('api/category', flask.request.args).json())
 
 
 @app.route('/api/v3/direct/category/<int:category_id>')
@@ -361,7 +356,7 @@ def api_v3_direct_get_category(category_id: int):
     Required:
     - `category_id`: A single category id.
     """
-    return to_json_response(_get_curse_api('api/category/%d' % category_id).json())
+    return to_json_response(get_curse_api('api/category/%d' % category_id).json())
 
 
 @app.route('/api/v3/direct/category/section/<int:section_id>')
@@ -371,13 +366,13 @@ def api_v3_direct_get_category_by_section(section_id: int):
     Required:
     - `section_id`: A single section id. Idk where to get these from.
     """
-    return to_json_response(_get_curse_api('api/category/section/%d' % section_id).json())
+    return to_json_response(get_curse_api('api/category/section/%d' % section_id).json())
 
 
 @app.route('/api/v3/direct/category/timestamp')
 @cache()
 def api_v3_direct_get_category_timestamp():
-    return _get_curse_api('api/category/timestamp').text
+    return get_curse_api('api/category/timestamp').text
 
 # ===== MultiMC =====
 
@@ -395,8 +390,9 @@ def _fix_names(obj):
 @app.route('/<int:addon_id>/<int:file_id>.json')
 @cache()
 def deprecated_project_file_json(addon_id: int, file_id: int):
-    data = _get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json(object_hook=_fix_names)
+    data = get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json(object_hook=_fix_names)
     data['__comment'] = 'WARNING: Deprecated API, Should only be used by existing users.'
     r = to_json_response(data)
     r.headers.add('Warning', '299 - "Deprecated API"')
+    FileModel.update_old(addon_id, data)
     return r

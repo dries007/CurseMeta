@@ -28,8 +28,12 @@ db_user = 'cursemeta'
 db_host = 'localhost'
 db_port = 5432
 db_name = db_user
-with open(get_file('db.pwd'), 'r') as f:
-    db_pwd = f.read().strip()
+f = get_file('db.pwd')
+if f is not None:
+    with open(f, 'r') as f:
+        db_pwd = f.read().strip()
+else:
+    db_pwd = None
 
 if STAGING or DEVELOPMENT:
     TEMPLATES_AUTO_RELOAD = True
@@ -49,7 +53,11 @@ if DEVELOPMENT:
     REDIS_URL = REDIS_URL[:-1] + '5'
     db_name += '_dev'
 
-SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%d/%s' % (db_user, db_pwd, db_host, db_port, db_name)
+if db_pwd:
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%d/%s' % (db_user, db_pwd, db_host, db_port, db_name)
+else:
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%s@%s:%d/%s' % (db_user, db_host, db_port, db_name)
+print(SQLALCHEMY_DATABASE_URI)
 del db_user, db_pwd, db_host, db_port, db_name
 
 

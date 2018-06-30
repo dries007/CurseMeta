@@ -1,7 +1,13 @@
 import json
 import flask
+import requests
 import werkzeug.datastructures
 from functools import wraps
+
+from app import curse_login
+
+
+CURSE_HOST = 'https://addons-v2.forgesvc.net/'
 
 
 def to_json_response(obj) -> flask.Response:
@@ -10,7 +16,7 @@ def to_json_response(obj) -> flask.Response:
 
 def cache(time=4*60*60, browser_time=None):
     def decorator(f):
-        @wraps(f)
+        @wraps(f)  # <- required to make __doc__ work, required for /docs
         def wrapper(*args, **kwargs):
             r = f(*args, **kwargs)
             if not isinstance(r, flask.Response):
@@ -27,3 +33,12 @@ def cache(time=4*60*60, browser_time=None):
         wrapper.__name__ = f.__name__
         return wrapper
     return decorator
+
+
+def get_curse_api(url, params=None):
+    """
+    todo: better error handling(?)
+    """
+    r = requests.get(CURSE_HOST + url, params, timeout=60, headers=curse_login.get_headers())
+    r.raise_for_status()
+    return r

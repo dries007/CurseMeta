@@ -2,12 +2,7 @@ import sqlalchemy_utils as sau
 
 from datetime import datetime
 
-from . import db
-
-
-class BaseModel(db.Model):
-    __abstract__ = True  # Tells SQLAlchemy not to make a table for this class
-    last_update = db.Column(db.DateTime, nullable=False, onupdate=datetime.now, default=datetime.now)
+from .. import db
 
 
 author_addon_table = db.Table('author_addon', db.Model.metadata,
@@ -15,8 +10,9 @@ author_addon_table = db.Table('author_addon', db.Model.metadata,
                               db.Column('addon', db.Integer, db.ForeignKey('addon.addon_id')))
 
 
-class AuthorModel(BaseModel):
+class AuthorModel(db.Model):
     __tablename__ = 'author'
+    last_update = db.Column(db.DateTime, nullable=False, onupdate=datetime.now, default=datetime.now)
     name = db.Column(db.String, primary_key=True)
 
     primary_addons = db.relationship('AddonModel', backref='primary_author', lazy='dynamic')
@@ -28,16 +24,17 @@ class AuthorModel(BaseModel):
 
     @classmethod
     def update(cls, data: dict):
-        obj = cls.query.get(data['Name'])
+        obj = cls.query.get(data['name'])
         if obj is None:
-            obj = cls(data['Name'])
+            obj = cls(data['name'])
         db.session.add(obj)
         db.session.commit()
         return obj
 
 
-class FileModel(BaseModel):
+class FileModel(db.Model):
     __tablename__ = 'file'
+    last_update = db.Column(db.DateTime, nullable=False, onupdate=datetime.now, default=datetime.now)
     file_id = db.Column(db.Integer, primary_key=True)
     addon_id = db.Column(db.Integer, db.ForeignKey('addon.addon_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
     name = db.Column(db.String, nullable=True)
@@ -59,7 +56,7 @@ class FileModel(BaseModel):
             db.session.commit()
 
     @classmethod
-    def update(cls, addon_id: int, data: dict):
+    def update_old(cls, addon_id: int, data: dict):
         obj = cls.query.get((data['Id'], addon_id))
         if obj is None:
             obj = cls(data['Id'], addon_id)
@@ -71,9 +68,23 @@ class FileModel(BaseModel):
         db.session.commit()
         return obj
 
+    @classmethod
+    def update(cls, addon_id: int, data: dict):
+        obj = cls.query.get((data['id'], addon_id))
+        if obj is None:
+            obj = cls(data['id'], addon_id)
 
-class AddonModel(BaseModel):
+        obj.name = data['fileNameOnDisk']
+        obj.url = data['downloadUrl']
+
+        db.session.add(obj)
+        db.session.commit()
+        return obj
+
+
+class AddonModel(db.Model):
     __tablename__ = 'addon'
+    last_update = db.Column(db.DateTime, nullable=False, onupdate=datetime.now, default=datetime.now)
     addon_id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, nullable=True)
     name = db.Column(db.String, nullable=True)
@@ -91,32 +102,33 @@ class AddonModel(BaseModel):
 
     @classmethod
     def update(cls, data: dict):
-        obj = cls.query.get(data['Id'])
+        obj = cls.query.get(data['id'])
         if obj is None:
-            obj = cls(data['Id'])
+            obj = cls(data['id'])
 
-        for author in data['Authors']:
+        for author in data['authors']:
             obj.authors.append(AuthorModel.update(author))
 
-        obj.name = data['Name']
-        obj.game_id = data['GameId']
-        obj.primary_author_name = data['PrimaryAuthorName']
-        obj.category = data['CategorySection']['Name']
-        obj.downloads = data['DownloadCount']
-        obj.score = data['PopularityScore']
+        obj.name = data['name']
+        obj.game_id = data['gameId']
+        obj.primary_author_name = data['primaryAuthorName']
+        obj.category = data['categorySection']['name']
+        obj.downloads = data['downloadCount']
+        obj.score = data['popularityScore']
 
         db.session.add(obj)
         db.session.commit()
 
-        if data['LatestFiles'] is not None:
-            for file in data['LatestFiles']:
-                FileModel.update(data['Id'], file)
+        if data['latestFiles'] is not None:
+            for file in data['latestFiles']:
+                FileModel.update(data['id'], file)
 
         return obj
 
 
 class HistoricRecord(db.Model):
     __tablename__ = 'history'
+    last_update = db.Column(db.DateTime, nullable=False, onupdate=datetime.now, default=datetime.now)
     timestamp = db.Column(db.DateTime, nullable=False, primary_key=True)
     addon_id = db.Column(db.Integer, db.ForeignKey('addon.addon_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
     downloads = db.Column(db.BigInteger)
