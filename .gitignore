@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.idea/
+
+/venv/
+/run/
+/migrations/
+
+# Secret files
+curse.json
+secret-key.bin
+db.pwd

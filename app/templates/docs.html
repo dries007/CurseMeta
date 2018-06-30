@@ -1,0 +1,36 @@
+{% extends "template_base.html" %}
+{% block title %}Documentation{% endblock %}
+{% block content %}
+    {{ super() }}
+    <h2 id="must-read">Required reading</h2>
+    <p>
+        You <b>MUST</b> set your <code>User-Agent</code> header to something unique and identifiable to your project.
+        Including a website or email address is highly encouraged.
+    </p>
+    <p>
+        All data is cached for (up to) 4 hours. Please do not make more frequent requests if it can be avoided.
+    </p>
+    <p>
+        You must handle <code>null</code> values <b>everywhere</b>, but in particular in array/object fields.
+        The API is not consistent about returning <code>null</code> or empty arrays/objects.
+        If invalid data is provided the response may be an error or a <code>null</code>, or an object with all <code>null</code> values.
+    </p>
+    <p>
+        When the old API went down, all access to the old v2 endpoints was lost. They are all removed.
+        <b>Be aware</b>: Most return data now has different capitalization!
+    </p>
+
+    <h2 id="toc">Table of content</h2>
+    <ul>
+    {% for api in apis|sort(attribute='name') %}
+        <li><a href="#{{ api.name|slugify }}">{{ api.name }}</a></li>
+    {% endfor %}
+    </ul>
+
+    {% for api in apis|sort(attribute='name') %}
+        <h2 id="{{ api.name|slugify }}">{{ api.name }}</h2>
+        <div class="float-right"><a href="#top" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> top</a></div>
+        <p>URL: <code>{{ api.rule.rule }}</code></p>
+        {{ api.function|docstring|markdown(2) or '' }}
+    {% endfor %}
+{% endblock %}
