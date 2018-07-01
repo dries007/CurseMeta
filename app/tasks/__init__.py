@@ -95,7 +95,7 @@ def periodic_find_hidden_addons():
     logger.info('Looking for {} missing ids'.format(len(missing_ids)))
     found_count = 0
     for i in range(0, len(missing_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons(missing_ids[i:i + MAX_ADDONS_PER_REQUEST]).s()
+        task_request_addons.s(missing_ids[i:i + MAX_ADDONS_PER_REQUEST])
     logger.info('Found {} hidden addons'.format(found_count))
 
 
@@ -108,7 +108,7 @@ def periodic_fill_missing_addons():
         return 0
     logger.info('Looking for {} addons with info missing'.format(len(missing_addon_ids)))
     for i in range(0, len(missing_addon_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons(missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST]).s()
+        task_request_addons.s(missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST])
 
 
 @celery.task
