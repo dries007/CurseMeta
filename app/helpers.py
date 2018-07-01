@@ -2,9 +2,11 @@ import json
 import flask
 import requests
 import werkzeug.datastructures
+import werkzeug.routing
 from functools import wraps
 
-from app import curse_login
+from . import app
+from . import curse_login
 
 
 CURSE_HOST = 'https://addons-v2.forgesvc.net/'
@@ -51,3 +53,20 @@ def post_curse_api(url, data):
     r = requests.post(CURSE_HOST + url, json=data, timeout=60, headers=curse_login.get_headers())
     r.raise_for_status()
     return r
+
+
+def get_routes_with_prefix(prefix, exclude=None):
+    routes = []
+    for rule in app.url_map.iter_rules():
+        rule: werkzeug.routing.Rule = rule
+        if not rule.endpoint.startswith(prefix):
+            continue
+        if exclude and rule.endpoint in exclude:
+            continue
+        routes.append({
+            'name': rule.endpoint.replace(prefix, ''),
+            'endpoint': rule.endpoint,
+            'rule': rule,
+            'function': app.view_functions[rule.endpoint]
+        })
+    return routes

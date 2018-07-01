@@ -22,15 +22,52 @@
 
     <h2 id="toc">Table of content</h2>
     <ul>
-    {% for api in apis|sort(attribute='name') %}
-        <li><a href="#{{ api.name|slugify }}">{{ api.name }}</a></li>
-    {% endfor %}
+        <li>
+            <h3>V3</h3>
+            <ul>
+                {% for api in v3|sort(attribute='name') %}<li><a href="#{{ api.name|slugify }}">{{ api.name|replace('_', ' ')|title }}</a></li>{% endfor %}
+                <li>
+                    <h4>V3 History</h4>
+                    <ul>{% for api in v3_history|sort(attribute='name') %}
+                        <li><a href="#{{ api.name|slugify }}">{{ api.name|replace('_', ' ')|title }}</a></li>
+                    {% endfor %}</ul>
+                </li>
+                <li>
+                    <h4>V3 Direct</h4>
+                    <ul>{% for api in v3_direct|sort(attribute='name') %}
+                        <li><a href="#{{ api.name|slugify }}">{{ api.name|replace('_', ' ')|title }}</a></li>
+                    {% endfor %}</ul>
+                </li>
+            </ul>
+        </li>
     </ul>
 
-    {% for api in apis|sort(attribute='name') %}
-        <h2 id="{{ api.name|slugify }}">{{ api.name }}</h2>
+    <h2>V3</h2>
+    <p class="lead">Version 3 now relies on the underlying REST API.
+        For the most part the returned data is the same as v2, except the casing is different and some fields got added.</p>
+    {% for api in v3|sort(attribute='name') %}
+        <h3 id="{{ api.name|slugify }}">{{ api.name|replace('_', ' ')|title }}</h3>
         <div class="float-right"><a href="#top" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> top</a></div>
         <p>URL: <code>{{ api.rule.rule }}</code></p>
-        {{ api.function|docstring|markdown(2) or '' }}
+        {{ api.function|docstring|markdown(3) or '<p><small>No docs, sorry.</small></p>'|safe }}
     {% endfor %}
+
+    <h3>V3 History</h3>
+    <p class="lead">The history API is meant for statistical overviews.</p>
+    {% for api in v3_history|sort(attribute='name') %}
+        <h4 id="{{ api.name|slugify }}">{{ api.name|replace('_', ' ')|title }}</h4>
+        <div class="float-right"><a href="#top" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> top</a></div>
+        <p>URL: <code>{{ api.rule.rule }}</code></p>
+        {{ api.function|docstring|markdown(4) or '<p><small>No docs, sorry.</small></p>'|safe }}
+    {% endfor %}
+
+    <h3>V3 Direct</h3>
+    <p class="lead">The direct API is direct (but server-side cached up to 1 hour) authenticated access to the internal Curse api.</p>
+    {% for api in v3_direct|sort(attribute='name') %}
+        <h4 id="{{ api.name|slugify }}">{{ api.name|replace('_', ' ')|title }}</h4>
+        <div class="float-right"><a href="#top" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> top</a></div>
+        <p>URL: <code>{{ api.rule.rule }}</code></p>
+        {{ api.function|docstring|markdown(4) or '<p><small>No docs, sorry.</small></p>'|safe }}
+    {% endfor %}
+
 {% endblock %}

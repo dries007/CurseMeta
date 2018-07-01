@@ -35,7 +35,7 @@ migrate = Migrate(app, db)
 redis_store = FlaskRedis(app)
 redis_store.ping()  # Just to make sure the config is OK
 # Monkey patch! To bypass use `with requests_cache.disabled():`
-requests_cache.install_cache(backend='redis', expire_after=datetime.timedelta(hours=24), connection=redis_store)
+requests_cache.install_cache(backend='redis', expire_after=datetime.timedelta(hours=1), connection=redis_store)
 
 
 # Curse Client

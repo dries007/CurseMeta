@@ -14,12 +14,15 @@ from urllib.parse import unquote_plus as url_decode
 from markdown import markdown
 from sqlalchemy.sql.expression import func
 
+from app.tasks import FEEDS_INTERVALS, get_dlfeed_key
 from .. import app
 from .. import curse_login
+from .. import redis_store
 from ..helpers import to_json_response
 from ..helpers import cache
 from ..helpers import get_curse_api
 from ..helpers import post_curse_api
+from ..helpers import get_routes_with_prefix
 from ..helpers import CURSE_HOST
 from ..models import *
 
@@ -106,17 +109,25 @@ def about():
 
 @app.route('/docs')
 def docs():
-    apis = []
-    for rule in app.url_map.iter_rules():
-        rule: werkzeug.routing.Rule
-        if not rule.endpoint.startswith('api_v3_'):
-            continue
-        apis.append({
-            'name': rule.endpoint.replace('api_v3_', ''),
-            'rule': rule,
-            'function': app.view_functions[rule.endpoint]
-        })
-    return flask.render_template('docs.html', apis=apis)
+    exclude = set()
+
+    v3_history = get_routes_with_prefix('api_v3_history', exclude)
+    exclude.update(x['endpoint'] for x in v3_history)
+
+    v3_direct = get_routes_with_prefix('api_v3_direct', exclude)
+    exclude.update(x['endpoint'] for x in v3_direct)
+
+    v3 = get_routes_with_prefix('api_v3', exclude)
+    exclude.update(x['endpoint'] for x in v3)
+
+    leftover = get_routes_with_prefix('api', exclude)
+
+    return flask.render_template('docs.html',
+                                 v3=v3,
+                                 v3_direct=v3_direct,
+                                 v3_history=v3_history,
+                                 leftover=leftover
+                                 )
 
 
 @app.route('/api/<path:p>')
@@ -133,7 +144,7 @@ def missing_api(p):
 @cache()
 def api_v3_direct_get_addon(addon_id: int):
     """
-    See _get_addons_ to request multiple addons at once.
+    See _Get Addons_ to request multiple addons at once.
     Required:
     - `addon_id`: A single addon ID
     """
@@ -162,7 +173,7 @@ def api_v3_direct_get_search():
     Required:
     - GET: `gameId`: Which game to search
     Optional:
-    - TODO: add optional parameters to docs, see http://ix.io/1bll/C#
+    - TODO: add optional parameters to docs, see http://ix.io/1bll/C#, line nr 47
     """
     data = get_curse_api('api/addon/search', flask.request.args).json()
     for x in data:
@@ -179,7 +190,6 @@ def api_v3_direct_get_addon_description(addon_id: int):
     Optional:
     - GET: `markdown` or `md`: If present, converts html to markdown. Might not be accurate.
     - GET: `fixlinks`: If present, replace `/linkout?=<url>` with the actual direct url.
-    Return type: HTML!
     """
     data = get_curse_api('api/addon/%d/description' % addon_id).text
     if 'fixlinks' in flask.request.args:
@@ -199,7 +209,6 @@ def api_v3_direct_get_addon_changelog(addon_id: int, file_id: int):
     Optional:
     - GET: `markdown` or `md`: If present, converts html to markdown. Might not be accurate.
     - GET: `fixlinks`: If present, replace `/linkout?=<url>` with the actual direct url.
-    Return type: HTML!
     """
     data = get_curse_api('api/addon/%d/file/%d/changelog' % (addon_id, file_id)).text
     if 'fixlinks' in flask.request.args:
@@ -213,7 +222,7 @@ def api_v3_direct_get_addon_changelog(addon_id: int, file_id: int):
 @cache()
 def api_v3_direct_get_addon_file(addon_id: int, file_id: int):
     """
-    See _get_addons_files_ to request multiple pairs at once.
+    See _Get Addons Files_ to request multiple pairs at once.
     Required:
     - `addon_id`: A single addon ID
     - `file_id`: A single file ID
@@ -264,7 +273,7 @@ def api_v3_direct_get_addons_files():
 @cache()
 def api_v3_direct_get_repo_from_slug():
     """
-    Might have something to do with WOW, git/hg repos. Requires further research.
+    Might have something to do with WOW, git/hg repos. _Requires further research._
     Required:
     - GET `gameSlug`: A string. todo: find out what this means
     - GET `addonSlug`: A string. todo: find out what this means
@@ -284,16 +293,13 @@ def api_v3_direct_get_featured():
     - GET: `updatedCount`: Defaults to 14
     - GET: `excluded`: Exclude an addon ID. Can be specified multiple times.
     """
-    # todo: cache in redis?
-    r = requests.post(CURSE_HOST + 'api/addon/featured', json={
+    data = post_curse_api('api/addon/featured', {
         'GameId': flask.request.args.get('gameId', type=int),
         'FeaturedCount': flask.request.args.get('featuredCount', 6, type=int),
         'PopularCount': flask.request.args.get('popularCount', 14, type=int),
         'UpdatedCount': flask.request.args.get('updatedCount', 14, type=int),
         'ExcludedAddons': flask.request.args.getlist('addonIds', type=int),
-    }, timeout=60, headers=curse_login.get_headers())
-    r.raise_for_status()
-    data = r.json()
+    }).json()
     for k, v in data.items():
         AddonModel.update(v)
     return to_json_response(data)
@@ -302,6 +308,9 @@ def api_v3_direct_get_featured():
 @app.route('/api/v3/direct/addon/timestamp')
 @cache()
 def api_v3_direct_get_timestamp():
+    """
+    Get the last (Curse internal) update timestamp
+    """
     return get_curse_api('api/addon/timestamp').text
 
 
@@ -322,13 +331,18 @@ def api_v3_direct_get_mc_modloader_by_key(key: str):
 @app.route('/api/v3/direct/minecraft/modloader/<string:key>')
 @cache()
 def api_v3_direct_get_mc_modloader_by_version(key: str):
-    # todo: how does this work? it's the same url and endpoint.
+    """
+    todo: how does this work? it's the same url and endpoint as `api_v3_direct_get_mc_modloader_by_key`...
+    """
     return to_json_response(get_curse_api('api/minecraft/modloader/%s' % key).json())
 
 
 @app.route('/api/v3/direct/minecraft/modloader/timestamp')
 @cache()
 def api_v3_direct_get_mc_modloader_timestamp():
+    """
+    Get the last (Curse internal) update timestamp
+    """
     return get_curse_api('api/minecraft/modloader/timestamp').text
 
 
@@ -343,6 +357,9 @@ def api_v3_direct_get_mc_versions():
 @app.route('/api/v3/direct/minecraft/version/timestamp')
 @cache()
 def api_v3_direct_get_mc_version_timestamp():
+    """
+    Get the last (Curse internal) update timestamp
+    """
     return get_curse_api('api/minecraft/version/timestamp').text
 
 
@@ -377,6 +394,9 @@ def api_v3_direct_get_game(game_id: int):
 @app.route('/api/v3/direct/game/timestamp')
 @cache()
 def api_v3_direct_get_game_timestamp():
+    """
+    Get the last (Curse internal) update timestamp
+    """
     return get_curse_api('api/game/timestamp').text
 
 
@@ -416,6 +436,9 @@ def api_v3_direct_get_category_by_section(section_id: int):
 @app.route('/api/v3/direct/category/timestamp')
 @cache()
 def api_v3_direct_get_category_timestamp():
+    """
+    Get the last (Curse internal) update timestamp
+    """
     return get_curse_api('api/category/timestamp').text
 
 
@@ -477,6 +500,45 @@ def api_v3_manifest():
     return to_json_response(manifest)
 
 
+# ===== Historical data =====
+
+
+@app.route('/api/v3/history/feeds')
+@cache(None)
+def api_v3_history_feeds():
+    """
+    Get a list of which feeds are available.
+    They are periodically generated and updated.
+    The returned timestamp is when the generation last took place. If that's null, there has been none.
+    """
+    timestamp = redis_store.get('history-timestamp')
+    timestamp = int(timestamp) if timestamp is not None else None
+    game_ids = list(sorted(int(x) for x in redis_store.smembers('history-game_ids')))
+
+    # noinspection PyProtectedMember
+    return to_json_response({
+        'timestamp': timestamp,
+        'game_ids': game_ids,
+        'intervals': FEEDS_INTERVALS
+    })
+
+
+@app.route('/api/v3/history/downloads/<int:game_id>/<string:interval>')
+@cache(None)
+def api_v3_history_downloads(game_id: int, interval: str):
+    """
+    Get a list of download numbers in the last `interval`.
+    A list of intervals generated is provided via the _Feeds_ endpoint.
+
+    The output is a map of `addon ids` → `download delta`. A negative delta is possible.
+    """
+    if game_id not in map(int, redis_store.smembers('history-game_ids')):
+        raise exceptions.BadRequest('This gameid does not exist or there is no feed yet.')
+    if interval not in FEEDS_INTERVALS:
+        raise exceptions.BadRequest('This interval does not exist or there is no feed yet.')
+    return flask.Response(redis_store.get(get_dlfeed_key(game_id, interval)), mimetype="application/json")
+
+
 # ===== MultiMC =====
 
 
@@ -492,7 +554,10 @@ def _fix_names(obj):
 
 @app.route('/<int:addon_id>/<int:file_id>.json')
 @cache()
-def deprecated_project_file_json(addon_id: int, file_id: int):
+def api_deprecated_project_file_json(addon_id: int, file_id: int):
+    """
+    **DEPRECATED**
+    """
     data = get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json(object_hook=_fix_names)
     data['__comment'] = 'WARNING: Deprecated API, Should only be used by existing users.'
     r = to_json_response(data)
