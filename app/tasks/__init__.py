@@ -202,7 +202,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(24 * 60 * 60, periodic_find_hidden_addons.s())  # daily
 
-    sender.add_periodic_task(7 * 24 * 60 * 60, task_request_all_files.s())  # weekly
+    sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_files.s())  # weekly
 
     sender.add_periodic_task(crontab(minute='0', hour='*'), periodic_keep_history.s())  # every hour at XX:00
 
@@ -216,4 +216,4 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     last = redis_store.get('periodic-request_all_files-last')
     if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
-        task_request_all_files.apply_async(countdown=4 * 60 * 60)
+        periodic_request_all_files.apply_async(countdown=4 * 60 * 60)
