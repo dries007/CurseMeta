@@ -8,6 +8,7 @@ from flask import Flask
 from flask_redis import FlaskRedis
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_humanize import Humanize
 
 import CurseClient
 
@@ -19,6 +20,7 @@ mimetypes.init()
 
 # Main Flask magic
 app = Flask(__name__)
+humanize = Humanize(app)
 app.config.from_object('config')
 
 if app.config.get('DEBUG', False):

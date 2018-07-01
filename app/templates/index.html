@@ -6,4 +6,15 @@
     <p>This is not limited to Minecraft related data!</p>
     {# todo: add some general stats #}
     {# todo: add more general info #}
+
+    <h2>CurseMetaMeta</h2>
+    <ul>
+        <li>Highest known Addon ID: {{ max_addon }}</li>
+        <li>Highest known File ID: {{ max_file }}</li>
+        <li>Number of addons in database: {{ num_addons|humanize('intword') }}</li>
+        <li>Number of files in database: {{ num_files|humanize('intword') }}</li>
+        <li>Number of authors in database: {{ num_authors|humanize('intword') }}</li>
+        <li>Number of historic records in database: {{ num_history|humanize('intword') }}</li>
+    </ul>
+
 {% endblock %}

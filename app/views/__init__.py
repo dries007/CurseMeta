@@ -2,7 +2,6 @@ import re
 import json
 import unicodedata
 import html2text
-from urllib.parse import unquote_plus as url_decode
 
 import flask
 import werkzeug.routing
@@ -11,7 +10,9 @@ import textwrap
 import requests
 import werkzeug.exceptions as exceptions
 
+from urllib.parse import unquote_plus as url_decode
 from markdown import markdown
+from sqlalchemy.sql.expression import func
 
 from .. import app
 from .. import curse_login
@@ -88,7 +89,14 @@ def any_error(e: Exception):
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html')
+    return flask.render_template('index.html',
+                                 max_addon=db.session.query(func.max(AddonModel.addon_id)).scalar(),
+                                 max_file=db.session.query(func.max(FileModel.file_id)).scalar(),
+                                 num_addons=db.session.query(AddonModel).count(),
+                                 num_files=db.session.query(FileModel).count(),
+                                 num_authors=db.session.query(AuthorModel).count(),
+                                 num_history=db.session.query(HistoricRecord).count(),
+                                 )
 
 
 @app.route('/about')
