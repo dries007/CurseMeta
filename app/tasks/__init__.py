@@ -95,7 +95,7 @@ def periodic_find_hidden_addons():
     logger.info('Looking for {} missing ids'.format(len(missing_ids)))
     found_count = 0
     for i in range(0, len(missing_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons.s(missing_ids[i:i + MAX_ADDONS_PER_REQUEST])
+        task_request_addons.delay(missing_ids[i:i + MAX_ADDONS_PER_REQUEST])
     logger.info('Found {} hidden addons'.format(found_count))
 
 
@@ -108,7 +108,7 @@ def periodic_fill_missing_addons():
         return 0
     logger.info('Looking for {} addons with info missing'.format(len(missing_addon_ids)))
     for i in range(0, len(missing_addon_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons.s(missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST])
+        task_request_addons.delay(missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST])
 
 
 @celery.task
@@ -117,7 +117,7 @@ def periodic_request_all_files():
     redis_store.set('periodic-request_all_files-last', int(datetime.now().timestamp()))
     known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
     for id in known_ids:
-        task_request_all_files.s(id)
+        task_request_all_files.delay(id)
 
 
 @celery.task
@@ -137,7 +137,7 @@ def manual_request_all_addons():
     known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
     logger.info('Requesting info on all {} addons'.format(len(known_ids)))
     for id in known_ids:
-        task_request_all_files.s(id)
+        task_request_all_files.delay(id)
 
 
 @celery.task
