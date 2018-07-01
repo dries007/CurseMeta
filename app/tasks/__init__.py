@@ -85,37 +85,18 @@ def periodic_remove_expired_caches():
 @locked_task('periodic-find_hidden_addons-lock', timeout=30*60)
 def periodic_find_hidden_addons():
     redis_store.set('periodic-find_hidden_addons-last', int(datetime.now().timestamp()))
-    start_id = redis_store.get('periodic-find_hidden_addons-start_id')
-    start_id = int(start_id) if start_id is not None else 1
     from sqlalchemy import func
     end_id = db.session.query(func.max(AddonModel.addon_id)).scalar() + 1000
-    logger.info('Finding hidden addons between id {} and {}'.format(start_id, end_id))
+    logger.info('Finding hidden addons until {}'.format(end_id))
     known_ids = set(x[0] for x in db.session.query(AddonModel.addon_id).all())
-    missing_ids = sorted(list(set(range(start_id, end_id)) - known_ids))
+    missing_ids = sorted(list(set(range(end_id)) - known_ids))
     if len(missing_ids) == 0:
         return 0
     logger.info('Looking for {} missing ids'.format(len(missing_ids)))
-    last_found_id = start_id
     found_count = 0
     for i in range(0, len(missing_ids), MAX_ADDONS_PER_REQUEST):
-        ids = missing_ids[i:i + MAX_ADDONS_PER_REQUEST]
-        logger.info('Batch {}, id {} to {}'.format(i / MAX_ADDONS_PER_REQUEST, ids[0], ids[-1]))
-        # noinspection PyBroadException
-        try:
-            data = post_curse_api('api/addon', ids).json()
-            if data is None or len(data) == 0:
-                logger.info('No addons found in batch?')
-                continue
-            for x in data:
-                AddonModel.update(x)
-            found_count += len(data)
-            last_found_id = max(data, key=lambda x: x['id'])['id']
-            logger.info('Found {} addons in batch, last id {}'.format(len(data), last_found_id))
-        except Exception:
-            logger.exception('Error in batch')
-    logger.info('Found {} hidden addons, last id: {}'.format(found_count, last_found_id))
-    redis_store.set('periodic-find_hidden_addons-start_id', last_found_id)
-    return found_count
+        task_request_addons(missing_ids[i:i + MAX_ADDONS_PER_REQUEST]).s()
+    logger.info('Found {} hidden addons'.format(found_count))
 
 
 @celery.task
@@ -126,24 +107,8 @@ def periodic_fill_missing_addons():
     if len(missing_addon_ids) == 0:
         return 0
     logger.info('Looking for {} addons with info missing'.format(len(missing_addon_ids)))
-    found_count = 0
     for i in range(0, len(missing_addon_ids), MAX_ADDONS_PER_REQUEST):
-        ids = missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST]
-        logger.info('Batch {}, id {} to {}'.format(i / MAX_ADDONS_PER_REQUEST, ids[0], ids[-1]))
-        # noinspection PyBroadException
-        try:
-            data = post_curse_api('api/addon', ids).json()
-            if data is None or len(data) == 0:
-                logger.info('No addons found in batch?')
-                continue
-            for x in data:
-                AddonModel.update(x)
-            found_count += len(data)
-            logger.info('Found {} addons in batch'.format(len(data)))
-        except Exception:
-            logger.exception('Error in batch')
-    logger.info('Filled {} missing addons'.format(found_count))
-    return found_count
+        task_request_addons(missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST]).s()
 
 
 @celery.task
@@ -152,14 +117,19 @@ def periodic_request_all_files():
     redis_store.set('periodic-request_all_files-last', int(datetime.now().timestamp()))
     known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
     for id in known_ids:
-        logger.info('Getting all files for {}'.format(id))
-        # noinspection PyBroadException
-        try:
-            data = get_curse_api('api/addon/%d/files' % id).json()
-            for x in data:
-                FileModel.update(id, x)
-        except requests.RequestException:
-            logger.exception('Error in batch')
+        task_request_all_files.s(id)
+
+
+@celery.task
+def task_request_all_files(id):
+    for x in get_curse_api('api/addon/%d/files' % id).json():
+        FileModel.update(id, x)
+
+
+@celery.task
+def task_request_addons(ids):
+    for x in post_curse_api('api/addon', ids).json():
+        AddonModel.update(x)
 
 
 @celery.task
@@ -167,13 +137,7 @@ def manual_request_all_addons():
     known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
     logger.info('Requesting info on all {} addons'.format(len(known_ids)))
     for id in known_ids:
-        # noinspection PyBroadException
-        try:
-            data = get_curse_api('api/addon/%d/files' % id).json()
-            for x in data:
-                FileModel.update(id, x)
-        except requests.RequestException:
-            logger.exception('Error in batch')
+        task_request_all_files.s(id)
 
 
 @celery.task
@@ -238,7 +202,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(24 * 60 * 60, periodic_find_hidden_addons.s())  # daily
 
-    sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_files.s())  # weekly
+    sender.add_periodic_task(7 * 24 * 60 * 60, task_request_all_files.s())  # weekly
 
     sender.add_periodic_task(crontab(minute='0', hour='*'), periodic_keep_history.s())  # every hour at XX:00
 
@@ -252,4 +216,4 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     last = redis_store.get('periodic-request_all_files-last')
     if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
-        periodic_request_all_files.apply_async(countdown=4 * 60 * 60)
+        task_request_all_files.apply_async(countdown=4 * 60 * 60)
