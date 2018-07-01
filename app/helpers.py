@@ -42,3 +42,12 @@ def get_curse_api(url, params=None):
     r = requests.get(CURSE_HOST + url, params, timeout=60, headers=curse_login.get_headers())
     r.raise_for_status()
     return r
+
+
+def post_curse_api(url, data):
+    """
+    todo: better error handling(?)
+    """
+    r = requests.post(CURSE_HOST + url, json=data, timeout=60, headers=curse_login.get_headers())
+    r.raise_for_status()
+    return r

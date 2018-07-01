@@ -18,6 +18,7 @@ from .. import curse_login
 from ..helpers import to_json_response
 from ..helpers import cache
 from ..helpers import get_curse_api
+from ..helpers import post_curse_api
 from ..helpers import CURSE_HOST
 from ..models import *
 
@@ -124,6 +125,7 @@ def missing_api(p):
 @cache()
 def api_v3_direct_get_addon(addon_id: int):
     """
+    See _get_addons_ to request multiple addons at once.
     Required:
     - `addon_id`: A single addon ID
     """
@@ -132,7 +134,18 @@ def api_v3_direct_get_addon(addon_id: int):
     return to_json_response(data)
 
 
-# todo: Add POST(?) for multiple addons at the same time. (maybe just allow a GET with multiple 'addonId' parameters?)
+@app.route('/api/v3/direct/addon')
+@cache()
+def api_v3_direct_get_addons():
+    """
+    Required:
+    - GET `id`: One or more addon ids. Just specify more than once.
+    """
+    data = post_curse_api('api/addon', flask.request.args.getlist('id', type=int)).json()
+    for x in data:
+        AddonModel.update(x)
+    return to_json_response(data)
+
 
 @app.route('/api/v3/direct/addon/search')
 @cache()
@@ -192,6 +205,7 @@ def api_v3_direct_get_addon_changelog(addon_id: int, file_id: int):
 @cache()
 def api_v3_direct_get_addon_file(addon_id: int, file_id: int):
     """
+    See _get_addons_files_ to request multiple pairs at once.
     Required:
     - `addon_id`: A single addon ID
     - `file_id`: A single file ID
@@ -213,7 +227,29 @@ def api_v3_direct_get_addon_files(addon_id: int):
         FileModel.update(addon_id, x)
     return to_json_response(data)
 
-# todo: Add POST(?) endpoint for 'api/addon/files' This is based on 'AddonFileKey's
+
+@app.route('/api/v3/direct/addon/files')
+@cache()
+def api_v3_direct_get_addons_files():
+    """
+    You **must** have an equal number of `addon` and `file` parameters.
+
+    Required:
+    - GET `addon`: One or more addon ids. Just specify more than once.
+    - GET `file`: One or more file ids. Just specify more than once.
+    """
+    addons = flask.request.args.getlist('addon', type=int)
+    files = flask.request.args.getlist('file', type=int)
+
+    if len(addons) != len(files):
+        raise exceptions.BadRequest('len(addons) != len(files)')
+
+    data = [{'addonId': addon, 'fileId': file} for addon, file in zip(addons, files)]
+    data = post_curse_api('api/addon/files', data).json()
+    for addon_id, x in data.items():
+        for xx in x:
+            FileModel.update(addon_id, xx)
+    return to_json_response(data)
 
 
 @app.route('/api/v3/direct/addon/slug')
@@ -242,11 +278,11 @@ def api_v3_direct_get_featured():
     """
     # todo: cache in redis?
     r = requests.post(CURSE_HOST + 'api/addon/featured', json={
-        'GameId': flask.request.args.get('gameId'),
-        'FeaturedCount': flask.request.args.get('featuredCount', 6),
-        'PopularCount': flask.request.args.get('popularCount', 14),
-        'UpdatedCount': flask.request.args.get('updatedCount', 14),
-        'ExcludedAddons': flask.request.args.getlist('addonIds'),
+        'GameId': flask.request.args.get('gameId', type=int),
+        'FeaturedCount': flask.request.args.get('featuredCount', 6, type=int),
+        'PopularCount': flask.request.args.get('popularCount', 14, type=int),
+        'UpdatedCount': flask.request.args.get('updatedCount', 14, type=int),
+        'ExcludedAddons': flask.request.args.getlist('addonIds', type=int),
     }, timeout=60, headers=curse_login.get_headers())
     r.raise_for_status()
     data = r.json()
@@ -373,6 +409,65 @@ def api_v3_direct_get_category_by_section(section_id: int):
 @cache()
 def api_v3_direct_get_category_timestamp():
     return get_curse_api('api/category/timestamp').text
+
+
+# ===== Manifest.json =====
+
+
+@app.route('/api/v3/manifest', methods=['POST'])
+@cache(None)
+def api_v3_manifest():
+    """
+    Upload a manifest.json from a Curse/Twitch modpack and it will be returned
+    with the list of files replaced with the projectID-fileID pairs resolved.
+
+    The resolved file data will be inserted in an added data field called `fileData`.
+    Any unsolvable files will remain, with an added data field `fileError`.
+
+    Required:
+    - POST: json manifest from Minecraft Modpack, version 1 only.
+
+    Optional:
+    - GET: `resolveAddons`: Also resolve and add addon data to field called `addonData`.
+    """
+    manifest = flask.request.get_json(force=True)
+    if manifest is None:
+        raise exceptions.BadRequest('Data was not json.')
+    if manifest['manifestType'] != 'minecraftModpack':
+        raise exceptions.BadRequest('Unknown manifest type.')
+    if manifest['manifestVersion'] != 1:
+        raise exceptions.BadRequest('Unknown manifest version.')
+
+    files = manifest['files']
+
+    file_data = [{'addonId': x['projectID'], 'fileId': x['fileID']} for x in files]
+    file_data = post_curse_api('api/addon/files', file_data).json()
+    for addon_id, x in file_data.items():
+        for xx in x:
+            FileModel.update(addon_id, xx)
+
+    if 'resolveAddons' in flask.request.args:
+        addon_data = {x['id']: x for x in post_curse_api('api/addon', [x['projectID'] for x in files]).json()}
+        for x in addon_data.values():
+            AddonModel.update(x)
+    else:
+        addon_data = None
+
+    for file in files:
+        for x in file_data[str(file['projectID'])]:
+            if file['fileID'] == x['id']:
+                file['fileData'] = x
+                break
+        if 'fileData' not in file:
+            file['fileError'] = True
+        if addon_data:
+            if file['projectID'] in addon_data:
+                file['addonData'] = addon_data[file['projectID']]
+            else:
+                file['addonError'] = True
+
+    return to_json_response(manifest)
+
 
 # ===== MultiMC =====
 

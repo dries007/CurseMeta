@@ -17,9 +17,11 @@ from .. import curse_login
 from .. import redis_store
 from ..models import *
 from ..helpers import get_curse_api
+from ..helpers import post_curse_api
 
 
 logger = get_task_logger(__name__)
+MAX_ADDONS_PER_REQUEST = 16000
 
 
 def locked_task(name_: str or callable, timeout=10*60):
@@ -95,15 +97,23 @@ def periodic_find_hidden_addons():
     logger.info('Looking for {} missing ids'.format(len(missing_ids)))
     last_found_id = start_id
     found_count = 0
-    for id in missing_ids:
+    for i in range(0, len(missing_ids), MAX_ADDONS_PER_REQUEST):
+        ids = missing_ids[i:i + MAX_ADDONS_PER_REQUEST]
+        logger.info('Batch {}, id {} to {}'.format(i / MAX_ADDONS_PER_REQUEST, ids[0], ids[-1]))
         # noinspection PyBroadException
         try:
-            data = get_curse_api('api/v3/direct/addon/%d' % id)
-            AddonModel.update(data)
-            last_found_id = data['id']
-        except requests.RequestException:
-            logger.exception('Error trying %d' % id)
-    logger.info('Foud {} hidden addons, last id: {}'.format(found_count, last_found_id))
+            data = post_curse_api('api/addon', ids).json()
+            if data is None or len(data) == 0:
+                logger.info('No addons found in batch?')
+                continue
+            for x in data:
+                AddonModel.update(x)
+            found_count += len(data)
+            last_found_id = max(data, key=lambda x: x['id'])['id']
+            logger.info('Found {} addons in batch, last id {}'.format(len(data), last_found_id))
+        except Exception:
+            logger.exception('Error in batch')
+    logger.info('Found {} hidden addons, last id: {}'.format(found_count, last_found_id))
     redis_store.set('periodic-find_hidden_addons-start_id', last_found_id)
     return found_count
 
@@ -117,15 +127,22 @@ def periodic_fill_missing_addons():
         return 0
     logger.info('Looking for {} addons with info missing'.format(len(missing_addon_ids)))
     found_count = 0
-    for id in missing_addon_ids:
+    for i in range(0, len(missing_addon_ids), MAX_ADDONS_PER_REQUEST):
+        ids = missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST]
+        logger.info('Batch {}, id {} to {}'.format(i / MAX_ADDONS_PER_REQUEST, ids[0], ids[-1]))
         # noinspection PyBroadException
         try:
-            data = get_curse_api('api/v3/direct/addon/%d' % id)
-            AddonModel.update(data)
-            found_count += 1
-        except requests.RequestException:
-            logger.exception('Error trying %d' % id)
-    logger.info('Filld {} missing addons'.format(found_count))
+            data = post_curse_api('api/addon', ids).json()
+            if data is None or len(data) == 0:
+                logger.info('No addons found in batch?')
+                continue
+            for x in data:
+                AddonModel.update(x)
+            found_count += len(data)
+            logger.info('Found {} addons in batch'.format(len(data)))
+        except Exception:
+            logger.exception('Error in batch')
+    logger.info('Filled {} missing addons'.format(found_count))
     return found_count
 
 
@@ -135,9 +152,10 @@ def periodic_request_all_files():
     redis_store.set('periodic-request_all_files-last', int(datetime.now().timestamp()))
     known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
     for id in known_ids:
+        logger.info('Getting all files for {}'.format(id))
         # noinspection PyBroadException
         try:
-            data = get_curse_api('api/v3/direct/addon/%d/files' % id)
+            data = get_curse_api('api/addon/%d/files' % id).json()
             for x in data:
                 FileModel.update(id, x)
         except requests.RequestException:
@@ -151,7 +169,7 @@ def manual_request_all_addons():
     for id in known_ids:
         # noinspection PyBroadException
         try:
-            data = get_curse_api('api/v3/direct/addon/%d/files' % id)
+            data = get_curse_api('api/addon/%d/files' % id).json()
             for x in data:
                 FileModel.update(id, x)
         except requests.RequestException:

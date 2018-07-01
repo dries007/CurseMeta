@@ -3,10 +3,12 @@ import json
 import requests
 
 
-def _post_json_retry(data, timeout=10, attempts=3):
+def _post_json_retry(data, timeout=10, attempts=5):
     while attempts > 0:
         try:
-            return requests.post('https://logins-v1.curseapp.net/login', json=data, timeout=timeout).json()
+            r = requests.post('https://logins-v1.curseapp.net/login', json=data, timeout=timeout)
+            r.raise_for_status()
+            return r.json()
         except ConnectionError:
             attempts -= 1
             if attempts == 0:
@@ -32,6 +34,8 @@ class LoginClient(object):
 
     def login(self):
         self.session = _post_json_retry({'Username': self.__username, 'Password': self.__password})['Session']
+        if self.session is None:
+            raise RuntimeError('Error logging in.')
         self.renewAfter = datetime.datetime.fromtimestamp(self.session['RenewAfter'] / 1000)
         if self.redis:
             expire_sec = int((self.renewAfter - datetime.datetime.now()).total_seconds())
