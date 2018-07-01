@@ -78,7 +78,7 @@ def periodic_curse_login():
 
 @celery.task
 def periodic_remove_expired_caches():
-    return requests_cache.remove_expired_responses()
+    return requests_cache.core.remove_expired_responses()
 
 
 @celery.task
@@ -229,7 +229,8 @@ def periodic_generate_history_feed():
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(60 * 60, periodic_curse_login.s())
-    sender.add_periodic_task(60 * 60, periodic_remove_expired_caches.s())
+
+    sender.add_periodic_task(15 * 60, periodic_remove_expired_caches.s())
 
     sender.add_periodic_task(15 * 60, periodic_fill_missing_addons.s())
 
