@@ -128,7 +128,6 @@ class AddonModel(db.Model):
 
 class HistoricRecord(db.Model):
     __tablename__ = 'history'
-    last_update = db.Column(db.DateTime, nullable=False, onupdate=datetime.now, default=datetime.now)
     timestamp = db.Column(db.DateTime, nullable=False, primary_key=True)
     addon_id = db.Column(db.Integer, db.ForeignKey('addon.addon_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
     downloads = db.Column(db.BigInteger)
