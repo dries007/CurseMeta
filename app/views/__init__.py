@@ -558,19 +558,23 @@ def api_deprecated_project_file_json(addon_id: int, file_id: int):
     """
     **DEPRECATED**
     """
+    enum = [
+        'UNKNOWN',
+        'Folder',
+        'Ctoc',
+        'SingleFile',
+        'Cmod2',
+        'ModPack',
+        'Mod',
+    ]
     file_data = get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json(object_hook=_fix_names)
     project_data = get_curse_api('api/addon/%d' % addon_id).json(object_hook=_fix_names)
+    print(file_data)
+    print(project_data)
     file_data['__comment'] = 'WARNING: Deprecated API, Should only be used by existing users.'
     file_data['_Project'] = {
-        'Path': project_data['categorySection']['path'],
-        'PackageType': [
-            'Folder',
-            'Ctoc',
-            'SingleFile',
-            'Cmod2',
-            'ModPack',
-            'Mod',
-        ][project_data['packageType']]
+        'Path': project_data['CategorySection']['Path'],
+        'PackageType': enum[project_data['PackageType']]
     }
     r = to_json_response(file_data)
     r.headers.add('Warning', '299 - "Deprecated API"')
