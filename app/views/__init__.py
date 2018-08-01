@@ -597,7 +597,7 @@ def api_v0_db_dump():
     return to_json_response([
         {
             'id': addon.addon_id,
-            'last_update': addon.last_update.timestamp(),
+            'last_update': int(addon.last_update.timestamp()),
             'slug': addon.slug,
             'game': addon.game_id,
             'name': addon.name,
@@ -607,7 +607,7 @@ def api_v0_db_dump():
             'files': None if not files else [
                 {
                     'id': file.file_id,
-                    'last_update': file.last_update.timestamp(),
+                    'last_update': int(file.last_update.timestamp()),
                     'name': file.name,
                     'url': file.url,
                 } for file in addon.files
