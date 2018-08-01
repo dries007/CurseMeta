@@ -91,6 +91,7 @@ class AddonModel(db.Model):
     category = db.Column(db.String, nullable=True)
     downloads = db.Column(db.BigInteger, nullable=True)
     score = db.Column(db.Float, nullable=True)
+    slug = db.Column(db.String, nullable=True)
 
     primary_author_name = db.Column(db.String, db.ForeignKey(AuthorModel.name, onupdate='cascade', ondelete='cascade'), nullable=True)
 
@@ -115,6 +116,7 @@ class AddonModel(db.Model):
         obj.category = data['categorySection']['name']
         obj.downloads = data['downloadCount']
         obj.score = data['popularityScore']
+        obj.slug = data['slug']
 
         db.session.add(obj)
         db.session.commit()
