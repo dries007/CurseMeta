@@ -145,6 +145,8 @@ def task_request_addons(ids):
 def manual_request_all_addons():
     known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
     logger.info('Requesting info on all {} addons'.format(len(known_ids)))
+    for i in range(0, len(known_ids), MAX_ADDONS_PER_REQUEST):
+        task_request_addons.delay(known_ids[i:i + MAX_ADDONS_PER_REQUEST])
     for id in known_ids:
         task_request_all_files.delay(id)
 

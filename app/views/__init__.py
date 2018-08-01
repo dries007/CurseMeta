@@ -542,8 +542,8 @@ def api_v3_history_downloads(game_id: int, interval: str):
 # ===== DB access =====
 
 
-@app.route('/api/v0/db/slug')
-@cache(None)
+@app.route('/api/v0/db/slug', methods=['GET', 'POST'])
+@cache()
 def api_v0_db_slug():
     """
     Required:
@@ -554,13 +554,15 @@ def api_v0_db_slug():
     **WARNING** Provisional API. Don't use in client side projects.
     """
 
-    slugs = flask.request.args.getlist('slug', type=str)
+    if flask.request.method == 'POST':
+        slugs = flask.request.get_json(force=True)
+    else:
+        slugs = flask.request.args.getlist('slug', type=str)
     addons = AddonModel.query.filter(AddonModel.slug.in_(slugs)).all()
-
-    # noinspection PyProtectedMember
     return to_json_response({
         addon.slug: {
             'id': addon.addon_id,
+            'last_update': addon.last_update,
             'game': addon.game_id,
             'name': addon.name,
             'category': addon.category,
@@ -568,6 +570,50 @@ def api_v0_db_slug():
             'score': addon.score,
         } for addon in addons
     })
+
+
+@app.route('/api/v0/db/dump', methods=['GET', 'POST'])
+@cache()
+def api_v0_db_dump():
+    """
+    Dumps the whole (addon) DB.
+    Some members may be null.
+
+    **WARING**: Large!
+
+    Optional:
+    - GET: `files`: Also dump the whole file DB. (**WARING**: Extra Large!)
+    - GET: `game`: Filter based on game. Can be specified multiple times.
+
+    **WARNING** Provisional API. Don't use in client side projects.
+    """
+    games = flask.request.args.getlist('game', type=str)
+    if games:
+        addons = AddonModel.query.filter(AddonModel.game_id.in_(games)).all()
+    else:
+        addons = AddonModel.query.all()
+
+    files = 'files' in flask.request.args
+    return to_json_response([
+        {
+            'id': addon.addon_id,
+            'last_update': addon.last_update.timestamp(),
+            'slug': addon.slug,
+            'game': addon.game_id,
+            'name': addon.name,
+            'category': addon.category,
+            'downloads': addon.downloads,
+            'score': addon.score,
+            'files': None if not files else [
+                {
+                    'id': file.file_id,
+                    'last_update': file.last_update.timestamp(),
+                    'name': file.name,
+                    'url': file.url,
+                } for file in addon.files
+            ]
+        } for addon in addons
+    ])
 
 
 # ===== MultiMC =====
