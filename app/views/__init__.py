@@ -539,6 +539,37 @@ def api_v3_history_downloads(game_id: int, interval: str):
     return flask.Response(redis_store.get(get_dlfeed_key(game_id, interval)), mimetype="application/json")
 
 
+# ===== DB access =====
+
+
+@app.route('/api/v0/db/slug')
+@cache(None)
+def api_v0_db_slug():
+    """
+    Required:
+    - GET: `slug`: The slug to look up. Can be specified multiple times.
+
+    A null value or missing key means no data was found.
+
+    **WARNING** Provisional API. Don't use in client side projects.
+    """
+
+    slugs = flask.request.args.getlist('slug', type=str)
+    addons = AddonModel.query.filter(AddonModel.slug.in_(slugs)).all()
+
+    # noinspection PyProtectedMember
+    return to_json_response({
+        addon.slug: {
+            'id': addon.addon_id,
+            'game': addon.game_id,
+            'name': addon.name,
+            'category': addon.category,
+            'downloads': addon.downloads,
+            'score': addon.score,
+        } for addon in addons
+    })
+
+
 # ===== MultiMC =====
 
 

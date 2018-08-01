@@ -70,4 +70,13 @@
         {{ api.function|docstring|markdown(4) or '<p><small>No docs, sorry.</small></p>'|safe }}
     {% endfor %}
 
+    <h3>Leftover endpoints</h3>
+    <p class="lead">These didn't fall into any of the previous categories.</p>
+    {% for api in leftover|sort(attribute='name') %}
+        <h4 id="{{ api.name|slugify }}">{{ api.name|replace('_', ' ')|title }}</h4>
+        <div class="float-right"><a href="#top" class="btn btn-outline-secondary btn-sm"><i class="fal fa-arrow-to-top"></i> top</a></div>
+        <p>URL: <code>{{ api.rule.rule }}</code></p>
+        {{ api.function|docstring|markdown(4) or '<p><small>No docs, sorry.</small></p>'|safe }}
+    {% endfor %}
+
 {% endblock %}
