@@ -121,6 +121,15 @@ def periodic_request_all_files():
 
 
 @celery.task
+@locked_task('periodic-request_all_addons-lock', timeout=2*60*60)
+def periodic_request_all_addons():
+    redis_store.set('periodic-request_all_addons-last', int(datetime.now().timestamp()))
+    known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
+    for i in range(0, len(known_ids), MAX_ADDONS_PER_REQUEST):
+        task_request_addons.delay(known_ids[i:i + MAX_ADDONS_PER_REQUEST])
+
+
+@celery.task
 def task_request_all_files(id):
     for x in get_curse_api('api/addon/%d/files' % id).json():
         FileModel.update(id, x)
@@ -203,6 +212,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(24 * 60 * 60, periodic_find_hidden_addons.s())  # daily
 
     sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_files.s())  # weekly
+    sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_addons.s())  # weekly
 
     sender.add_periodic_task(crontab(minute='0', hour='*'), periodic_keep_history.s())  # every hour at XX:00
 
@@ -217,3 +227,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
     last = redis_store.get('periodic-request_all_files-last')
     if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
         periodic_request_all_files.apply_async(countdown=4 * 60 * 60)
+
+    last = redis_store.get('periodic-request_all_addons-last')
+    if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
+        periodic_request_all_addons.apply_async(countdown=4 * 60 * 60)
