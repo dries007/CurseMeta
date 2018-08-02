@@ -562,7 +562,7 @@ def api_v0_db_slug():
     return to_json_response({
         addon.slug: {
             'id': addon.addon_id,
-            'last_update': addon.last_update,
+            'last_update': int(addon.last_update.timestamp()),
             'game': addon.game_id,
             'name': addon.name,
             'category': addon.category,
