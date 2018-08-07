@@ -18,7 +18,7 @@ The staging environment (a testing ground) will be live on [staging_cursemeta.dr
 ## Useful resources
 
 + [Join my discord server and ask for CurseMeta access.](https://discord.gg/zCQaCAA)
-+ [A decompiled class from the Twitch launcher](http://ix.io/1bll/C#)
++ [A (particularly useful) decompiled class from the Twitch launcher](http://ix.io/1bll/C#)
 + A (partial) history of CurseMeta sits in [this](https://gist.github.com/dries007/10d8dc05a6fc5d1e700404cdd4446d21) gist.
 
 ## Dev setup
@@ -36,7 +36,7 @@ See `config.py` for more details on what needs running and how.
 This service uses Font Awesome *Pro*, their CDN is tied to my domain.
 If you want the icons either buy a license (quite cheap) or swap out the pro 
 for a free version and remove the non free icons.
-.
+
 ## Licence
 
 [EUPL v1.2](LICENCE.txt)

@@ -548,6 +548,8 @@ def api_v0_db_slug():
     """
     Required:
     - GET: `slug`: The slug to look up. Can be specified multiple times.
+    Optional:
+    - GET: `files`: Include files. (**WARING**: Large)
 
     A null value or missing key means no data was found.
 
@@ -558,6 +560,8 @@ def api_v0_db_slug():
         slugs = flask.request.get_json(force=True)
     else:
         slugs = flask.request.args.getlist('slug', type=str)
+
+    do_files = 'files' in flask.request.args
     addons = AddonModel.query.filter(AddonModel.slug.in_(slugs)).all()
     return to_json_response({
         addon.slug: {
@@ -568,6 +572,16 @@ def api_v0_db_slug():
             'category': addon.category,
             'downloads': addon.downloads,
             'score': addon.score,
+            'files': None if not do_files else [
+                {
+                    'id': file.file_id,
+                    'last_update': int(file.last_update.timestamp()),
+                    'name': file.name,
+                    'url': file.url,
+                } for file in addon.files
+            ],
+            'owner': addon.primary_author_name,
+            'authors': [x.name for x in addon.authors]
         } for addon in addons
     })
 
@@ -582,18 +596,21 @@ def api_v0_db_dump():
     **WARING**: Large!
 
     Optional:
-    - GET: `files`: Also dump the whole file DB. (**WARING**: Extra Large!)
-    - GET: `game`: Filter based on game. Can be specified multiple times.
+    - GET: `files`: Include files. (**WARING**: Extra Large!)
+    - GET: `gameId`: Filter based on game. Can be specified multiple times.
 
     **WARNING** Provisional API. Don't use in client side projects.
     """
-    games = flask.request.args.getlist('game', type=str)
-    if games:
-        addons = AddonModel.query.filter(AddonModel.game_id.in_(games)).all()
-    else:
-        addons = AddonModel.query.all()
+    games = flask.request.args.getlist('gameId', type=int)
+    if not games:
+        games = flask.request.args.getlist('game', type=int)
 
-    files = 'files' in flask.request.args
+    if games:
+        addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id.in_(games)).all()
+    else:
+        addons: [AddonModel] = AddonModel.query.all()
+
+    do_files = 'files' in flask.request.args
     return to_json_response([
         {
             'id': addon.addon_id,
@@ -604,14 +621,16 @@ def api_v0_db_dump():
             'category': addon.category,
             'downloads': addon.downloads,
             'score': addon.score,
-            'files': None if not files else [
+            'files': None if not do_files else [
                 {
                     'id': file.file_id,
                     'last_update': int(file.last_update.timestamp()),
                     'name': file.name,
                     'url': file.url,
                 } for file in addon.files
-            ]
+            ],
+            'owner': addon.primary_author_name,
+            'authors': [x.name for x in addon.authors]
         } for addon in addons
     ])
 

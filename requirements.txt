@@ -1,7 +1,7 @@
-alembic==0.9.10
+alembic==1.0.0
 amqp==2.3.2
-billiard==3.5.0.3
-celery==4.2.0
+billiard==3.5.0.4
+celery==4.2.1
 certifi==2018.4.16
 chardet==3.0.4
 click==6.7
@@ -29,7 +29,7 @@ redis==2.10.6
 requests==2.19.1
 requests-cache==0.4.13
 six==1.11.0
-SQLAlchemy==1.2.9
+SQLAlchemy==1.2.10
 SQLAlchemy-Utils==0.33.3
 urllib3==1.23
 vine==1.1.4
