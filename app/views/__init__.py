@@ -700,6 +700,7 @@ def api_v0_db_updated_file():
     Required:
     - GET: `since`: Starting timestamp.
     Optional:
+    - GET: `addon`: Include addon information. (**WARING**: Large)
     - GET: `gameId`: Filter based on game. Can be specified multiple times.
 
     **WARNING** Provisional API. Don't use in client side projects.
@@ -713,30 +714,28 @@ def api_v0_db_updated_file():
     since = datetime.datetime.fromtimestamp(flask.request.args.get('since', type=int))
     q = q.filter(FileModel.last_update > since)
 
-    addons: [FileModel] = q.all()
+    files: [FileModel] = q.all()
 
-    do_files = 'files' in flask.request.args
+    do_addon = 'addon' in flask.request.args
     return to_json_response([
         {
-            'id': addon.addon_id,
-            'last_update': int(addon.last_update.timestamp()),
-            'slug': addon.slug,
-            'game': addon.game_id,
-            'name': addon.name,
-            'category': addon.category,
-            'downloads': addon.downloads,
-            'score': addon.score,
-            'files': None if not do_files else [
-                {
-                    'id': file.file_id,
-                    'last_update': int(file.last_update.timestamp()),
-                    'name': file.name,
-                    'url': file.url,
-                } for file in addon.files
-            ],
-            'owner': addon.primary_author_name,
-            'authors': [x.name for x in addon.authors]
-        } for addon in addons
+            'id': file.file_id,
+            'last_update': int(file.last_update.timestamp()),
+            'name': file.name,
+            'url': file.url,
+            'addon': None if not do_addon else {
+                'id': file.addon.addon_id,
+                'last_update': int(file.addon.last_update.timestamp()),
+                'slug': file.addon.slug,
+                'game': file.addon.game_id,
+                'name': file.addon.name,
+                'category': file.addon.category,
+                'downloads': file.addon.downloads,
+                'score': file.addon.score,
+                'owner': file.addon.primary_author_name,
+                'authors': [x.name for x in file.addon.authors]
+            }
+        } for file in files
     ])
 
 
