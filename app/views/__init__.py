@@ -4,11 +4,9 @@ import unicodedata
 import html2text
 
 import flask
-import werkzeug.routing
 import logging
 import textwrap
 import datetime
-import requests
 import werkzeug.exceptions as exceptions
 
 from urllib.parse import unquote_plus as url_decode
@@ -17,15 +15,16 @@ from sqlalchemy.sql.expression import func
 
 from app.tasks import FEEDS_INTERVALS, get_dlfeed_key
 from .. import app
-from .. import curse_login
 from .. import redis_store
 from ..helpers import to_json_response
 from ..helpers import cache
 from ..helpers import get_curse_api
 from ..helpers import post_curse_api
 from ..helpers import get_routes_with_prefix
-from ..helpers import CURSE_HOST
-from ..models import *
+from ..models import AuthorModel
+from ..models import FileModel
+from ..models import AddonModel
+from ..models import HistoricRecord
 
 
 _LOGGER = logging.getLogger('Views')
