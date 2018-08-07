@@ -7,6 +7,7 @@ import flask
 import werkzeug.routing
 import logging
 import textwrap
+import datetime
 import requests
 import werkzeug.exceptions as exceptions
 
@@ -586,7 +587,7 @@ def api_v0_db_slug():
     })
 
 
-@app.route('/api/v0/db/dump', methods=['GET', 'POST'])
+@app.route('/api/v0/db/dump')
 @cache()
 def api_v0_db_dump():
     """
@@ -601,14 +602,119 @@ def api_v0_db_dump():
 
     **WARNING** Provisional API. Don't use in client side projects.
     """
+
+    q = AddonModel.query
+
     games = flask.request.args.getlist('gameId', type=int)
     if not games:
         games = flask.request.args.getlist('game', type=int)
-
     if games:
-        addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id.in_(games)).all()
-    else:
-        addons: [AddonModel] = AddonModel.query.all()
+        q = q.filter(AddonModel.game_id.in_(games))
+
+    addons: [AddonModel] = q.all()
+
+    do_files = 'files' in flask.request.args
+    return to_json_response([
+        {
+            'id': addon.addon_id,
+            'last_update': int(addon.last_update.timestamp()),
+            'slug': addon.slug,
+            'game': addon.game_id,
+            'name': addon.name,
+            'category': addon.category,
+            'downloads': addon.downloads,
+            'score': addon.score,
+            'files': None if not do_files else [
+                {
+                    'id': file.file_id,
+                    'last_update': int(file.last_update.timestamp()),
+                    'name': file.name,
+                    'url': file.url,
+                } for file in addon.files
+            ],
+            'owner': addon.primary_author_name,
+            'authors': [x.name for x in addon.authors]
+        } for addon in addons
+    ])
+
+
+@app.route('/api/v0/db/updated/addon')
+@cache()
+def api_v0_db_updated_addon():
+    """
+    Get a list of updated addons since the specified timestamp.
+    Some members may be null.
+
+    All files are included, not only those who have been updated since the timestamp.
+
+    Required:
+    - GET: `since`: Starting timestamp.
+    Optional:
+    - GET: `files`: Include files. (**WARING**: Large)
+    - GET: `gameId`: Filter based on game. Can be specified multiple times.
+
+    **WARNING** Provisional API. Don't use in client side projects.
+    """
+    q = AddonModel.query
+
+    games = flask.request.args.getlist('gameId', type=int)
+    if games:
+        q = q.filter(AddonModel.game_id.in_(games))
+
+    since = datetime.datetime.fromtimestamp(flask.request.args.get('since', type=int))
+    q = q.filter(AddonModel.last_update > since)
+
+    addons: [AddonModel] = q.all()
+
+    do_files = 'files' in flask.request.args
+    return to_json_response([
+        {
+            'id': addon.addon_id,
+            'last_update': int(addon.last_update.timestamp()),
+            'slug': addon.slug,
+            'game': addon.game_id,
+            'name': addon.name,
+            'category': addon.category,
+            'downloads': addon.downloads,
+            'score': addon.score,
+            'files': None if not do_files else [
+                {
+                    'id': file.file_id,
+                    'last_update': int(file.last_update.timestamp()),
+                    'name': file.name,
+                    'url': file.url,
+                } for file in addon.files
+            ],
+            'owner': addon.primary_author_name,
+            'authors': [x.name for x in addon.authors]
+        } for addon in addons
+    ])
+
+
+@app.route('/api/v0/db/updated/file')
+@cache()
+def api_v0_db_updated_file():
+    """
+    Get a list of updated files since the specified timestamp.
+    Some members may be null.
+
+    Required:
+    - GET: `since`: Starting timestamp.
+    Optional:
+    - GET: `gameId`: Filter based on game. Can be specified multiple times.
+
+    **WARNING** Provisional API. Don't use in client side projects.
+    """
+    q = FileModel.query
+
+    games = flask.request.args.getlist('gameId', type=int)
+    if games:
+        q = q.filter(FileModel.addon.has(AddonModel.game_id.in_(games)))
+
+    since = datetime.datetime.fromtimestamp(flask.request.args.get('since', type=int))
+    q = q.filter(FileModel.last_update > since)
+
+    addons: [FileModel] = q.all()
 
     do_files = 'files' in flask.request.args
     return to_json_response([
