@@ -15,6 +15,7 @@ from sqlalchemy.sql.expression import func
 
 from app.tasks import FEEDS_INTERVALS, get_dlfeed_key
 from .. import app
+from .. import db
 from .. import redis_store
 from ..helpers import to_json_response
 from ..helpers import cache
