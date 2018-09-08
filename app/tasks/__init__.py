@@ -1,9 +1,6 @@
 import json
-from datetime import datetime
 from datetime import timedelta
 
-import requests
-import requests_cache
 from celery import Celery
 from celery.schedules import crontab
 
@@ -11,20 +8,33 @@ from functools import wraps
 from celery.utils.log import get_task_logger
 from redis.exceptions import LockError
 
+
+from CurseClient import MAX_ADDONS_PER_REQUEST
+
 from .. import celery
-from .. import db
-from .. import curse_login
 from .. import redis_store
 from ..models import *
-from ..helpers import get_curse_api
-from ..helpers import post_curse_api
+
+
+from .periodic import p_curse_checklogin
+from .periodic import p_remove_expired_caches
+from .periodic import p_fill_incomplete_addons
+from .periodic import p_find_hidden_addons
+from .periodic import p_update_all_files
+from .periodic import p_update_all_addons
 
 
 logger = get_task_logger(__name__)
-MAX_ADDONS_PER_REQUEST = 16000
 
 
 def locked_task(name_: str or callable, timeout=10*60):
+    """
+    todo: Re-evaluate usefulness.
+    todo: Autodetect name based on underlying function name.
+    :param name_:
+    :param timeout:
+    :return:
+    """
     def lock_task(fun):
         @wraps(fun)
         def outer(*args, **kwargs):
@@ -71,88 +81,17 @@ FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
 
 
 @celery.task
-@locked_task('periodic-curse_login')
-def periodic_curse_login():
-    return curse_login.checklogin()
+def manual_update_all():
+    ids: [int] = [x.addon_id for x in AddonModel.query.all()]
+    logger.info('Requesting ALL info on all {} addons'.format(len(ids)))
+    from .tasks import request_addons_split
+    from .tasks import request_all_files
+    request_addons_split(ids)
+    for id_ in ids:
+        request_all_files.delay(id_)
 
 
 @celery.task
-def periodic_remove_expired_caches():
-    return requests_cache.core.remove_expired_responses()
-
-
-@celery.task
-@locked_task('periodic-find_hidden_addons-lock', timeout=30*60)
-def periodic_find_hidden_addons():
-    redis_store.set('periodic-find_hidden_addons-last', int(datetime.now().timestamp()))
-    from sqlalchemy import func
-    end_id = db.session.query(func.max(AddonModel.addon_id)).scalar() + 1000
-    logger.info('Finding hidden addons until {}'.format(end_id))
-    known_ids = set(x[0] for x in db.session.query(AddonModel.addon_id).all())
-    missing_ids = sorted(list(set(range(end_id)) - known_ids))
-    if len(missing_ids) == 0:
-        return 0
-    logger.info('Looking for {} missing ids'.format(len(missing_ids)))
-    found_count = 0
-    for i in range(0, len(missing_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons.delay(missing_ids[i:i + MAX_ADDONS_PER_REQUEST])
-    logger.info('Found {} hidden addons'.format(found_count))
-
-
-@celery.task
-@locked_task('periodic-fill_missing_addons')
-def periodic_fill_missing_addons():
-    # noinspection PyComparisonWithNone
-    missing_addon_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).filter(AddonModel.name == None).all())
-    if len(missing_addon_ids) == 0:
-        return 0
-    logger.info('Looking for {} addons with info missing'.format(len(missing_addon_ids)))
-    for i in range(0, len(missing_addon_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons.delay(missing_addon_ids[i:i + MAX_ADDONS_PER_REQUEST])
-
-
-@celery.task
-@locked_task('periodic-request_all_files-lock', timeout=2*60*60)
-def periodic_request_all_files():
-    redis_store.set('periodic-request_all_files-last', int(datetime.now().timestamp()))
-    known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
-    for id in known_ids:
-        task_request_all_files.delay(id)
-
-
-@celery.task
-@locked_task('periodic-request_all_addons-lock', timeout=2*60*60)
-def periodic_request_all_addons():
-    redis_store.set('periodic-request_all_addons-last', int(datetime.now().timestamp()))
-    known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
-    for i in range(0, len(known_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons.delay(known_ids[i:i + MAX_ADDONS_PER_REQUEST])
-
-
-@celery.task
-def task_request_all_files(id):
-    for x in get_curse_api('api/addon/%d/files' % id).json():
-        FileModel.update(id, x)
-
-
-@celery.task
-def task_request_addons(ids):
-    for x in post_curse_api('api/addon', ids).json():
-        AddonModel.update(x)
-
-
-@celery.task
-def manual_request_all_addons():
-    known_ids = sorted(x[0] for x in db.session.query(AddonModel.addon_id).all())
-    logger.info('Requesting info on all {} addons'.format(len(known_ids)))
-    for i in range(0, len(known_ids), MAX_ADDONS_PER_REQUEST):
-        task_request_addons.delay(known_ids[i:i + MAX_ADDONS_PER_REQUEST])
-    for id in known_ids:
-        task_request_all_files.delay(id)
-
-
-@celery.task
-@locked_task('periodic-keep_history')
 def periodic_keep_history():
     now = datetime.now()
     logger.info('Starting keeping history for timestamp {}'.format(now))
@@ -188,13 +127,12 @@ def periodic_keep_history():
 
 
 @celery.task
-@locked_task('periodic-generate_history_feed')
 def periodic_generate_history_feed():
     now = datetime.now()
     addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None).all()
     game_ids = set(x.game_id for x in addons)
     for name, days in FEEDS_INTERVALS.items():
-        records = {x.addon_id: x for x in HistoricRecord.get_all_last_before(timestamp=now - timedelta(days=days))}
+        records: {int: HistoricRecord} = {x.addon_id: x for x in HistoricRecord.get_all_last_before(timestamp=now - timedelta(days=days))}
         for game_id in game_ids:
             redis_store.set(get_dlfeed_key(game_id, name), json.dumps(_download_feed(records, addons, game_id)))
     redis_store.sadd('history-game_ids', *game_ids)
@@ -203,33 +141,34 @@ def periodic_generate_history_feed():
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
-    sender.add_periodic_task(60 * 60, periodic_curse_login.s())
+    sender.add_periodic_task(15 * 60, p_remove_expired_caches.s())
+    sender.add_periodic_task(15 * 60, p_fill_incomplete_addons.s())
 
-    sender.add_periodic_task(15 * 60, periodic_remove_expired_caches.s())
+    sender.add_periodic_task(30 * 60, p_update_all_addons.s())
 
-    sender.add_periodic_task(15 * 60, periodic_fill_missing_addons.s())
+    sender.add_periodic_task(60 * 60, p_curse_checklogin.s())
+    sender.add_periodic_task(60 * 60, p_find_hidden_addons.s())
+    sender.add_periodic_task(60 * 60, p_update_all_files.s())
+
+    sender.add_periodic_task(crontab(minute='0'), periodic_keep_history.s())  # every hour at XX:00, for consistency
+
+
+
+
+
+    sender.add_periodic_task(15 * 60, periodic_fill_incomplete_addons.s())
 
     # todo: replacement for periodic feeds
+
+    sender.add_periodic_task(60 * 60, periodic_request_all_addons.s())  # hourly
 
     sender.add_periodic_task(24 * 60 * 60, periodic_find_hidden_addons.s())  # daily
 
     sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_files.s())  # weekly
-    sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_addons.s())  # weekly
 
-    sender.add_periodic_task(crontab(minute='0', hour='*'), periodic_keep_history.s())  # every hour at XX:00
 
-    periodic_fill_missing_addons.apply_async(countdown=30)
 
-    # Mainly for staging, so we don't redo a full dl every time the env restart if it's been less than a day.
-    # The hourly & daily's will get it.
-    last = redis_store.get('periodic-find_hidden_addons-last')
-    if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
-        periodic_find_hidden_addons.apply_async(countdown=60 * 60)
-
-    last = redis_store.get('periodic-request_all_files-last')
-    if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
-        periodic_request_all_files.apply_async(countdown=4 * 60 * 60)
-
-    last = redis_store.get('periodic-request_all_addons-last')
-    if last is None or datetime.now() - datetime.fromtimestamp(int(last)) > timedelta(days=1):
-        periodic_request_all_addons.apply_async(countdown=4 * 60 * 60)
+    periodic_fill_incomplete_addons.apply_async(countdown=60)
+    periodic_find_hidden_addons.apply_async(countdown=60)
+    periodic_request_all_files.apply_async(countdown=60)
+    periodic_request_all_addons.apply_async(countdown=60)

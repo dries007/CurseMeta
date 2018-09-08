@@ -3,6 +3,9 @@ import json
 import requests
 
 
+MAX_ADDONS_PER_REQUEST = 16000
+
+
 def _post_json_retry(data, timeout=10, attempts=5):
     while attempts > 0:
         try:
@@ -53,3 +56,4 @@ class LoginClient(object):
 
     def get_headers(self):
         return {'AuthenticationToken': self.get_token()}
+

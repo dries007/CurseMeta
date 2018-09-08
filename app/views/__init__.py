@@ -171,10 +171,12 @@ def api_v3_direct_get_addons():
 @cache()
 def api_v3_direct_get_search():
     """
+    TODO: Add optional parameters to docs. They can be used but are not documented.
+
     Required:
     - GET: `gameId`: Which game to search
     Optional:
-    - TODO: add optional parameters to docs, see http://ix.io/1bll/C#, line nr 47
+    - See http://ix.io/1bll/C#, line nr 47
     """
     data = get_curse_api('api/addon/search', flask.request.args).json()
     for x in data:
@@ -743,12 +745,15 @@ def api_v0_db_updated_file():
 # ===== MultiMC =====
 
 
-def _fix_names(obj):
+def _fix_names_multimc(obj):
     for key in obj.keys():
         new_key = key[0].upper() + key[1:]
         new_key = new_key.replace('Url', 'URL')
+        v = obj[key]
+        if type(v) == dict:
+            v = _fix_names_multimc(v)
+        obj[new_key] = v
         if new_key != key:
-            obj[new_key] = obj[key]
             del obj[key]
     return obj
 
@@ -758,6 +763,10 @@ def _fix_names(obj):
 def api_deprecated_project_file_json(addon_id: int, file_id: int):
     """
     **DEPRECATED**
+
+    This API is used by MultiMC, which is the only reason it still exists.
+    **Do not used.**
+
     """
     enum = [
         'UNKNOWN',
@@ -768,16 +777,19 @@ def api_deprecated_project_file_json(addon_id: int, file_id: int):
         'ModPack',
         'Mod',
     ]
-    file_data = get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json(object_hook=_fix_names)
-    project_data = get_curse_api('api/addon/%d' % addon_id).json(object_hook=_fix_names)
-    print(file_data)
-    print(project_data)
+    file_data = get_curse_api('api/addon/%d/file/%d' % (addon_id, file_id)).json()
+    project_data = get_curse_api('api/addon/%d' % addon_id).json()
+    FileModel.update(addon_id, file_data)
+    AddonModel.update(project_data)
+
+    file_data = _fix_names_multimc(file_data)
+
     file_data['__comment'] = 'WARNING: Deprecated API, Should only be used by existing users.'
     file_data['_Project'] = {
-        'Path': project_data['CategorySection']['Path'],
-        'PackageType': enum[project_data['PackageType']]
+        'Path': project_data['categorySection']['path'],
+        'PackageType': enum[project_data['packageType']]
     }
     r = to_json_response(file_data)
     r.headers.add('Warning', '299 - "Deprecated API"')
-    FileModel.update_old(addon_id, file_data)
+
     return r
