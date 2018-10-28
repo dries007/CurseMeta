@@ -153,20 +153,20 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
 
 
-
-    sender.add_periodic_task(15 * 60, periodic_fill_incomplete_addons.s())
-
-    # todo: replacement for periodic feeds
-
-    sender.add_periodic_task(60 * 60, periodic_request_all_addons.s())  # hourly
-
-    sender.add_periodic_task(24 * 60 * 60, periodic_find_hidden_addons.s())  # daily
-
-    sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_files.s())  # weekly
-
-
-
-    periodic_fill_incomplete_addons.apply_async(countdown=60)
-    periodic_find_hidden_addons.apply_async(countdown=60)
-    periodic_request_all_files.apply_async(countdown=60)
-    periodic_request_all_addons.apply_async(countdown=60)
+    #
+    # sender.add_periodic_task(15 * 60, periodic_fill_incomplete_addons.s())
+    #
+    # # todo: replacement for periodic feeds
+    #
+    # sender.add_periodic_task(60 * 60, periodic_request_all_addons.s())  # hourly
+    #
+    # sender.add_periodic_task(24 * 60 * 60, periodic_find_hidden_addons.s())  # daily
+    #
+    # sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_files.s())  # weekly
+    #
+    #
+    #
+    # periodic_fill_incomplete_addons.apply_async(countdown=60)
+    # periodic_find_hidden_addons.apply_async(countdown=60)
+    # periodic_request_all_files.apply_async(countdown=60)
+    # periodic_request_all_addons.apply_async(countdown=60)
