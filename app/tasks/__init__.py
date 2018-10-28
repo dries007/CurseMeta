@@ -89,7 +89,7 @@ def manual_update_all():
     # https://stackoverflow.com/a/36466097
     batch = group(request_addons.s(ids[i:i + MAX_ADDONS_PER_REQUEST])
                   for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST))
-    results = batch.apply_async()
+    results = batch.apply_async(disable_sync_subtasks=False)
     results.join(disable_sync_subtasks=False)
 
     # Re-request because some addons might have been removed due to 404 etc.
@@ -97,7 +97,7 @@ def manual_update_all():
     logger.info("Done with addons. Now doing files on all {} addons".format(len(ids)))
 
     batch = group(request_all_files.s(id_) for id_ in ids)
-    results = batch.apply_async()
+    results = batch.apply_async(disable_sync_subtasks=False)
     results.join(disable_sync_subtasks=False)
 
 
