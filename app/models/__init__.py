@@ -171,6 +171,7 @@ class FileModel(db.Model):
         if obj.alternate_file_id and AddonModel.query.get(obj.alternate_file_id) is None:
             # Don't fill in any data here, it'll get periodically filled in by a background task.
             db.session.add(AddonModel(obj.alternate_file_id))
+            db.session.commit()
 
         db.session.add(obj)
         db.session.commit()
