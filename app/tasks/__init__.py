@@ -87,7 +87,7 @@ def manual_update_all():
     from .tasks import request_all_files
 
     # https://stackoverflow.com/a/36466097
-    batch = group(request_addons.subtask(ids[i:i + MAX_ADDONS_PER_REQUEST])
+    batch = group(request_addons.s(ids[i:i + MAX_ADDONS_PER_REQUEST])
                   for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST))
     results = batch.apply_async()
     results.join(disable_sync_subtasks=False)
@@ -96,7 +96,7 @@ def manual_update_all():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
     logger.info("Done with addons. Now doing files on all {} addons".format(len(ids)))
 
-    batch = group(request_all_files.delay(id_) for id_ in ids)
+    batch = group(request_all_files.s(id_) for id_ in ids)
     results = batch.apply_async()
     results.join(disable_sync_subtasks=False)
 
