@@ -80,25 +80,23 @@ FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
 
 
 @celery.task
-def manual_update_all():
+def manual_addons():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
     logger.info("Requesting ALL info on all {} addons".format(len(ids)))
     from .tasks import request_addons
-    from .tasks import request_all_files
 
-    # https://stackoverflow.com/a/36466097
-    batch = group(request_addons.s(ids[i:i + MAX_ADDONS_PER_REQUEST])
-                  for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST))
-    results = batch.apply_async(disable_sync_subtasks=False)
-    results.join(disable_sync_subtasks=False)
+    for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
+        request_addons.delay(ids[i:i + MAX_ADDONS_PER_REQUEST])
 
-    # Re-request because some addons might have been removed due to 404 etc.
+
+@celery.task
+def manual_files():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
     logger.info("Done with addons. Now doing files on all {} addons".format(len(ids)))
+    from .tasks import request_all_files
 
-    batch = group(request_all_files.s(id_) for id_ in ids)
-    results = batch.apply_async(disable_sync_subtasks=False)
-    results.join(disable_sync_subtasks=False)
+    for id_ in ids:
+        request_all_files.delay(id_)
 
 
 @celery.task
