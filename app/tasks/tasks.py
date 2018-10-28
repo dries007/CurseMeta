@@ -33,7 +33,7 @@ def request_addons(ids):
     if ids:
         logger.info('Some ids are missing, deleting {} ids'.format(len(ids)))
         for id_ in ids:
-            AddonModel.query.delete(id_)
+            AddonModel.query.filter_by(addon_id=id_).delete()
         db.session.commit()
 
 
