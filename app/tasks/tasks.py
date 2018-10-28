@@ -15,7 +15,6 @@ logger = get_task_logger(__name__)
 
 @celery.task
 def request_all_files(id_):
-    logger.info('Requesting all files for id {}'.format(id_))
     try:
         for x in get_curse_api('api/addon/%d/files' % id_).json():
             FileModel.update(id_, x)
@@ -25,7 +24,6 @@ def request_all_files(id_):
 
 @celery.task
 def request_addons(ids):
-    logger.info('Requesting addon {} ids'.format(len(ids)))
     for x in post_curse_api('api/addon', ids).json():
         o = AddonModel.update(x)
         # todo: also update the 'gameVersionLatestFiles' from this info

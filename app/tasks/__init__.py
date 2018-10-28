@@ -82,7 +82,6 @@ FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
 @celery.task
 def manual_addons():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
-    logger.info("Requesting ALL info on all {} addons".format(len(ids)))
     from .tasks import request_addons
 
     for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
@@ -92,7 +91,6 @@ def manual_addons():
 @celery.task
 def manual_files():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
-    logger.info("Done with addons. Now doing files on all {} addons".format(len(ids)))
     from .tasks import request_all_files
 
     for id_ in ids:
@@ -150,13 +148,15 @@ def periodic_generate_history_feed():
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(15 * 60, p_remove_expired_caches.s())
-    sender.add_periodic_task(15 * 60, p_fill_incomplete_addons.s())
 
-    sender.add_periodic_task(30 * 60, p_update_all_addons.s())
+    sender.add_periodic_task(30 * 60, p_fill_incomplete_addons.s())
 
+    sender.add_periodic_task(60 * 60, p_update_all_addons.s())
     sender.add_periodic_task(60 * 60, p_curse_checklogin.s())
-    sender.add_periodic_task(60 * 60, p_find_hidden_addons.s())
-    sender.add_periodic_task(60 * 60, p_update_all_files.s())
+
+    sender.add_periodic_task(4 * 60 * 60, p_update_all_files.s())
+
+    sender.add_periodic_task(12 * 60 * 60, p_find_hidden_addons.s())
 
     sender.add_periodic_task(crontab(minute='0'), periodic_keep_history.s())  # every hour at XX:00, for consistency
 

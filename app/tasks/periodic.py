@@ -33,14 +33,13 @@ def p_remove_expired_caches():
 def p_fill_incomplete_addons():
     # `AddonModel.name == None` is required.
     ids: [int] = [x.addon_id for x in AddonModel.query.filter(AddonModel.name == None).all()]
-    logger.info('Looking for {} addons with info missing'.format(len(ids)))
     request_addons_split(ids)
 
 
 @celery.task
 def p_find_hidden_addons():
     end_id: int = db.session.query(func.max(AddonModel.addon_id)).scalar() + MAX_ADDONS_PER_REQUEST // 4
-    known_ids: {int} = {x.addon_id for x in db.session.query(AddonModel.addon_id).all()}
+    known_ids: {int} = {x.addon_id for x in AddonModel.query.all()}
     ids = list(set(range(end_id)) - known_ids)
     logger.info('Looking for hidden addons until id {}, missing {} ids.'.format(end_id, len(ids)))
     request_addons_split(ids)
