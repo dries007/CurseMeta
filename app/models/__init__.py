@@ -169,7 +169,7 @@ class FileModel(db.Model):
 
         if obj.alternate_file_id != data['alternateFileId'] and AddonModel.query.get(data['alternateFileId']) is None:
             # Don't fill in any data here, it'll get periodically filled in by a background task.
-            db.session.add(AddonModel(obj.alternate_file_id))
+            db.session.add(cls(data['alternateFileId'], addon_id))
             db.session.commit()
 
         _do_update(cls._JSON_MAP, obj, data, skip_keys_extra=cls._SKIP_KEYS)
