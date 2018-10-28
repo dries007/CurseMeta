@@ -31,9 +31,9 @@ def request_addons(ids):
         # todo: also update the 'gameVersionLatestFiles' from this info
         ids.remove(o.addon_id)
     if ids:
-        logger.info('Some ids are missing, deleting: {}'.format(ids))
+        logger.info('Some ids are missing, deleting {} ids'.format(len(ids)))
         for id_ in ids:
-            db.session.delete(AddonModel.query.get(id_))
+            AddonModel.query.delete(id_)
         db.session.commit()
 
 
