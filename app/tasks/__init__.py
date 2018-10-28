@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 
 from celery import Celery
+from celery import group
 from celery.schedules import crontab
 
 from functools import wraps
@@ -81,13 +82,23 @@ FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
 @celery.task
 def manual_update_all():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
-    logger.info('Requesting ALL info on all {} addons'.format(len(ids)))
+    logger.info("Requesting ALL info on all {} addons".format(len(ids)))
     from .tasks import request_addons
     from .tasks import request_all_files
-    for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
-        request_addons(ids[i:i + MAX_ADDONS_PER_REQUEST])
-    for id_ in ids:
-        request_all_files(id_)
+
+    # https://stackoverflow.com/a/36466097
+    batch = group(request_addons.s(ids[i:i + MAX_ADDONS_PER_REQUEST])
+                  for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST))
+    results = batch.apply_async()
+    results.join()
+
+    # Re-request because some addons might have been removed due to 404 etc.
+    ids: [int] = [x.addon_id for x in AddonModel.query.all()]
+    logger.info("Done with addons. Now doing files on all {} addons".format(len(ids)))
+
+    batch = group(request_all_files.delay(id_) for id_ in ids)
+    results = batch.apply_async()
+    results.join()
 
 
 @celery.task

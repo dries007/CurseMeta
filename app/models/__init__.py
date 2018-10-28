@@ -329,9 +329,8 @@ class AddonModel(db.Model):
         'defaultFileId': (default_file_id, lambda v, obj, data: v if v != 0 else None),
         'status': status,
         'stage': stage,
-        'section_id': section_id,
-        'package_type': package_type,
-
+        'categorySection': (section_id, lambda v, obj, data: v['Id']),
+        'packageType': package_type,
     }
     _SKIP_KEYS = (
         'id',
