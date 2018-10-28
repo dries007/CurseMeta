@@ -327,6 +327,11 @@ class AddonModel(db.Model):
         'isFeatured': featured,
         'websiteUrl': url,
         'defaultFileId': (default_file_id, lambda v, obj, data: v if v != 0 else None),
+        'status': status,
+        'stage': stage,
+        'section_id': section_id,
+        'package_type': package_type,
+
     }
     _SKIP_KEYS = (
         'id',
