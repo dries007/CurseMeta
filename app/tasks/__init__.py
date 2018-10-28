@@ -8,12 +8,13 @@ from functools import wraps
 from celery.utils.log import get_task_logger
 from redis.exceptions import LockError
 
-
+from CurseClient import MAX_ADDONS_PER_REQUEST
 from .. import celery
 from .. import redis_store
 from ..models import *
 
 
+from .tasks import request_addons
 from .periodic import p_curse_checklogin
 from .periodic import p_remove_expired_caches
 from .periodic import p_fill_incomplete_addons
@@ -84,9 +85,10 @@ def manual_update_all():
     logger.info('Requesting ALL info on all {} addons'.format(len(ids)))
     from .tasks import request_addons_split
     from .tasks import request_all_files
-    request_addons_split(ids)
+    for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
+        request_addons(ids[i:i + MAX_ADDONS_PER_REQUEST])
     for id_ in ids:
-        request_all_files.delay(id_)
+        request_all_files(id_)
 
 
 @celery.task

@@ -16,8 +16,11 @@ logger = get_task_logger(__name__)
 @celery.task
 def request_all_files(id_):
     logger.info('Requesting all files for id {}'.format(id_))
-    for x in get_curse_api('api/addon/%d/files' % id_).json():
-        FileModel.update(id_, x)
+    try:
+        for x in get_curse_api('api/addon/%d/files' % id_).json():
+            FileModel.update(id_, x)
+    except:
+        logger.info('All files request error on {}'.format(id_))
 
 
 @celery.task

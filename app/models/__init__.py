@@ -325,7 +325,7 @@ class AddonModel(db.Model):
         'isAvailable': available,
         'isFeatured': featured,
         'websiteUrl': url,
-        'defaultFileId': default_file_id,
+        'defaultFileId': (default_file_id, lambda v, obj, data: v if v != 0 else None),
     }
     _SKIP_KEYS = (
         'id',
