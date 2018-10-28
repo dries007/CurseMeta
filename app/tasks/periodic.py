@@ -21,7 +21,7 @@ logger = get_task_logger(__name__)
 
 @celery.task
 def p_curse_checklogin():
-    return curse_login.checklogin()
+    return curse_login.renew_session()
 
 
 @celery.task

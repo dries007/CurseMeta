@@ -81,8 +81,8 @@ else:
     print("Using temp secret key, sessions won't persist, make a static one!")
     SECRET_KEY = os.urandom(512)
 
-with open(get_file('curse.json'), 'r') as f:
-    data = json.load(f)
-    CURSE_USER = data['user']
-    CURSE_PASS = data['pass']
-    del data
+with open(get_file('curse.txt'), 'r') as f:
+    CURSE_CODE = f.read().strip()
+
+with open(get_file('ifttt.txt'), 'r') as f:
+    IFTTT_CODE = f.read().strip()

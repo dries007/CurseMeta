@@ -37,6 +37,34 @@ This service uses Font Awesome *Pro*, their CDN is tied to my domain.
 If you want the icons either buy a license (quite cheap) or swap out the pro 
 for a free version and remove the non free icons.
 
+### Decompiling a .NET app
+
+This information may be useful when conducting research on .NET applications.
+
+You'll need a Windows (VM, _obviously_) with:
+
++ [dotPeek](https://www.jetbrains.com/decompiler/)
++ [de4dot](https://github.com/0xd4d/de4dot)
++ The target program 
+
+My folder layout:
++ Project
+  + `de4dot` (unpacked zip)
+    + `de4dot.exe`
+  + `output`
+  + `target` (folder with exe and dlls)
+
+Steps:
+
+1. Run the program to make it self-update and close it out completely.
+2. Nuke any old output.
+3. Copy over all files from the program folder to an output folder.
+4. Open a batch prompt.
+5. Run `de4dot\de4dot.exe -r target -ro output --dont-rename`.
+6. Wait.
+7. Open the output folder with dotPeek.
+8. Enjoy poking around.
+
 ## Licence
 
 [EUPL v1.2](LICENCE.txt)

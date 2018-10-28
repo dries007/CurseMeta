@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_humanize import Humanize
 
-import CurseClient
+from CurseClient import LoginClientIFTTT
 
 # Init code
 logging.basicConfig(level=logging.WARN)
@@ -22,8 +22,9 @@ mimetypes.init()
 app = Flask(__name__)
 humanize = Humanize(app)
 app.config.from_object('config')
+cfg = app.config
 
-if app.config.get('DEBUG', False):
+if cfg.get('DEBUG', False):
     logging.basicConfig(logging=logging.DEBUG)
 
 # Postgres DB
@@ -37,14 +38,12 @@ redis_store.ping()  # Just to make sure the config is OK
 # Monkey patch! To bypass use `with requests_cache.disabled():`
 requests_cache.install_cache(backend='redis', expire_after=datetime.timedelta(hours=1), connection=redis_store)
 
-
 # Curse Client
-curse_login = CurseClient.LoginClient(app.config['CURSE_USER'], app.config['CURSE_PASS'], redis_store)
-
+curse_login = LoginClientIFTTT(cfg['CURSE_CODE'], redis_store, cfg['IFTTT_CODE'], cfg['LOGGER_NAME'])
 
 # Celery
-celery = Celery(app.import_name, backend=app.config['CELERY_RESULT_BACKEND'], broker=app.config['CELERY_BROKER_URL'])
-celery.conf.update(app.config)
+celery = Celery(app.import_name, backend=cfg['CELERY_RESULT_BACKEND'], broker=cfg['CELERY_BROKER_URL'])
+celery.conf.update(cfg)
 
 TaskBase = celery.Task
 

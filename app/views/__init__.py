@@ -171,12 +171,17 @@ def api_v3_direct_get_addons():
 @cache()
 def api_v3_direct_get_search():
     """
-    TODO: Add optional parameters to docs. They can be used but are not documented.
-
     Required:
     - GET: `gameId`: Which game to search
     Optional:
-    - See http://ix.io/1bll/C#, line nr 47
+    - GET: `sectionId` (int)
+    - GET: `categoryId` (int)
+    - GET: `sort` (AddonSortMethod) One of: `Featured`, `Popularity`, `LastUpdated`, `Name`, `Author`, `TotalDownloads`, `Category`, `GameVersion`.
+    - GET: `isSortDescending` (bool)
+    - GET: `gameVersion` (string)
+    - GET: `index` (int)
+    - GET: `pageSize` (int)
+    - GET: `searchFilter` (string)
     """
     data = get_curse_api('api/addon/search', flask.request.args).json()
     for x in data:

@@ -9,8 +9,6 @@ from celery.utils.log import get_task_logger
 from redis.exceptions import LockError
 
 
-from CurseClient import MAX_ADDONS_PER_REQUEST
-
 from .. import celery
 from .. import redis_store
 from ..models import *
