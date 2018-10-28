@@ -103,12 +103,13 @@ class AuthorModel(db.Model):
         self.name = name
 
     @classmethod
-    def update(cls, data: dict):
+    def update(cls, data: dict, commit=True):
         obj = cls.query.get(data['name'])
         if obj is None:
             obj = cls(data['name'])
-        db.session.add(obj)
-        db.session.commit()
+            db.session.add(obj)
+        if commit:
+            db.session.commit()
         return obj
 
 
@@ -151,7 +152,7 @@ class FileModel(db.Model):
         'fileName',
     )
 
-    def __init__(self, id_: int, addon_id: int):
+    def __init__(self, id_: int, addon_id: int, commit=True):
         super().__init__()
         self.file_id = id_
         self.addon_id = addon_id
@@ -159,23 +160,23 @@ class FileModel(db.Model):
         if AddonModel.query.get(addon_id) is None:
             # Don't fill in any data here, it'll get periodically filled in by a background task.
             db.session.add(AddonModel(addon_id))
-            db.session.commit()
+            if commit:
+                db.session.commit()
 
     @classmethod
-    def update(cls, addon_id: int, data: dict):
+    def update(cls, addon_id: int, data: dict, commit=True):
         obj = cls.query.get(data['id'])
         if obj is None:
             obj = cls(data['id'], addon_id)
+            db.session.add(obj)
 
         if obj.alternate_file_id != data['alternateFileId'] and cls.query.get(data['alternateFileId']) is None:
             # Don't fill in any data here, it'll get periodically filled in by a background task.
-            db.session.add(cls(data['alternateFileId'], addon_id))
-            db.session.commit()
+            db.session.add(cls(data['alternateFileId'], addon_id, commit=False))
 
         _do_update(cls._JSON_MAP, obj, data, skip_keys_extra=cls._SKIP_KEYS)
-
-        db.session.add(obj)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return obj
 
 
@@ -210,15 +211,15 @@ class AttachmentModel(db.Model):
         self.attachment_id = id_
 
     @classmethod
-    def update(cls, data: dict):
+    def update(cls, data: dict, commit=True):
         obj = cls.query.get(data['id'])
         if obj is None:
             obj = cls(data['id'])
+            db.session.add(obj)
 
         _do_update(cls._JSON_MAP, obj, data)
-
-        db.session.add(obj)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return obj
 
 
@@ -255,15 +256,16 @@ class CategoryModel(db.Model):
         self.attachment_id = id_
 
     @classmethod
-    def update(cls, data: dict):
+    def update(cls, data: dict, commit=True):
         obj = cls.query.get(data['id'])
         if obj is None:
             obj = cls(data['id'])
+            db.session.add(obj)
 
         _do_update(cls._JSON_MAP, obj, data)
 
-        db.session.add(obj)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return obj
 
 
@@ -349,30 +351,30 @@ class AddonModel(db.Model):
         self.addon_id = id_
 
     @classmethod
-    def update(cls, data: dict):
+    def update(cls, data: dict, commit=True):
         obj = cls.query.get(data['id'])
         if obj is None:
             obj = cls(data['id'])
+            db.session.add(obj)
 
         if data['authors']:
             for author in data['authors']:
-                author = AuthorModel.update(author)
+                author = AuthorModel.update(author, commit=False)
                 if author not in obj.authors:
                     obj.authors.append(author)
         if data['attachments']:
             for attachment in data['attachments']:
-                attachment = AttachmentModel.update(attachment)
+                attachment = AttachmentModel.update(attachment, commit=False)
                 if attachment not in obj.attachments:
                     obj.attachments.append(attachment)
 
         if data['latestFiles']:
             for file in data['latestFiles']:
-                FileModel.update(data['id'], file)
+                FileModel.update(data['id'], file, commit=False)
 
         _do_update(cls._JSON_MAP, obj, data, skip_keys_extra=cls._SKIP_KEYS)
-
-        db.session.add(obj)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return obj
 
 

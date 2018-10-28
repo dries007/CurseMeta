@@ -39,7 +39,7 @@ def p_fill_incomplete_addons():
 
 @celery.task
 def p_find_hidden_addons():
-    end_id: int = db.session.query(func.max(AddonModel.addon_id)).scalar() + MAX_ADDONS_PER_REQUEST / 4
+    end_id: int = db.session.query(func.max(AddonModel.addon_id)).scalar() + MAX_ADDONS_PER_REQUEST // 4
     known_ids: {int} = {x.addon_id for x in db.session.query(AddonModel.addon_id).all()}
     ids = list(set(range(end_id)) - known_ids)
     logger.info('Looking for hidden addons until id {}, missing {} ids.'.format(end_id, len(ids)))
@@ -50,7 +50,7 @@ def p_find_hidden_addons():
 def p_update_all_files():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
     for addon_id in ids:
-        request_all_files.delay(addon_id)
+        request_all_files(addon_id)
 
 
 @celery.task

@@ -86,7 +86,7 @@ def manual_addons():
     from .tasks import request_addons
 
     for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
-        request_addons.delay(ids[i:i + MAX_ADDONS_PER_REQUEST])
+        request_addons(ids[i:i + MAX_ADDONS_PER_REQUEST])
 
 
 @celery.task
@@ -96,7 +96,7 @@ def manual_files():
     from .tasks import request_all_files
 
     for id_ in ids:
-        request_all_files.delay(id_)
+        request_all_files(id_)
 
 
 @celery.task

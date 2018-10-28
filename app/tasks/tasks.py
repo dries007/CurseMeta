@@ -34,9 +34,9 @@ def request_addons(ids):
         logger.info('Some ids are missing, deleting {} ids'.format(len(ids)))
         for id_ in ids:
             AddonModel.query.filter_by(addon_id=id_).delete()
-        db.session.commit()
+            db.session.commit()
 
 
 def request_addons_split(ids):
     for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
-        request_addons.delay(ids[i:i + MAX_ADDONS_PER_REQUEST])
+        request_addons(ids[i:i + MAX_ADDONS_PER_REQUEST])
