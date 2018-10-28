@@ -14,7 +14,6 @@ from .. import redis_store
 from ..models import *
 
 
-from .tasks import request_addons
 from .periodic import p_curse_checklogin
 from .periodic import p_remove_expired_caches
 from .periodic import p_fill_incomplete_addons
@@ -83,7 +82,7 @@ FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
 def manual_update_all():
     ids: [int] = [x.addon_id for x in AddonModel.query.all()]
     logger.info('Requesting ALL info on all {} addons'.format(len(ids)))
-    from .tasks import request_addons_split
+    from .tasks import request_addons
     from .tasks import request_all_files
     for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
         request_addons(ids[i:i + MAX_ADDONS_PER_REQUEST])
