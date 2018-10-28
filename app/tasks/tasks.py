@@ -30,11 +30,11 @@ def request_addons(ids):
         o = AddonModel.update(x)
         # todo: also update the 'gameVersionLatestFiles' from this info
         ids.remove(o.addon_id)
-    if ids:
-        logger.info('Some ids are missing, deleting {} ids'.format(len(ids)))
-        for id_ in ids:
-            AddonModel.query.filter_by(addon_id=id_).delete()
-            db.session.commit()
+    # if ids:
+    #     logger.info('Some ids are missing, deleting {} ids'.format(len(ids)))
+    #     for id_ in ids:
+    #         AddonModel.query.filter_by(addon_id=id_).delete()
+    #         db.session.commit()
 
 
 def request_addons_split(ids):
