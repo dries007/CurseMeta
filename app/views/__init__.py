@@ -13,6 +13,7 @@ from urllib.parse import unquote_plus as url_decode
 from markdown import markdown
 from sqlalchemy.sql.expression import func
 
+from app.helpers import get_or_create_cached_value
 from app.tasks import FEEDS_INTERVALS, get_dlfeed_key
 from .. import app
 from .. import db
@@ -93,14 +94,16 @@ def any_error(e: Exception):
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html',
-                                 max_addon=db.session.query(func.max(AddonModel.addon_id)).scalar(),
-                                 max_file=db.session.query(func.max(FileModel.file_id)).scalar(),
-                                 num_addons=db.session.query(AddonModel).count(),
-                                 num_files=db.session.query(FileModel).count(),
-                                 num_authors=db.session.query(AuthorModel).count(),
-                                 num_history=db.session.query(HistoricRecord).count(),
-                                 )
+    stat_getters = {
+        'max_addon': lambda: db.session.query(func.max(AddonModel.addon_id)).scalar(),
+        'max_file': lambda: db.session.query(func.max(FileModel.file_id)).scalar(),
+        'num_addons': lambda: db.session.query(AddonModel).count(),
+        'num_files': lambda: db.session.query(FileModel).count(),
+        'num_authors': lambda: db.session.query(AuthorModel).count(),
+        'num_history': lambda: db.session.query(HistoricRecord).count(),
+    }
+    stats = {k: get_or_create_cached_value('index', k, x, 60 * 60) for k, x in stat_getters.items()}
+    return flask.render_template('index.html', **stats)
 
 
 @app.route('/about')

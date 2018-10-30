@@ -5,8 +5,10 @@ import werkzeug.datastructures
 import werkzeug.routing
 from functools import wraps
 
+from app import redis_store
 from . import app
 from . import curse_login
+from . import redis_store
 
 
 CURSE_HOST = 'https://addons-v2.forgesvc.net/'
@@ -78,3 +80,15 @@ def get_routes_with_prefix(prefix, exclude=None):
             'function': app.view_functions[rule.endpoint]
         })
     return routes
+
+
+def get_or_create_cached_value(prefix, key, getter, timeout):
+    """
+    get-or-set for redis
+    """
+    key = prefix + '-' + key
+    v = redis_store.get(key)
+    if v is None:
+        v = getter()
+        redis_store.set(key, v, ex=timeout)
+    return v

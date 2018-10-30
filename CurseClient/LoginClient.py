@@ -37,7 +37,7 @@ class LoginClient(object):
         self._session = None
         self._redis = redis_store
         if self._redis:
-            self._redisLock = self._redis.lock(_REDIS_KEY_LOCK, timeout=60, sleep=1)
+            self._redisLock = self._redis.lock(_REDIS_KEY_LOCK, timeout=60, sleep=1, blocking_timeout=30)
             with self._redisLock:
                 try:
                     self._lastRenew = self._redis[_REDIS_KEY_LAST_RENEW]
@@ -155,7 +155,7 @@ class LoginClient(object):
                     if self._session_should_renew(False):
                         data = None
                         try:
-                            data = _post_json_retry(_URL_BASE + "renew", headers=self.get_headers(True))
+                            data = _post_json_retry(_URL_BASE + "renew", headers=self.get_headers(_is_renewing=True))
                             print("Curse Login renewed.")
                             self._lastRenew = int(datetime.datetime.now().timestamp())
                             self._session.update(data)
@@ -167,7 +167,7 @@ class LoginClient(object):
             else:
                 data = None
                 try:
-                    data = _post_json_retry(_URL_BASE + "renew", headers=self.get_headers(True))
+                    data = _post_json_retry(_URL_BASE + "renew", headers=self.get_headers(_is_renewing=True))
                     print("Curse Login renewed.")
                     self._session.update(data)
                 except Exception as e:
@@ -176,18 +176,18 @@ class LoginClient(object):
             return True
         return False
 
-    def get_token(self, __is_renewing=False):
+    def get_token(self, _is_renewing=False):
         """
         Returns our current token. May be renewed first if required.
-        :param __is_renewing: Must be false unless called from self.renew_session
+        :param _is_renewing: Must be false unless called from self.renew_session
         """
-        if not __is_renewing:
+        if not _is_renewing:
             self.renew_session()
         return self._session['Token']
 
-    def get_headers(self, __is_renewing=False):
+    def get_headers(self, _is_renewing=False):
         """
         Returns the header(s) required for authentication to the API.
-        :param __is_renewing: Must be false unless called from self.renew_session
+        :param _is_renewing: Must be false unless called from self.renew_session
         """
-        return {'AuthenticationToken': self.get_token()}
+        return {'AuthenticationToken': self.get_token(_is_renewing=_is_renewing)}
