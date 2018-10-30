@@ -112,17 +112,15 @@ class LoginClient(object):
         Should only be called if a valid session is stored.
         True if a renew should be tried.
         """
-        if datetime.datetime.fromtimestamp(self._session["RenewAfter"] / 1000) < datetime.datetime.now():
-            return False
         if check_redis and self._redis:
-            with self._redisLock:
-                try:
-                    if self._lastRenew != self._redis[_REDIS_KEY_LAST_RENEW]:
-                        return True
-                except KeyError:
-                    self._redis.delete(_REDIS_KEY_SESSION, _REDIS_KEY_LAST_RENEW)
+            # No need to lock here because it's only set _after_ the session is set.
+            try:
+                if self._lastRenew != self._redis[_REDIS_KEY_LAST_RENEW]:
                     return True
-        return True
+            except KeyError:
+                self._redis.delete(_REDIS_KEY_SESSION, _REDIS_KEY_LAST_RENEW)
+                return True
+        return datetime.datetime.fromtimestamp(self._session["RenewAfter"] / 1000) < datetime.datetime.now()
 
     def renew_session(self):
         """
@@ -161,8 +159,8 @@ class LoginClient(object):
                             print("Curse Login renewed.")
                             self._lastRenew = int(datetime.datetime.now().timestamp())
                             self._session.update(data)
-                            self._redis.set(_REDIS_KEY_LAST_RENEW, self._lastRenew)
                             self._redis.set(_REDIS_KEY_SESSION, json.dumps(self._session))
+                            self._redis.set(_REDIS_KEY_LAST_RENEW, self._lastRenew)
                         except Exception as e:
                             # This is *bad*
                             self.error(e, "Error renewing session. Keeping old.", data=data, session=self._session)
