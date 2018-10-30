@@ -5,13 +5,12 @@ import werkzeug.datastructures
 import werkzeug.routing
 from functools import wraps
 
-from app import redis_store
 from . import app
 from . import curse_login
 from . import redis_store
 
 
-CURSE_HOST = 'https://addons-v2.forgesvc.net/'
+CURSE_HOST = 'https://addons-ecs.forgesvc.net/'
 
 
 def to_json_response(obj) -> flask.Response:
