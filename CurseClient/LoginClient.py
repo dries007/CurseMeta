@@ -37,7 +37,7 @@ class LoginClient(object):
         self._session = None
         self._redis = redis_store
         if self._redis:
-            self._redisLock = self._redis.lock(_REDIS_KEY_LOCK, timeout=60)
+            self._redisLock = self._redis.lock(_REDIS_KEY_LOCK, timeout=60, sleep=1)
             with self._redisLock:
                 try:
                     self._lastRenew = self._redis[_REDIS_KEY_LAST_RENEW]
@@ -82,7 +82,7 @@ class LoginClient(object):
             if output["Status"] != 0:
                 # Warning
                 self.error(None, "Login Status != 0", code=code, output=output)
-        except BaseException as e:
+        except Exception as e:
             # This is *bad*
             self.error(e, "Error logging in.", code=code, output=output)
             raise
@@ -153,6 +153,7 @@ class LoginClient(object):
                             raise RuntimeError("Session became invalid.")
                     # Now we've loaded the session data from redis, someone else might have already renewed it.
                     if self._session_should_renew(False):
+                        data = None
                         try:
                             data = _post_json_retry(_URL_BASE + "renew", headers=self.get_headers(True))
                             print("Curse Login renewed.")
@@ -160,7 +161,7 @@ class LoginClient(object):
                             self._session.update(data)
                             self._redis.set(_REDIS_KEY_LAST_RENEW, self._lastRenew)
                             self._redis.set(_REDIS_KEY_SESSION, json.dumps(self._session))
-                        except BaseException as e:
+                        except Exception as e:
                             # This is *bad*
                             self.error(e, "Error renewing session. Keeping old.", data=data, session=self._session)
             else:
@@ -169,7 +170,7 @@ class LoginClient(object):
                     data = _post_json_retry(_URL_BASE + "renew", headers=self.get_headers(True))
                     print("Curse Login renewed.")
                     self._session.update(data)
-                except BaseException as e:
+                except Exception as e:
                     # This is *bad*
                     self.error(e, "Error renewing session. Keeping old.", data=data, session=self._session)
             return True
