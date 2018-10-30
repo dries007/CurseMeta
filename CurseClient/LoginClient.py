@@ -112,6 +112,8 @@ class LoginClient(object):
         Should only be called if a valid session is stored.
         True if a renew should be tried.
         """
+        if datetime.datetime.fromtimestamp(self._session["RenewAfter"] / 1000) < datetime.datetime.now():
+            return False
         if check_redis and self._redis:
             with self._redisLock:
                 try:
@@ -120,7 +122,7 @@ class LoginClient(object):
                 except KeyError:
                     self._redis.delete(_REDIS_KEY_SESSION, _REDIS_KEY_LAST_RENEW)
                     return True
-        return datetime.datetime.fromtimestamp(self._session["RenewAfter"] / 1000) < datetime.datetime.now()
+        return True
 
     def renew_session(self):
         """
