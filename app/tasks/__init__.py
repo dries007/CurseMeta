@@ -158,7 +158,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(12 * 60 * 60, p_find_hidden_addons.s())
 
-    sender.add_periodic_task(crontab(minute='0'), periodic_keep_history.s())  # every hour at XX:00, for consistency
+    sender.add_periodic_task(crontab(hour='4', minute='0'), periodic_keep_history.s())  # every day at 4:00
 
 
 
