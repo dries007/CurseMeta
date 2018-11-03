@@ -11,6 +11,7 @@ from .. import curse_login
 from .. import celery
 from .. import db
 from ..models import AddonModel
+from ..models import HistoricRecord
 
 from .tasks import request_addons_split
 from .tasks import request_all_files
@@ -54,6 +55,14 @@ def p_update_all_files():
 
 @celery.task
 def p_update_all_addons():
-    threshold = datetime.now() - timedelta(hours=1)
+    threshold = datetime.now() - timedelta(hours=12)
     ids: [int] = [x.addon_id for x in AddonModel.query.filter(AddonModel.last_update < threshold).all()]
     request_addons_split(ids)
+
+
+@celery.task
+def p_keep_history():
+    now = datetime.now()
+    addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None).all()
+    db.session.add_all([HistoricRecord(now, addon) for addon in addons])
+    db.session.commit()

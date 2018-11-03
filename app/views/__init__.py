@@ -604,6 +604,8 @@ def api_v0_db_dump():
     Dumps the whole (addon) DB.
     Some members may be null.
 
+    **DISABLED FOR NOW**
+
     **WARING**: Large!
 
     Optional:
@@ -613,39 +615,40 @@ def api_v0_db_dump():
     **WARNING** Provisional API. Don't use in client side projects.
     """
 
-    q = AddonModel.query
-
-    games = flask.request.args.getlist('gameId', type=int)
-    if not games:
-        games = flask.request.args.getlist('game', type=int)
-    if games:
-        q = q.filter(AddonModel.game_id.in_(games))
-
-    addons: [AddonModel] = q.all()
-
-    do_files = 'files' in flask.request.args
-    return to_json_response([
-        {
-            'id': addon.addon_id,
-            'last_update': int(addon.last_update.timestamp()),
-            'slug': addon.slug,
-            'game': addon.game_id,
-            'name': addon.name,
-            'category': addon.category,
-            'downloads': addon.downloads,
-            'score': addon.score,
-            'files': None if not do_files else [
-                {
-                    'id': file.file_id,
-                    'last_update': int(file.last_update.timestamp()),
-                    'name': file.name,
-                    'url': file.url,
-                } for file in addon.files
-            ],
-            'owner': addon.primary_author_name,
-            'authors': [x.name for x in addon.authors]
-        } for addon in addons
-    ])
+    # q = AddonModel.query
+    #
+    # games = flask.request.args.getlist('gameId', type=int)
+    # if not games:
+    #     games = flask.request.args.getlist('game', type=int)
+    # if games:
+    #     q = q.filter(AddonModel.game_id.in_(games))
+    #
+    # addons: [AddonModel] = q.all()
+    #
+    # do_files = 'files' in flask.request.args
+    # return to_json_response([
+    #     {
+    #         'id': addon.addon_id,
+    #         'last_update': int(addon.last_update.timestamp()),
+    #         'slug': addon.slug,
+    #         'game': addon.game_id,
+    #         'name': addon.name,
+    #         'category': addon.category_list,
+    #         'downloads': addon.downloads,
+    #         'score': addon.score,
+    #         'files': None if not do_files else [
+    #             {
+    #                 'id': file.file_id,
+    #                 'last_update': int(file.last_update.timestamp()),
+    #                 'name': file.name,
+    #                 'url': file.url,
+    #             } for file in addon.files
+    #         ],
+    #         'owner': addon.primary_author_name,
+    #         'authors': [x.name for x in addon.authors]
+    #     } for addon in addons
+    # ])
+    return to_json_response(None)
 
 
 @app.route('/api/v0/db/updated/addon')
