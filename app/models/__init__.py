@@ -378,6 +378,21 @@ class AddonModel(db.Model):
         return obj
 
 
+class HistoricDayRecord(db.Model):
+    __tablename__ = 'history_day'
+    date = db.Column(db.Date, nullable=False, primary_key=True)
+    addon_id = db.Column(db.Integer, db.ForeignKey('addon.addon_id', onupdate='cascade', ondelete='cascade'), primary_key=True)
+    downloads = db.Column(db.BigInteger)
+    score = db.Column(db.Float)
+
+    def __init__(self, date_, addon: AddonModel):
+        super().__init__()
+        self.date = date_
+        self.addon_id = addon.addon_id
+        self.downloads = addon.downloads
+        self.score = addon.score
+
+
 class HistoricRecord(db.Model):
     __tablename__ = 'history'
     timestamp = db.Column(db.DateTime, nullable=False, primary_key=True)

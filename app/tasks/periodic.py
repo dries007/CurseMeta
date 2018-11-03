@@ -11,7 +11,7 @@ from .. import curse_login
 from .. import celery
 from .. import db
 from ..models import AddonModel
-from ..models import HistoricRecord
+from ..models import HistoricDayRecord
 
 from .tasks import request_addons_split
 from .tasks import request_all_files
@@ -62,7 +62,7 @@ def p_update_all_addons():
 
 @celery.task
 def p_keep_history():
-    now = datetime.now()
+    now = datetime.now().date()
     addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None).all()
-    db.session.add_all([HistoricRecord(now, addon) for addon in addons])
+    db.session.add_all([HistoricDayRecord(now, addon) for addon in addons])
     db.session.commit()

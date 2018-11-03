@@ -26,7 +26,7 @@ from ..helpers import get_routes_with_prefix
 from ..models import AuthorModel
 from ..models import FileModel
 from ..models import AddonModel
-from ..models import HistoricRecord
+from ..models import HistoricDayRecord
 
 
 _LOGGER = logging.getLogger('Views')
@@ -100,7 +100,7 @@ def index():
         'num_addons': lambda: db.session.query(AddonModel).count(),
         'num_files': lambda: db.session.query(FileModel).count(),
         'num_authors': lambda: db.session.query(AuthorModel).count(),
-        'num_history': lambda: db.session.query(HistoricRecord).count(),
+        'num_history': lambda: db.session.query(HistoricDayRecord).count(),
     }
     stats = {k: get_or_create_cached_value('index', k, x, 60 * 60) for k, x in stat_getters.items()}
     return flask.render_template('index.html', **stats)

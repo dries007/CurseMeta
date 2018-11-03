@@ -1,6 +1,3 @@
-import json
-from datetime import timedelta
-
 from celery import Celery
 from celery.schedules import crontab
 
@@ -63,17 +60,16 @@ def locked_task(name_: str or callable, timeout=10*60):
 def get_dlfeed_key(game_id, interval):
     return 'history-feed-{}-{}'.format(game_id, interval)
 
-
-def _delta_dl(records: {int: HistoricRecord}, x: AddonModel):
-    cur = x.downloads
-    if cur is None:
-        return 0
-    old = records[x.addon_id].downloads if x.addon_id in records else None
-    return cur if old is None else cur - old
-
-
-def _download_feed(records: {int: HistoricRecord}, addons: [AddonModel], game_id: int):
-    return {x.addon_id: _delta_dl(records, x) for x in addons if x.game_id == game_id}
+# def _delta_dl(records: {int: HistoricRecord}, x: AddonModel):
+#     cur = x.downloads
+#     if cur is None:
+#         return 0
+#     old = records[x.addon_id].downloads if x.addon_id in records else None
+#     return cur if old is None else cur - old
+#
+#
+# def _download_feed(records: {int: HistoricRecord}, addons: [AddonModel], game_id: int):
+#     return {x.addon_id: _delta_dl(records, x) for x in addons if x.game_id == game_id}
 
 
 FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
