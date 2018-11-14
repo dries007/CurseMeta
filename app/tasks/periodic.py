@@ -4,13 +4,15 @@ from sqlalchemy import func
 from celery.utils.log import get_task_logger
 from datetime import datetime
 from datetime import timedelta
+from influxdb import InfluxDBClient
 
 from CurseClient import MAX_ADDONS_PER_REQUEST
 
 from .. import curse_login
 from .. import celery
 from .. import db
-from ..models import AddonModel
+from .. import app
+from ..models import AddonModel, AddonStatusEnum
 from ..models import HistoricDayRecord
 
 from .tasks import request_addons_split
@@ -48,21 +50,37 @@ def p_find_hidden_addons():
 
 @celery.task
 def p_update_all_files():
-    ids: [int] = [x.addon_id for x in AddonModel.query.all()]
+    ids: [int] = [x.addon_id for x in AddonModel.query.filter(AddonModel.game_id != None, AddonModel.stage != AddonStatusEnum.Deleted).all()]
     for addon_id in ids:
         request_all_files(addon_id)
 
 
 @celery.task
 def p_update_all_addons():
-    threshold = datetime.now() - timedelta(hours=12)
-    ids: [int] = [x.addon_id for x in AddonModel.query.filter(AddonModel.last_update < threshold).all()]
+    threshold = datetime.now() - timedelta(hours=2)
+    ids: [int] = [x.addon_id for x in AddonModel.query.filter(AddonModel.last_update < threshold, AddonModel.stage != AddonStatusEnum.Deleted).all()]
     request_addons_split(ids)
 
 
 @celery.task
 def p_keep_history():
     now = datetime.now().date()
-    addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None).all()
+    addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None, AddonModel.downloads > 1000, AddonModel.stage != AddonStatusEnum.Deleted).all()
     db.session.add_all([HistoricDayRecord(now, addon) for addon in addons])
     db.session.commit()
+    client = InfluxDBClient(database=app.config['INFLUX_DB'])
+    client.write_points([
+        {
+            "measurement": "cursemeta",
+            "tags": {
+                'id': addon.addon_id,
+                'slug': addon.slug,
+                'author': addon.primary_author_name,
+                'game': addon.game_id,
+            },
+            "time": addon.last_update.isoformat(),
+            "fields": {
+                "downloads": addon.downloads,
+                "score": addon.score,
+            }
+        } for addon in addons])

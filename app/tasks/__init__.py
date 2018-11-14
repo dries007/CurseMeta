@@ -93,54 +93,6 @@ def manual_files():
         request_all_files(id_)
 
 
-# @celery.task
-# def broken_periodic_keep_history():
-#     now = datetime.now()
-#     logger.info('Starting keeping history for timestamp {}'.format(now))
-#
-#     records = {x.addon_id: x for x in HistoricRecord.get_all_last_before(timestamp=now)}
-#     addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None).all()
-#     n = len(addons)
-#     logger.info('Currently have history for {} out of {} addons'.format(len(records), n))
-#
-#     new_count = 0
-#     update_count = 0
-#     records = []
-#     for i, addon in enumerate(addons):
-#         if i % 5000 == 0:
-#             logger.info('Working on addon {} / {} ({:.2f}%) got {} new {} updated so far.'.format(i, n, i/n*100, new_count, update_count))
-#         # addon: AddonModel
-#         if addon.addon_id not in records:
-#             records.append(HistoricRecord(now, addon.addon_id, addon.downloads, addon.score))
-#             new_count += 1
-#         else:
-#             current: HistoricRecord = records[addon.addon_id]
-#             if current.downloads != addon.downloads or current.score != addon.score:
-#                 records.append(HistoricRecord(now, addon.addon_id, addon.downloads, addon.score))
-#                 update_count += 1
-#     db.session.add_all(records)
-#     db.session.commit()
-#
-#     logger.info('{} new, {} updated, timestamp {}'.format(new_count, update_count, now))
-#
-#     broken_periodic_generate_history_feed.delay()
-#
-#     return new_count, update_count
-
-
-# @celery.task
-# def broken_periodic_generate_history_feed():
-#     now = datetime.now()
-#     addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None).all()
-#     game_ids = set(x.game_id for x in addons)
-#     for name, days in FEEDS_INTERVALS.items():
-#         records: {int: HistoricRecord} = {x.addon_id: x for x in HistoricRecord.get_all_last_before(timestamp=now - timedelta(days=days))}
-#         for game_id in game_ids:
-#             redis_store.set(get_dlfeed_key(game_id, name), json.dumps(_download_feed(records, addons, game_id)))
-#     redis_store.sadd('history-game_ids', *game_ids)
-#     redis_store.set('history-timestamp', int(now.timestamp()))
-
-
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(15 * 60, p_remove_expired_caches.s())
@@ -153,22 +105,5 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(6 * 60 * 60, p_update_all_files.s())
     sender.add_periodic_task(12 * 60 * 60, p_find_hidden_addons.s())
 
-    sender.add_periodic_task(crontab(hour='4', minute='0'), p_keep_history.s())  # every day at 4:00
+    sender.add_periodic_task(crontab(hour='23', minute='0'), p_keep_history.s())  # every day at 23:00
 
-    #
-    # sender.add_periodic_task(15 * 60, periodic_fill_incomplete_addons.s())
-    #
-    # # todo: replacement for periodic feeds
-    #
-    # sender.add_periodic_task(60 * 60, periodic_request_all_addons.s())  # hourly
-    #
-    # sender.add_periodic_task(24 * 60 * 60, periodic_find_hidden_addons.s())  # daily
-    #
-    # sender.add_periodic_task(7 * 24 * 60 * 60, periodic_request_all_files.s())  # weekly
-    #
-    #
-    #
-    # periodic_fill_incomplete_addons.apply_async(countdown=60)
-    # periodic_find_hidden_addons.apply_async(countdown=60)
-    # periodic_request_all_files.apply_async(countdown=60)
-    # periodic_request_all_addons.apply_async(countdown=60)

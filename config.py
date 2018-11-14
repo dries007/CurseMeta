@@ -1,5 +1,4 @@
 import os
-import json
 
 GOOGLE_ANALYTICS = '115047102-1'
 PREFERRED_URL_SCHEME = 'https'
@@ -52,6 +51,8 @@ if DEVELOPMENT:
     CELERY_BROKER_URL = CELERY_RESULT_BACKEND = CELERY_BROKER_URL[:-1] + '5'
     REDIS_URL = REDIS_URL[:-1] + '5'
     db_name += '_dev'
+
+INFLUX_DB = db_name
 
 if db_pwd:
     SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%d/%s' % (db_user, db_pwd, db_host, db_port, db_name)
