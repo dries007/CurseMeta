@@ -51,7 +51,9 @@ def p_find_hidden_addons():
 @celery.task
 def p_update_all_files():
     ids: [int] = [x.addon_id for x in AddonModel.query.filter(AddonModel.game_id != None, AddonModel.stage != AddonStatusEnum.Deleted).all()]
-    for addon_id in ids:
+    for i, addon_id in enumerate(ids):
+        if i % 1000 == 0:
+            logger.info('p_update_all_files {} of {} ({} %) '.format(i, len(ids), 100*i/len(ids)))
         request_all_files(addon_id)
 
 

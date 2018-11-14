@@ -58,5 +58,5 @@ def request_addons(ids):
 
 def request_addons_split(ids):
     for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
-        logger.info('request_addons_split {} of {} ({}%)', i, len(ids), 100*i/len(ids))
+        logger.info('request_addons_split {} of {} ({} %)'.format(i, len(ids), 100*i/len(ids)))
         request_addons(ids[i:i + MAX_ADDONS_PER_REQUEST])
