@@ -296,7 +296,8 @@ class AddonModel(db.Model):
     available = db.Column(db.Boolean, nullable=True)
     featured = db.Column(db.Boolean, nullable=True)
     url = db.Column(sau.URLType, nullable=True)
-    default_file_id = db.Column(db.Integer, db.ForeignKey(FileModel.file_id), nullable=True)
+    default_file_id = db.Column(db.Integer, nullable=True)
+    # default_file_id = db.Column(db.Integer, db.ForeignKey(FileModel.file_id), nullable=True)
     status = db.Column(db.Enum(AddonStatusEnum), nullable=True)
     stage = db.Column(db.Enum(AddonStageEnum), nullable=True)
     section_id = db.Column(db.Integer, nullable=True)  # todo: make FK with relation
@@ -308,7 +309,7 @@ class AddonModel(db.Model):
     # Relationships
     files = db.relationship(FileModel, backref='addon', foreign_keys=[FileModel.addon_id], lazy='dynamic')
     attachments = db.relationship(AttachmentModel, backref='addon', lazy='dynamic')
-    default_file = db.relationship(FileModel, foreign_keys=[default_file_id], lazy='select')
+    # default_file = db.relationship(FileModel, foreign_keys=[default_file_id], lazy='select')
     primary_author = db.relationship(AuthorModel, foreign_keys=[primary_author_name], backref='primary_addons', lazy='select')
     authors = db.relationship(AuthorModel, secondary=author_addon_table, backref='addons', lazy='dynamic')
     categories = db.relationship(CategoryModel, secondary=category_addon_table, backref='addons', lazy='dynamic')
