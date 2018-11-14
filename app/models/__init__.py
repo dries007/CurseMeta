@@ -127,13 +127,14 @@ class FileModel(db.Model):
     file_status = db.Column(db.Enum(FileStatusEnum), nullable=True)
     alternate = db.Column(db.Boolean, nullable=True)
     available = db.Column(db.Boolean, nullable=True)
-    alternate_file_id = db.Column(db.Integer, db.ForeignKey(file_id), nullable=True)
+    alternate_file_id = db.Column(db.Integer, nullable=True)
+    # alternate_file_id = db.Column(db.Integer, db.ForeignKey(file_id), nullable=True)
     game_versions = db.Column(db.ARRAY(db.String), nullable=True)
     # todo: dependencies?
     # Anything extra
     extra = db.Column(db.JSON, nullable=True)
     # Relationships
-    alternate_file = db.relationship('FileModel', foreign_keys=[alternate_file_id], lazy='dynamic')
+    # alternate_file = db.relationship('FileModel', foreign_keys=[alternate_file_id], lazy='dynamic')
     # addon provided via backref.
 
     _JSON_MAP = {
@@ -170,9 +171,9 @@ class FileModel(db.Model):
             obj = cls(data['id'], addon_id)
             db.session.add(obj)
 
-        if obj.alternate_file_id != data['alternateFileId'] and cls.query.get(data['alternateFileId']) is None:
+        # if obj.alternate_file_id != data['alternateFileId'] and cls.query.get(data['alternateFileId']) is None:
             # Don't fill in any data here, it'll get periodically filled in by a background task.
-            db.session.add(cls(data['alternateFileId'], addon_id, commit=False))
+            # db.session.add(cls(data['alternateFileId'], addon_id, commit=False))
 
         _do_update(cls._JSON_MAP, obj, data, skip_keys_extra=cls._SKIP_KEYS)
         if commit:
