@@ -23,9 +23,13 @@ def request_all_files(id_: int):
     except requests.HTTPError as e:
         if e.response.status_code == 404:
             logger.info('404 on addon {}. Setting status to deleted to disable further polling.'.format(id_))
-            x: AddonModel = AddonModel.query.get(id_)
-            x.status = AddonStatusEnum.Deleted
-            db.session.commit()
+            try:
+                x: AddonModel = AddonModel.query.get(id_)
+                if x:
+                    x.status = AddonStatusEnum.Deleted
+                    db.session.commit()
+            except:
+                logger.exception('Error setting deleted on {}'.format(id_))
         else:
             logger.exception('Request HTTP error on {}'.format(id_))
     except:
@@ -44,9 +48,13 @@ def request_addons_by_id(ids: [int]):
         except requests.HTTPError as e:
             if e.response.status_code == 404:
                 logger.info('404 on addon {}. Setting status to deleted to disable further polling.'.format(id_))
-                x: AddonModel = AddonModel.query.get(id_)
-                x.status = AddonStatusEnum.Deleted
-                db.session.commit()
+                try:
+                    x: AddonModel = AddonModel.query.get(id_)
+                    if x:
+                        x.status = AddonStatusEnum.Deleted
+                        db.session.commit()
+                except:
+                    logger.exception('Error setting deleted on {}'.format(id_))
             else:
                 logger.exception('Request HTTP error on {}'.format(id_))
         except:
@@ -64,9 +72,11 @@ def request_addons(objects: [AddonModel]):
         except requests.HTTPError as e:
             if e.response.status_code == 404:
                 logger.info('404 on addon {}. Setting status to deleted to disable further polling.'.format(obj.addon_id))
-                x: AddonModel = AddonModel.query.get(obj.addon_id)
-                x.status = AddonStatusEnum.Deleted
-                db.session.commit()
+                try:
+                    obj.status = AddonStatusEnum.Deleted
+                    db.session.commit()
+                except:
+                    logger.exception('Error setting deleted on {}'.format(obj.addon_id))
             else:
                 logger.exception('Request HTTP error on {}'.format(obj.addon_id))
         except:
