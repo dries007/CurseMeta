@@ -63,7 +63,7 @@ def request_addons(objects: [AddonModel]):
             obj.update_direct(get_curse_api('api/addon/%d' % obj.addon_id).json())
         except requests.HTTPError as e:
             if e.response.status_code == 404:
-                logger.info('404 on addon {}. Setting status to deleted to disable further polling.'.format(id_))
+                logger.info('404 on addon {}. Setting status to deleted to disable further polling.'.format(obj.addon_id))
                 x: AddonModel = AddonModel.query.get(obj.addon_id)
                 x.status = AddonStatusEnum.Deleted
                 db.session.commit()
