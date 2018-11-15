@@ -74,7 +74,7 @@ def request_addons(objects: [AddonModel]):
             logger.info('Posted, got back {} items'.format(len(raw_data)))
             for x in raw_data:
                 try:
-                    subsection[x['id']].update_direct(x)
+                    subsection[x['id']].update_direct(x, commit=False)
                     del subsection[x['id']]
                 except:
                     logger.exception('Error updating data after request on {}'.format(x))
