@@ -8,6 +8,7 @@ from .. import db
 from ..models import AddonModel, AddonStatusEnum
 from ..models import FileModel
 from ..helpers import get_curse_api
+from ..helpers import post_curse_api
 
 
 logger = get_task_logger(__name__)
@@ -62,19 +63,20 @@ def request_addons_by_id(ids: [int]):
 def request_addons(objects: [AddonModel]):
     # todo: also update the 'gameVersionLatestFiles' from this info
     total = len(objects)
-    for i, obj in enumerate(objects):
-        if i % 1000 == 0:
-            logger.info('Requesting addons... {} of {} ({:.2} %)'.format(i, total, 100 * i / total))
+    for i in range(0, total, MAX_ADDONS_PER_REQUEST):
+        logger.info('Requesting addons... {} of {} ({:.2} %)'.format(i, total, 100 * i / total))
         try:
-            obj.update_direct(get_curse_api('api/addon/%d' % obj.addon_id).json())
-        except requests.HTTPError as e:
-            if e.response.status_code == 404:
+            subsection = {x.addon_id: x for x in objects[i:i + MAX_ADDONS_PER_REQUEST]}
+            for x in post_curse_api('api/addon', list(subsection.keys())).json():
                 try:
-                    obj.status = AddonStatusEnum.Deleted
-                    db.session.commit()
+                    subsection[x['id']].update_direct(x)
+                    del subsection[x['id']]
                 except:
-                    logger.exception('Error setting deleted on {}'.format(obj.addon_id))
-            else:
-                logger.exception('Request HTTP error on {}'.format(obj.addon_id))
+                    logger.exception('Error updating data after request on {}'.format(x))
+            logger.info('Marking {} addons as deleted'.format(len(subsection)))
+            for x in subsection.values():
+                x.status = AddonStatusEnum.Deleted
+            db.session.commit()
         except:
-            logger.exception('Request error on {}'.format(obj.addon_id))
+            logger.exception('Request error on range {}'.format(i))
+
