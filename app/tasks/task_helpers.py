@@ -5,6 +5,7 @@ from CurseClient import MAX_ADDONS_PER_REQUEST
 from celery.utils.log import get_task_logger
 
 from .. import db
+from .. import redis_store
 from ..models import AddonModel, AddonStatusEnum
 from ..models import FileModel
 from ..helpers import get_curse_api
@@ -52,6 +53,8 @@ def request_addons_by_id(ids: [int]):
                     if x:
                         x.status = AddonStatusEnum.Deleted
                         db.session.commit()
+                    else:
+                        redis_store.sadd('cursemeta-periodic-failedById', id_)
                 except:
                     logger.exception('Error setting deleted on {}'.format(id_))
             else:
@@ -63,11 +66,13 @@ def request_addons_by_id(ids: [int]):
 def request_addons(objects: [AddonModel]):
     # todo: also update the 'gameVersionLatestFiles' from this info
     total = len(objects)
-    for i in range(0, total, MAX_ADDONS_PER_REQUEST):
+    for i in range(0, total, 1000):
         logger.info('Requesting addons... {} of {} ({:.2} %)'.format(i, total, 100 * i / total))
         try:
-            subsection = {x.addon_id: x for x in objects[i:i + MAX_ADDONS_PER_REQUEST]}
-            for x in post_curse_api('api/addon', list(subsection.keys())).json():
+            subsection = {x.addon_id: x for x in objects[i:i + 1000]}
+            raw_data = post_curse_api('api/addon', list(subsection.keys())).json()
+            logger.info('Posted, got back {} items', len(raw_data))
+            for x in raw_data:
                 try:
                     subsection[x['id']].update_direct(x)
                     del subsection[x['id']]

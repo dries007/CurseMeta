@@ -6,12 +6,11 @@ from datetime import datetime
 from datetime import timedelta
 from influxdb import InfluxDBClient
 
-from CurseClient import MAX_ADDONS_PER_REQUEST
-
 from .. import curse_login
 from .. import celery
 from .. import db
 from .. import app
+from .. import redis_store
 from ..models import AddonModel, AddonStatusEnum
 
 from .task_helpers import request_addons
@@ -34,13 +33,16 @@ def p_remove_expired_caches():
 
 @celery.task
 def p_fill_incomplete_addons():
-    request_addons(AddonModel.query.filter(AddonModel.name == None, AddonModel.status == None).all())
+    request_addons(AddonModel.query.filter(AddonModel.name == None).all())
 
 
 @celery.task
 def p_find_hidden_addons():
     end_id: int = db.session.query(func.max(AddonModel.addon_id)).scalar() + 1000
     known_ids: {int} = {x for x, in db.session.query(AddonModel.addon_id).all()}
+    # tried = redis_store.get('cursemeta-periodic-failedById') or set()
+    # ids = list(set(range(end_id)) - known_ids - tried)
+    # logger.info('Looking for hidden addons until id {}, missing {} ids. Skipping {} redis keys.'.format(end_id, len(ids), len(tried)))
     ids = list(set(range(end_id)) - known_ids)
     logger.info('Looking for hidden addons until id {}, missing {} ids.'.format(end_id, len(ids)))
     request_addons_by_id(ids)
