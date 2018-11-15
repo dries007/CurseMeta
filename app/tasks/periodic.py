@@ -58,7 +58,7 @@ def p_update_all_files():
 @celery.task
 def p_update_all_addons():
     threshold = datetime.now() - timedelta(hours=2)
-    request_addons(AddonModel.query.filter(AddonModel.last_update < threshold, AddonModel.status != AddonStatusEnum.Deleted).all())
+    request_addons(AddonModel.query.filter(AddonModel.last_update < threshold, AddonModel.game_id != None, AddonModel.status != AddonStatusEnum.Deleted).all())
 
 
 @celery.task
