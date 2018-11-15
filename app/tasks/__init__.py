@@ -77,20 +77,18 @@ FEEDS_INTERVALS = {'daily': 1, 'weekly': 7, 'monthly': 30}
 
 @celery.task
 def manual_addons():
-    ids: [int] = [x.addon_id for x in AddonModel.query.all()]
-    from .tasks import request_addons
-
-    for i in range(0, len(ids), MAX_ADDONS_PER_REQUEST):
-        request_addons(ids[i:i + MAX_ADDONS_PER_REQUEST])
+    from .task_helpers import request_addons
+    request_addons(AddonModel.query.all())
 
 
 @celery.task
 def manual_files():
-    ids: [int] = [x.addon_id for x in AddonModel.query.all()]
-    from .tasks import request_all_files
-
-    for id_ in ids:
-        request_all_files(id_)
+    from .task_helpers import request_all_files
+    ids: [(int,)] = db.session.query(AddonModel.addon_id).all()
+    for i, (addon_id,) in enumerate(ids):
+        if i % 1000 == 0:
+            logger.info('p_update_all_files {} of {} ({} %) '.format(i, len(ids), 100 * i / len(ids)))
+        request_all_files(addon_id)
 
 
 @celery.on_after_configure.connect

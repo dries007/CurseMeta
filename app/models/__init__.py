@@ -358,26 +358,29 @@ class AddonModel(db.Model):
         if obj is None:
             obj = cls(data['id'])
             db.session.add(obj)
+        obj.update_direct(data, commit)
+        return obj
 
+    def update_direct(self, data: dict, commit=True):
         if data['authors']:
             for author in data['authors']:
                 author = AuthorModel.update(author, commit=False)
-                if author not in obj.authors:
-                    obj.authors.append(author)
+                if author not in self.authors:
+                    self.authors.append(author)
         if data['attachments']:
             for attachment in data['attachments']:
                 attachment = AttachmentModel.update(attachment, commit=False)
-                if attachment not in obj.attachments:
-                    obj.attachments.append(attachment)
+                if attachment not in self.attachments:
+                    self.attachments.append(attachment)
 
         if data['latestFiles']:
             for file in data['latestFiles']:
                 FileModel.update(data['id'], file, commit=False)
 
-        _do_update(cls._JSON_MAP, obj, data, skip_keys_extra=cls._SKIP_KEYS)
+        _do_update(self._JSON_MAP, self, data, skip_keys_extra=self._SKIP_KEYS)
         if commit:
             db.session.commit()
-        return obj
+        return self
 
 
 class HistoricDayRecord(db.Model):
