@@ -71,7 +71,7 @@ def request_addons(objects: [AddonModel]):
         try:
             subsection = {x.addon_id: x for x in objects[i:i + 1000]}
             raw_data = post_curse_api('api/addon', list(subsection.keys())).json()
-            logger.info('Posted, got back {} items', len(raw_data))
+            logger.info('Posted, got back {} items'.format(len(raw_data)))
             for x in raw_data:
                 try:
                     subsection[x['id']].update_direct(x)
