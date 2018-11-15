@@ -39,7 +39,7 @@ def request_addons_by_id(ids: [int]):
     # todo: also update the 'gameVersionLatestFiles' from this info
     total = len(ids)
     for i, id_ in enumerate(ids):
-        if i % MAX_ADDONS_PER_REQUEST == 0:
+        if i % 1000 == 0:
             logger.info('Requesting addons... {} of {} ({:.2} %)'.format(i, total, 100 * i / total))
         try:
             x = get_curse_api('api/addon/%d' % id_).json()
@@ -63,7 +63,7 @@ def request_addons(objects: [AddonModel]):
     # todo: also update the 'gameVersionLatestFiles' from this info
     total = len(objects)
     for i, obj in enumerate(objects):
-        if i % MAX_ADDONS_PER_REQUEST == 0:
+        if i % 1000 == 0:
             logger.info('Requesting addons... {} of {} ({:.2} %)'.format(i, total, 100 * i / total))
         try:
             obj.update_direct(get_curse_api('api/addon/%d' % obj.addon_id).json())
