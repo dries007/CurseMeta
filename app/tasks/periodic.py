@@ -34,7 +34,7 @@ def p_remove_expired_caches():
 
 @celery.task
 def p_fill_incomplete_addons():
-    request_addons(AddonModel.query.filter(AddonModel.name == None, AddonModel.stage != AddonStatusEnum.Deleted).all())
+    request_addons(AddonModel.query.filter(AddonModel.name == None, AddonModel.status == None).all())
 
 
 @celery.task
@@ -48,7 +48,7 @@ def p_find_hidden_addons():
 
 @celery.task
 def p_update_all_files():
-    ids: [(int, )] = db.session.query(AddonModel.addon_id).filter(AddonModel.game_id != None, AddonModel.stage != AddonStatusEnum.Deleted).all()
+    ids: [(int, )] = db.session.query(AddonModel.addon_id).filter(AddonModel.game_id != None, AddonModel.status != AddonStatusEnum.Deleted).all()
     for i, (addon_id, ) in enumerate(ids):
         if i % 1000 == 0:
             logger.info('p_update_all_files {} of {} ({} %) '.format(i, len(ids), 100*i/len(ids)))
@@ -58,13 +58,13 @@ def p_update_all_files():
 @celery.task
 def p_update_all_addons():
     threshold = datetime.now() - timedelta(hours=2)
-    request_addons(AddonModel.query.filter(AddonModel.last_update < threshold, AddonModel.stage != AddonStatusEnum.Deleted).all())
+    request_addons(AddonModel.query.filter(AddonModel.last_update < threshold, AddonModel.status != AddonStatusEnum.Deleted).all())
 
 
 @celery.task
 def p_keep_history():
     # now = datetime.now().date()
-    addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None, AddonModel.downloads >= 1000, AddonModel.stage != AddonStatusEnum.Deleted).all()
+    addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None, AddonModel.downloads >= 1000, AddonModel.status != AddonStatusEnum.Deleted).all()
     # db.session.add_all([HistoricDayRecord(now, addon) for addon in addons])
     # db.session.commit()
     client = InfluxDBClient(database=app.config['INFLUX_DB'])
