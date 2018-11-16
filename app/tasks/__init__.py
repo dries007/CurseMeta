@@ -94,14 +94,14 @@ def manual_files():
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(15 * 60, p_remove_expired_caches.s())
+    sender.add_periodic_task(15 * 60, p_curse_checklogin.s())
 
-    sender.add_periodic_task(30 * 60, p_fill_incomplete_addons.s())
+    sender.add_periodic_task(15 * 60, p_update_all_addons.s())
 
-    sender.add_periodic_task(60 * 60, p_curse_checklogin.s())
+    sender.add_periodic_task(45 * 60, p_fill_incomplete_addons.s())
 
-    sender.add_periodic_task(3 * 60 * 60, p_update_all_addons.s())
     sender.add_periodic_task(6 * 60 * 60, p_update_all_files.s())
-    sender.add_periodic_task(12 * 60 * 60, p_find_hidden_addons.s())
+    sender.add_periodic_task(24 * 60 * 60, p_find_hidden_addons.s())
 
-    sender.add_periodic_task(crontab(hour='23', minute='0'), p_keep_history.s())  # every day at 23:00
+    sender.add_periodic_task(crontab(minute='0'), p_keep_history.s())
 

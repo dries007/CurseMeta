@@ -59,13 +59,13 @@ def p_update_all_files():
 
 @celery.task
 def p_update_all_addons():
-    threshold = datetime.now() - timedelta(hours=2)
+    threshold = datetime.now() - timedelta(minutes=50)
     request_addons(AddonModel.query.filter(AddonModel.last_update < threshold, AddonModel.game_id != None, AddonModel.status != AddonStatusEnum.Deleted).all())
 
 
 @celery.task
 def p_keep_history():
-    # now = datetime.now().date()
+    now = datetime.now().isoformat()
     addons: [AddonModel] = AddonModel.query.filter(AddonModel.game_id != None, AddonModel.downloads >= 1000, AddonModel.status != AddonStatusEnum.Deleted).all()
     # db.session.add_all([HistoricDayRecord(now, addon) for addon in addons])
     # db.session.commit()
@@ -79,7 +79,7 @@ def p_keep_history():
                 'author': addon.primary_author_name,
                 'game': addon.game_id,
             },
-            "time": addon.last_update.isoformat(),
+            "time": now,  # Better for data consistency than using the addons's own update time.
             "fields": {
                 "downloads": addon.downloads,
                 "score": addon.score,
