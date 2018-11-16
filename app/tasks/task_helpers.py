@@ -66,19 +66,19 @@ def request_addons_by_id(ids: [int]):
 def request_addons(objects: [AddonModel]):
     # todo: also update the 'gameVersionLatestFiles' from this info
     total = len(objects)
-    for i in range(0, total, 1000):
+    for i in range(0, total, 5000):
         logger.info('Requesting addons... {} of {} ({:.2} %)'.format(i, total, 100 * i / total))
         try:
-            subsection = {x.addon_id: x for x in objects[i:i + 1000]}
+            subsection = {x.addon_id: x for x in objects[i:i + 5000]}
             raw_data = post_curse_api('api/addon', list(subsection.keys())).json()
-            logger.info('Posted, got back {} items'.format(len(raw_data)))
+            # logger.info('Posted, got back {} items'.format(len(raw_data)))
             for x in raw_data:
                 try:
                     subsection[x['id']].update_direct(x, commit=False, skip_some=True)
                     del subsection[x['id']]
                 except:
                     logger.exception('Error updating data after request on {}'.format(x))
-            logger.info('Marking {} addons as deleted'.format(len(subsection)))
+            # logger.info('Marking {} addons as deleted'.format(len(subsection)))
             for x in subsection.values():
                 x.status = AddonStatusEnum.Deleted
             db.session.commit()
