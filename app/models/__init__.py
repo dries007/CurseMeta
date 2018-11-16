@@ -361,17 +361,18 @@ class AddonModel(db.Model):
         obj.update_direct(data, commit)
         return obj
 
-    def update_direct(self, data: dict, commit=True):
-        if data['authors']:
-            for author in data['authors']:
-                author = AuthorModel.update(author, commit=False)
-                if author not in self.authors:
-                    self.authors.append(author)
-        if data['attachments']:
-            for attachment in data['attachments']:
-                attachment = AttachmentModel.update(attachment, commit=False)
-                if attachment not in self.attachments:
-                    self.attachments.append(attachment)
+    def update_direct(self, data: dict, commit=True, skip_some=False):
+        if not skip_some:
+            if data['authors']:
+                for author in data['authors']:
+                    author = AuthorModel.update(author, commit=False)
+                    if author not in self.authors:
+                        self.authors.append(author)
+            if data['attachments']:
+                for attachment in data['attachments']:
+                    attachment = AttachmentModel.update(attachment, commit=False)
+                    if attachment not in self.attachments:
+                        self.attachments.append(attachment)
 
         if data['latestFiles']:
             for file in data['latestFiles']:
