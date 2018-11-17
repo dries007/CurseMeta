@@ -283,7 +283,8 @@ class AddonModel(db.Model):
     name = db.Column(db.String, nullable=True)
     game_id = db.Column(db.Integer, nullable=True)  # todo: make FK with relation
     # Easy to store & useful data
-    primary_author_name = db.Column(db.String, db.ForeignKey(AuthorModel.name, onupdate='cascade', ondelete='cascade'), nullable=True)
+    # primary_author_name = db.Column(db.String, db.ForeignKey(AuthorModel.name, onupdate='cascade', ondelete='cascade'), nullable=True)
+    primary_author_name = db.Column(db.String, nullable=True)
     category_list = db.Column(db.String, nullable=True)
     slug = db.Column(db.String, nullable=True)
     downloads = db.Column(db.BigInteger, nullable=True)
@@ -310,7 +311,7 @@ class AddonModel(db.Model):
     files = db.relationship(FileModel, backref='addon', foreign_keys=[FileModel.addon_id], lazy='dynamic')
     attachments = db.relationship(AttachmentModel, backref='addon', lazy='dynamic')
     # default_file = db.relationship(FileModel, foreign_keys=[default_file_id], lazy='select')
-    primary_author = db.relationship(AuthorModel, foreign_keys=[primary_author_name], backref='primary_addons', lazy='select')
+    # primary_author = db.relationship(AuthorModel, foreign_keys=[primary_author_name], backref='primary_addons', lazy='select')
     authors = db.relationship(AuthorModel, secondary=author_addon_table, backref='addons', lazy='dynamic')
     categories = db.relationship(CategoryModel, secondary=category_addon_table, backref='addons', lazy='dynamic')
 

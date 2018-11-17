@@ -53,8 +53,8 @@ def request_addons_by_id(ids: [int]):
                     if x:
                         x.status = AddonStatusEnum.Deleted
                         db.session.commit()
-                    else:
-                        redis_store.sadd('cursemeta-periodic-failedById', id_)
+                    # else:
+                        # redis_store.sadd('cursemeta-periodic-failedById', id_)
                 except:
                     logger.exception('Error setting deleted on {}'.format(id_))
             else:

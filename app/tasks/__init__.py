@@ -101,7 +101,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
     sender.add_periodic_task(45 * 60, p_fill_incomplete_addons.s())
 
     sender.add_periodic_task(6 * 60 * 60, p_update_all_files.s())
-    sender.add_periodic_task(24 * 60 * 60, p_find_hidden_addons.s())
+    # sender.add_periodic_task(7 * 24 * 60 * 60, p_find_hidden_addons.s())
 
     sender.add_periodic_task(crontab(minute='0'), p_keep_history.s())
 
