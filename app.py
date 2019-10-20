@@ -10,7 +10,7 @@ HTML = r'''<!DOCTYPE html><html lang="en"><head> <meta charset="UTF-8"> <title>C
 href="https://twitchappapi.docs.apiary.io">Documentation on that here.</a><br/> For help and information, join us on Discord: <a 
 href="https://discord.gg/zCQaCAA">#cursemeta</a> Ask for private access if you need it, use the public channel otherwise. </p><p> This service is kept online 
 because MultiMC relies on it for it's Twitch/CurseForge modpack installation.<br/> The only endpoint that is still maintained is 
-<code>/<project_id>/<file_id>.json</code>. </p><p>Any contribution to the cost of keeping it online is greatly appreciated via <a 
+<code>/{project_id}/{file_id}.json</code>. </p><p>Any contribution to the cost of keeping it online is greatly appreciated via <a 
 href="https://www.patreon.com/dries007">Patreon</a> or <a href="https://paypal.me/dries007/5usd">PayPal</a>.</p><p> CurseMeta is not associated with 
 Minecraft (and/or Mojang and/or Microsoft) and/or Curse (and/or Twitch and/or Amazon).<br/> This service is provided as medium to facilitate interoperability 
 between the Curse mod database and third party tools. </p></body></html>'''
