@@ -1,3 +1,11 @@
+# It's dead Jim.
+
+It's been fun all. Please migrate towards the official API. This service has been deprecated for years.
+
+More info: https://docs.curseforge.com/#getting-started & https://discord.gg/257dCwUNvu
+
+---
+
 # CurseMeta Ultraslim edition (2019)
 
 A bridge between the MultiMC (and others) and CurseForge/Twitch's internal API.
